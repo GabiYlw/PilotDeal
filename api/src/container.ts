@@ -1,0 +1,46 @@
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client.js";
+import type { Config } from "./config/env.js";
+import { CompanyController } from "./modules/companies/companies.controller.js";
+import { PrismaCompanyRepository } from "./modules/companies/companies.repository.js";
+import { CompanyService } from "./modules/companies/companies.service.js";
+import { ContactController } from "./modules/contacts/contacts.controller.js";
+import { PrismaContactRepository } from "./modules/contacts/contacts.repository.js";
+import { ContactService } from "./modules/contacts/contacts.service.js";
+import { HealthController } from "./modules/health/health.controller.js";
+import { PrismaHealthRepository } from "./modules/health/health.repository.js";
+import { HealthService } from "./modules/health/health.service.js";
+
+export interface Controllers {
+  healthController: HealthController;
+  companyController: CompanyController;
+  contactController: ContactController;
+}
+
+export interface Container {
+  controllers: Controllers;
+  disconnect(): Promise<void>;
+}
+
+// The only place where classes are instantiated and wired together.
+export function createContainer(config: Config): Container {
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+  });
+
+  const healthRepository = new PrismaHealthRepository(prisma);
+  const healthService = new HealthService(healthRepository);
+  const healthController = new HealthController(healthService);
+
+  const companyRepository = new PrismaCompanyRepository(prisma);
+  const contactRepository = new PrismaContactRepository(prisma);
+  const companyService = new CompanyService(companyRepository);
+  const contactService = new ContactService(contactRepository, companyRepository);
+  const companyController = new CompanyController(companyService);
+  const contactController = new ContactController(contactService);
+
+  return {
+    controllers: { healthController, companyController, contactController },
+    disconnect: () => prisma.$disconnect(),
+  };
+}
