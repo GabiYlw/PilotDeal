@@ -22,8 +22,6 @@ export const updateContactSchema = z
     message: "At least one field must be provided",
   });
 
-export const companyIdParamsSchema = z.object({ companyId: z.uuid() });
-
 export type CreateContactInput = z.output<typeof createContactSchema>;
 export type UpdateContactInput = z.output<typeof updateContactSchema>;
 

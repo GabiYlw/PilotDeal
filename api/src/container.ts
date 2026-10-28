@@ -7,14 +7,22 @@ import { CompanyService } from "./modules/companies/companies.service.js";
 import { ContactController } from "./modules/contacts/contacts.controller.js";
 import { PrismaContactRepository } from "./modules/contacts/contacts.repository.js";
 import { ContactService } from "./modules/contacts/contacts.service.js";
+import { DealController } from "./modules/deals/deals.controller.js";
+import { PrismaDealRepository } from "./modules/deals/deals.repository.js";
+import { DealService } from "./modules/deals/deals.service.js";
 import { HealthController } from "./modules/health/health.controller.js";
 import { PrismaHealthRepository } from "./modules/health/health.repository.js";
 import { HealthService } from "./modules/health/health.service.js";
+import { InteractionController } from "./modules/interactions/interactions.controller.js";
+import { PrismaInteractionRepository } from "./modules/interactions/interactions.repository.js";
+import { InteractionService } from "./modules/interactions/interactions.service.js";
 
 export interface Controllers {
   healthController: HealthController;
   companyController: CompanyController;
   contactController: ContactController;
+  dealController: DealController;
+  interactionController: InteractionController;
 }
 
 export interface Container {
@@ -39,8 +47,21 @@ export function createContainer(config: Config): Container {
   const companyController = new CompanyController(companyService);
   const contactController = new ContactController(contactService);
 
+  const dealRepository = new PrismaDealRepository(prisma);
+  const interactionRepository = new PrismaInteractionRepository(prisma);
+  const dealService = new DealService(dealRepository, companyRepository);
+  const interactionService = new InteractionService(interactionRepository, dealRepository);
+  const dealController = new DealController(dealService);
+  const interactionController = new InteractionController(interactionService);
+
   return {
-    controllers: { healthController, companyController, contactController },
+    controllers: {
+      healthController,
+      companyController,
+      contactController,
+      dealController,
+      interactionController,
+    },
     disconnect: () => prisma.$disconnect(),
   };
 }

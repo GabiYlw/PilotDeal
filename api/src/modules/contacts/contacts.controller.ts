@@ -4,14 +4,11 @@ import {
   INVALID_BODY_MESSAGE,
   INVALID_PARAMS_MESSAGE,
   INVALID_QUERY_MESSAGE,
+  companyIdParamsSchema,
   idParamsSchema,
   parseOrThrow,
 } from "../../shared/validation.js";
-import {
-  companyIdParamsSchema,
-  createContactSchema,
-  updateContactSchema,
-} from "./contacts.schemas.js";
+import { createContactSchema, updateContactSchema } from "./contacts.schemas.js";
 import type { ContactService } from "./contacts.service.js";
 
 export class ContactController {

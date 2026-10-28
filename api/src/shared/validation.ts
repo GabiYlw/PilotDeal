@@ -31,6 +31,7 @@ export function parseOrThrow<S extends z.ZodType>(
 }
 
 export const idParamsSchema = z.object({ id: z.uuid() });
+export const companyIdParamsSchema = z.object({ companyId: z.uuid() });
 
 // Trimmed, non-empty text that may be omitted or set to null.
 export function optionalText(max: number) {
