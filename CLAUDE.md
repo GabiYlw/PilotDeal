@@ -83,6 +83,9 @@ Before reporting a task as done, run lint, typecheck and all API tests.
 - **Tests never call the real Claude API or download embedding models.** Mock `LlmScorer`'s client and `EmbeddingProvider` (a fake that returns deterministic vectors).
 - Test names describe behavior: `it("returns 404 when the deal does not exist")`.
 - Every new endpoint gets integration tests for the success path, validation errors and not found. Every scorer rule gets unit tests, including edge cases (no interactions, past close date, zero value).
+- Prefer table-driven tests (`it.each`) for cases that differ only in input and expected output, instead of one test per variant.
+- Each test must be able to fail: it checks one specific behavior, and removing or breaking that behavior makes it fail.
+- Do not duplicate coverage: if a validation rule is covered by unit tests, integration tests only need one representative case for it.
 
 ## Data model (starting point)
 
