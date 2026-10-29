@@ -21,6 +21,7 @@ api/                  Express REST API (TypeScript, Prisma, PostgreSQL)
     scoring/          PriorityScorer interface and implementations
     ai/               LLM client and EmbeddingProvider interface and implementations
     shared/           Errors, error middleware, utilities
+    scripts/          CLI entry points (embed:backfill)
   prisma/             schema.prisma, migrations, seed.ts
   tests/
     unit/             No database, no network
@@ -44,7 +45,8 @@ Run from the repository root.
 | All API tests | `npm --prefix api test` |
 | Lint and typecheck | `npm --prefix api run lint` and `npm --prefix api run typecheck` |
 | New migration | `npm --prefix api run migrate -- --name <name>` |
-| Seed data | `npm --prefix api run seed` |
+| Seed data (also embeds notes; first run downloads the embedding model) | `npm --prefix api run seed` |
+| Embed interactions missing an embedding | `npm --prefix api run embed:backfill` |
 | Web dev server | `npm --prefix web run dev` |
 
 Before reporting a task as done, run lint, typecheck and all API tests.
@@ -73,6 +75,7 @@ Before reporting a task as done, run lint, typecheck and all API tests.
 - Keep prompts in `src/ai/prompts.ts`, not inline in services.
 - **Embeddings:** `@huggingface/transformers` with `Xenova/all-MiniLM-L6-v2` (384 dimensions), loaded once and reused.
 - **Vector storage:** PostgreSQL with pgvector (Docker image `pgvector/pgvector:pg16`). The extension must be enabled by a migration (`CREATE EXTENSION IF NOT EXISTS vector;`) before any vector column is created. Prisma has no native vector type: declare the column as `Unsupported("vector(384)")` and read or write it with `$queryRaw` / `$executeRaw` inside the repository only. Use parameterized raw queries, never string concatenation.
+- No vector index: /ask uses exact cosine search, which is always correct with filters and fast at this scale. Consider an HNSW index only with hundreds of thousands of interactions.
 - Embed an interaction's notes when it is created or its notes change.
 
 ## Testing

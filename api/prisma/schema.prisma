@@ -81,6 +81,8 @@ model Interaction {
   occurredAt DateTime        @default(now())
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
+  // Written and read only with raw SQL in repositories. No vector index: /ask uses exact cosine search.
+  embedding  Unsupported("vector(384)")?
 
   @@index([dealId, occurredAt])
 }

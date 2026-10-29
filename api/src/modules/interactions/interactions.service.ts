@@ -1,6 +1,7 @@
 import { NotFoundError } from "../../shared/errors.js";
 import { type Paginated, type Pagination, toPaginated } from "../../shared/pagination.js";
 import type { DealRepository } from "../deals/deals.repository.js";
+import type { InteractionEmbeddingService } from "./interaction-embeddings.service.js";
 import type { InteractionRepository } from "./interactions.repository.js";
 import type {
   CreateInteractionInput,
@@ -12,6 +13,7 @@ export class InteractionService {
   constructor(
     private readonly interactionRepository: InteractionRepository,
     private readonly dealRepository: DealRepository,
+    private readonly interactionEmbeddings: InteractionEmbeddingService,
   ) {}
 
   async listForDeal(dealId: string, pagination: Pagination): Promise<Paginated<Interaction>> {
@@ -29,6 +31,9 @@ export class InteractionService {
       // The deal was deleted between the check and the insert.
       throw dealNotFound(dealId);
     }
+    // Save first, embed second: the row never depends on the embedding model.
+    // refreshEmbedding never rejects, so an embedding failure does not fail the request.
+    await this.interactionEmbeddings.refreshEmbedding(interaction);
     return interaction;
   }
 
@@ -44,6 +49,10 @@ export class InteractionService {
     const interaction = await this.interactionRepository.update(id, input);
     if (!interaction) {
       throw interactionNotFound(id);
+    }
+    // Only a PATCH that contains notes can change what the embedding represents.
+    if (input.notes !== undefined) {
+      await this.interactionEmbeddings.refreshEmbedding(interaction);
     }
     return interaction;
   }

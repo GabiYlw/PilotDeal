@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
-import { createContainer } from "../../src/container.js";
+import { createTestContainer } from "./test-container.js";
 import { createTestPrisma, resetDatabase } from "./database.js";
 import { bodyOf } from "./http.js";
 import { loadTestConfig } from "./test-env.js";
@@ -11,7 +11,7 @@ const DAY = 86_400_000;
 const NOW = new Date("2026-03-15T12:00:00.000Z");
 
 const config = loadTestConfig();
-const container = createContainer(config, { clock: { now: () => NOW } });
+const container = createTestContainer(config, { clock: { now: () => NOW } });
 const app = createApp(container.controllers);
 const prisma = createTestPrisma(config.databaseUrl);
 

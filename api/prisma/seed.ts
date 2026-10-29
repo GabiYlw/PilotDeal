@@ -7,6 +7,7 @@ import {
   PrismaClient,
 } from "../generated/prisma/client.js";
 import { loadConfig } from "../src/config/env.js";
+import { runEmbeddingBackfill } from "../src/scripts/run-embedding-backfill.js";
 
 interface SeedContact {
   name: string;
@@ -265,6 +266,8 @@ async function main(): Promise<void> {
     console.log(
       `Seeded ${companyCount} companies, ${contactCount} contacts, ${dealCount} deals and ${interactionCount} interactions.`,
     );
+    // Makes the seeded notes searchable. Uses the real local model (downloaded on the first run).
+    await runEmbeddingBackfill(config);
   } finally {
     await prisma.$disconnect();
   }

@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import type { Controllers } from "./container.js";
+import { createAskRouter } from "./modules/ask/ask.routes.js";
 import { createCompaniesRouter } from "./modules/companies/companies.routes.js";
 import {
   createCompanyContactsRouter,
@@ -29,6 +30,7 @@ export function createApp(controllers: Controllers): Express {
   );
   app.use("/deals", createDealsRouter(controllers.dealController));
   app.use("/interactions", createInteractionsRouter(controllers.interactionController));
+  app.use("/ask", createAskRouter(controllers.askController));
 
   app.use(notFoundHandler);
   app.use(errorMiddleware);

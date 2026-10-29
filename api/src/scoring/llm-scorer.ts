@@ -7,6 +7,7 @@ import {
   PRIORITY_TOOL,
 } from "../ai/prompts.js";
 import type { Clock } from "../shared/clock.js";
+import { describeError } from "../shared/describe-error.js";
 import type { Logger } from "../shared/logger.js";
 import {
   AI_ADJUSTMENT_FACTOR_NAME,
@@ -58,10 +59,6 @@ export class LlmScorer implements PriorityScorer {
       return baseline;
     }
   }
-}
-
-function describeError(error: unknown): string {
-  return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
 }
 
 // The +-20 band is the guardrail against a wrong or injected score; 0..100 is applied after it.

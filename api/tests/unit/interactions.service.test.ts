@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DealRepository } from "../../src/modules/deals/deals.repository.js";
 import type { Deal } from "../../src/modules/deals/deals.schemas.js";
+import type { InteractionEmbeddingService } from "../../src/modules/interactions/interaction-embeddings.service.js";
 import type { InteractionRepository } from "../../src/modules/interactions/interactions.repository.js";
 import type { Interaction } from "../../src/modules/interactions/interactions.schemas.js";
 import { InteractionService } from "../../src/modules/interactions/interactions.service.js";
@@ -15,6 +16,9 @@ function createInteractionRepository(): {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    saveEmbedding: vi.fn(),
+    clearEmbedding: vi.fn(),
+    listMissingEmbeddings: vi.fn(),
   };
 }
 
@@ -58,11 +62,13 @@ const interaction: Interaction = {
 function setup() {
   const interactionRepository = createInteractionRepository();
   const dealRepository = createDealRepository();
+  const interactionEmbeddings = { refreshEmbedding: vi.fn().mockResolvedValue(undefined) };
   const service = new InteractionService(
     interactionRepository as unknown as InteractionRepository,
     dealRepository as unknown as DealRepository,
+    interactionEmbeddings as unknown as InteractionEmbeddingService,
   );
-  return { interactionRepository, dealRepository, service };
+  return { interactionRepository, dealRepository, interactionEmbeddings, service };
 }
 
 describe("InteractionService", () => {

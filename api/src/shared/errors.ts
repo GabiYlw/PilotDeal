@@ -25,3 +25,8 @@ export class DealClosedError extends AppError {
   readonly statusCode = 409;
   readonly code = "DEAL_CLOSED";
 }
+
+export class EmbeddingUnavailableError extends AppError {
+  readonly statusCode = 503;
+  readonly code = "EMBEDDING_UNAVAILABLE";
+}

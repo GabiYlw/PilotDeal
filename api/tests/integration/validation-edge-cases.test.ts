@@ -4,13 +4,13 @@ import { resolve } from "node:path";
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
-import { createContainer } from "../../src/container.js";
+import { createTestContainer } from "./test-container.js";
 import { bodyOf } from "./http.js";
 import { createTestPrisma, resetDatabase } from "./database.js";
 import { loadTestConfig } from "./test-env.js";
 
 const config = loadTestConfig();
-const container = createContainer(config);
+const container = createTestContainer(config);
 const app = createApp(container.controllers);
 const prisma = createTestPrisma(config.databaseUrl);
 

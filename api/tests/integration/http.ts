@@ -8,6 +8,17 @@ export interface ApiPriority {
   scoredBy: string;
 }
 
+export interface ApiSource {
+  interactionId: string;
+  dealId: string;
+  dealTitle: string;
+  companyName: string;
+  type: string;
+  occurredAt: string;
+  excerpt: string;
+  similarity: number;
+}
+
 // Superset of every resource the API returns, so tests avoid untyped `any` access.
 export interface ApiItem {
   id: string;
@@ -57,6 +68,9 @@ export interface ApiBody {
   scoredBy: string;
   data: ApiItem[];
   meta: { page: number; pageSize: number; total: number };
+  answer: string | null;
+  answeredBy: string;
+  sources: ApiSource[];
   error: { code: string; message: string; details?: unknown };
 }
 

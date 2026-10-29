@@ -1,8 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
+import { EMBEDDING_DIMENSIONS, type EmbeddingProvider } from "./ai/embedding-provider.js";
 import { AnthropicLlmClient } from "./ai/llm-client.js";
+import { LOCAL_EMBEDDING_MODEL, LocalEmbeddingProvider } from "./ai/local-embedding-provider.js";
+import { loadTransformersExtractor } from "./ai/transformers-extractor.js";
 import type { Config } from "./config/env.js";
+import { AskController } from "./modules/ask/ask.controller.js";
+import { PrismaAskRepository } from "./modules/ask/ask.repository.js";
+import { AskService } from "./modules/ask/ask.service.js";
 import { CompanyController } from "./modules/companies/companies.controller.js";
 import { PrismaCompanyRepository } from "./modules/companies/companies.repository.js";
 import { CompanyService } from "./modules/companies/companies.service.js";
@@ -15,6 +21,7 @@ import { DealService } from "./modules/deals/deals.service.js";
 import { HealthController } from "./modules/health/health.controller.js";
 import { PrismaHealthRepository } from "./modules/health/health.repository.js";
 import { HealthService } from "./modules/health/health.service.js";
+import { InteractionEmbeddingService } from "./modules/interactions/interaction-embeddings.service.js";
 import { InteractionController } from "./modules/interactions/interactions.controller.js";
 import { PrismaInteractionRepository } from "./modules/interactions/interactions.repository.js";
 import { InteractionService } from "./modules/interactions/interactions.service.js";
@@ -30,10 +37,12 @@ export interface Controllers {
   contactController: ContactController;
   dealController: DealController;
   interactionController: InteractionController;
+  askController: AskController;
 }
 
 export interface Container {
   controllers: Controllers;
+  interactionEmbeddings: InteractionEmbeddingService;
   disconnect(): Promise<void>;
 }
 
@@ -41,6 +50,7 @@ export interface Container {
 export interface ContainerOverrides {
   clock?: Clock;
   logger?: Logger;
+  embeddingProvider?: EmbeddingProvider;
 }
 
 export interface PriorityScorers {
@@ -56,6 +66,20 @@ export function createPriorityScorers(config: Config, clock: Clock, logger: Logg
     listScorer: ruleBasedScorer,
     actionScorer: createActionScorer(config, ruleBasedScorer, clock, logger),
   };
+}
+
+// The single place to switch embedding providers. The model is loaded lazily on the first embed().
+export function createEmbeddingProvider(): EmbeddingProvider {
+  return new LocalEmbeddingProvider(loadTransformersExtractor, LOCAL_EMBEDDING_MODEL);
+}
+
+// Fail fast: a provider with another size would make every vector write fail.
+function assertEmbeddingDimensions(provider: EmbeddingProvider): void {
+  if (provider.dimensions !== EMBEDDING_DIMENSIONS) {
+    throw new Error(
+      `Embedding provider has ${provider.dimensions} dimensions, but the database column is vector(${EMBEDDING_DIMENSIONS})`,
+    );
+  }
 }
 
 function createActionScorer(
@@ -76,6 +100,8 @@ function createActionScorer(
 export function createContainer(config: Config, overrides: ContainerOverrides = {}): Container {
   const clock: Clock = overrides.clock ?? new SystemClock();
   const logger: Logger = overrides.logger ?? new ConsoleLogger();
+  const embeddingProvider = overrides.embeddingProvider ?? createEmbeddingProvider();
+  assertEmbeddingDimensions(embeddingProvider);
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: config.databaseUrl }),
   });
@@ -95,9 +121,22 @@ export function createContainer(config: Config, overrides: ContainerOverrides = 
   const interactionRepository = new PrismaInteractionRepository(prisma);
   const { listScorer, actionScorer } = createPriorityScorers(config, clock, logger);
   const dealService = new DealService(dealRepository, companyRepository, listScorer, actionScorer);
-  const interactionService = new InteractionService(interactionRepository, dealRepository);
+  const interactionEmbeddings = new InteractionEmbeddingService(
+    interactionRepository,
+    embeddingProvider,
+    logger,
+  );
+  const interactionService = new InteractionService(
+    interactionRepository,
+    dealRepository,
+    interactionEmbeddings,
+  );
   const dealController = new DealController(dealService);
   const interactionController = new InteractionController(interactionService);
+
+  const askRepository = new PrismaAskRepository(prisma);
+  const askService = new AskService(askRepository, dealRepository, embeddingProvider, logger);
+  const askController = new AskController(askService);
 
   return {
     controllers: {
@@ -106,7 +145,9 @@ export function createContainer(config: Config, overrides: ContainerOverrides = 
       contactController,
       dealController,
       interactionController,
+      askController,
     },
+    interactionEmbeddings,
     disconnect: () => prisma.$disconnect(),
   };
 }

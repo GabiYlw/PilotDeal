@@ -12,10 +12,12 @@
     "typecheck": "tsc --noEmit",
     "migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
+    "embed:backfill": "tsx src/scripts/embed-backfill.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
+    "@huggingface/transformers": "^4.3.2",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "dotenv": "^18.0.9",

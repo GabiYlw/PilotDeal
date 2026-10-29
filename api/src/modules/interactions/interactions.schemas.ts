@@ -50,3 +50,9 @@ export interface Interaction {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// The part of an interaction that is needed to compute its embedding.
+export interface EmbeddableInteraction {
+  id: string;
+  notes: string;
+}
