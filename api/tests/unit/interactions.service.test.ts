@@ -25,6 +25,8 @@ function createDealRepository(): { [K in keyof DealRepository]: ReturnType<typeo
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    listOpenForScoring: vi.fn(),
+    findByIdForScoring: vi.fn(),
   };
 }
 

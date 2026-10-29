@@ -1,5 +1,13 @@
 import type { Response } from "supertest";
 
+export interface ApiPriority {
+  score: number;
+  reason: string;
+  nextAction: string;
+  factors: { name: string; points: number }[];
+  scoredBy: string;
+}
+
 // Superset of every resource the API returns, so tests avoid untyped `any` access.
 export interface ApiItem {
   id: string;
@@ -16,6 +24,9 @@ export interface ApiItem {
   occurredAt: string;
   createdAt: string;
   updatedAt: string;
+  companyName: string;
+  deal: ApiItem;
+  priority: ApiPriority;
 }
 
 // Superset of every JSON body the API returns, so tests avoid untyped `any` access.
@@ -39,6 +50,11 @@ export interface ApiBody {
   occurredAt: string;
   createdAt: string;
   updatedAt: string;
+  score: number;
+  reason: string;
+  nextAction: string;
+  factors: { name: string; points: number }[];
+  scoredBy: string;
   data: ApiItem[];
   meta: { page: number; pageSize: number; total: number };
   error: { code: string; message: string; details?: unknown };

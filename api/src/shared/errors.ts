@@ -20,3 +20,8 @@ export class NotFoundError extends AppError {
   readonly statusCode = 404;
   readonly code = "NOT_FOUND";
 }
+
+export class DealClosedError extends AppError {
+  readonly statusCode = 409;
+  readonly code = "DEAL_CLOSED";
+}

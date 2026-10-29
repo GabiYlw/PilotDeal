@@ -1,7 +1,13 @@
-import type { Deal as DealRow, PrismaClient } from "../../../generated/prisma/client.js";
+import type { Deal as DealRow, Prisma, PrismaClient } from "../../../generated/prisma/client.js";
 import { type PageResult, type Pagination, toSkipTake } from "../../shared/pagination.js";
 import { isForeignKeyViolation, isRecordNotFoundError } from "../../shared/prisma-errors.js";
-import type { CreateDealData, Deal, DealListFilter, UpdateDealData } from "./deals.schemas.js";
+import type {
+  CreateDealData,
+  Deal,
+  DealListFilter,
+  ScoringCandidate,
+  UpdateDealData,
+} from "./deals.schemas.js";
 
 export interface DealRepository {
   findById(id: string): Promise<Deal | null>;
@@ -12,6 +18,10 @@ export interface DealRepository {
   update(id: string, data: UpdateDealData): Promise<Deal | null>;
   /** Returns false when the deal does not exist. */
   delete(id: string): Promise<boolean>;
+  /** Every deal that is not WON or LOST, with what the scorer needs. */
+  listOpenForScoring(): Promise<ScoringCandidate[]>;
+  /** Any stage; the service decides what to do with closed deals. */
+  findByIdForScoring(id: string): Promise<ScoringCandidate | null>;
 }
 
 // Prisma returns Decimal (serialized as a string by JSON) and a Date for DATE columns.
@@ -30,6 +40,28 @@ function toDeal(row: DealRow): Deal {
     closedAt: row.closedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  };
+}
+
+// One Prisma call loads the company name, the interaction count and the 5 newest interactions.
+const scoringInclude = {
+  company: { select: { name: true } },
+  interactions: {
+    select: { type: true, notes: true, occurredAt: true },
+    orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+    take: 5,
+  },
+  _count: { select: { interactions: true } },
+} satisfies Prisma.DealInclude;
+
+type ScoringRow = Prisma.DealGetPayload<{ include: typeof scoringInclude }>;
+
+function toScoringCandidate(row: ScoringRow): ScoringCandidate {
+  return {
+    deal: toDeal(row),
+    companyName: row.company.name,
+    interactionCount: row._count.interactions,
+    recentInteractions: row.interactions,
   };
 }
 
@@ -100,5 +132,18 @@ export class PrismaDealRepository implements DealRepository {
       }
       throw error;
     }
+  }
+
+  async listOpenForScoring(): Promise<ScoringCandidate[]> {
+    const rows = await this.prisma.deal.findMany({
+      where: { stage: { notIn: ["WON", "LOST"] } },
+      include: scoringInclude,
+    });
+    return rows.map(toScoringCandidate);
+  }
+
+  async findByIdForScoring(id: string): Promise<ScoringCandidate | null> {
+    const row = await this.prisma.deal.findUnique({ where: { id }, include: scoringInclude });
+    return row ? toScoringCandidate(row) : null;
   }
 }

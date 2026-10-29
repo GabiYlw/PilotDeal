@@ -16,6 +16,9 @@ import { HealthService } from "./modules/health/health.service.js";
 import { InteractionController } from "./modules/interactions/interactions.controller.js";
 import { PrismaInteractionRepository } from "./modules/interactions/interactions.repository.js";
 import { InteractionService } from "./modules/interactions/interactions.service.js";
+import type { PriorityScorer } from "./scoring/priority-scorer.js";
+import { RuleBasedScorer } from "./scoring/rule-based-scorer.js";
+import { type Clock, SystemClock } from "./shared/clock.js";
 
 export interface Controllers {
   healthController: HealthController;
@@ -30,8 +33,14 @@ export interface Container {
   disconnect(): Promise<void>;
 }
 
+// Tests can replace parts of the wiring, for example with a fixed clock.
+export interface ContainerOverrides {
+  clock?: Clock;
+}
+
 // The only place where classes are instantiated and wired together.
-export function createContainer(config: Config): Container {
+export function createContainer(config: Config, overrides: ContainerOverrides = {}): Container {
+  const clock: Clock = overrides.clock ?? new SystemClock();
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: config.databaseUrl }),
   });
@@ -49,7 +58,9 @@ export function createContainer(config: Config): Container {
 
   const dealRepository = new PrismaDealRepository(prisma);
   const interactionRepository = new PrismaInteractionRepository(prisma);
-  const dealService = new DealService(dealRepository, companyRepository);
+  // A future LlmScorer will be chosen here from config (config.anthropicApiKey).
+  const priorityScorer: PriorityScorer = new RuleBasedScorer(clock);
+  const dealService = new DealService(dealRepository, companyRepository, priorityScorer);
   const interactionService = new InteractionService(interactionRepository, dealRepository);
   const dealController = new DealController(dealService);
   const interactionController = new InteractionController(interactionService);

@@ -46,6 +46,16 @@ export class DealController {
     res.status(200).json(await this.dealService.update(id, input));
   };
 
+  listPrioritizedDeals = async (req: Request, res: Response): Promise<void> => {
+    const pagination = parseOrThrow(paginationQuerySchema, req.query, INVALID_QUERY_MESSAGE);
+    res.status(200).json(await this.dealService.listPrioritized(pagination));
+  };
+
+  getNextAction = async (req: Request, res: Response): Promise<void> => {
+    const { id } = parseOrThrow(idParamsSchema, req.params, INVALID_PARAMS_MESSAGE);
+    res.status(200).json(await this.dealService.getNextAction(id));
+  };
+
   deleteDeal = async (req: Request, res: Response): Promise<void> => {
     const { id } = parseOrThrow(idParamsSchema, req.params, INVALID_PARAMS_MESSAGE);
     await this.dealService.delete(id);

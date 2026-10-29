@@ -2,9 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CompanyRepository } from "../../src/modules/companies/companies.repository.js";
 import type { Company } from "../../src/modules/companies/companies.schemas.js";
 import type { DealRepository } from "../../src/modules/deals/deals.repository.js";
-import type { Deal, DealStage } from "../../src/modules/deals/deals.schemas.js";
+import type { Deal, DealStage, ScoringCandidate } from "../../src/modules/deals/deals.schemas.js";
 import { DealService } from "../../src/modules/deals/deals.service.js";
-import { NotFoundError } from "../../src/shared/errors.js";
+import type { PriorityResult } from "../../src/scoring/priority-scorer.js";
+import { DealClosedError, NotFoundError } from "../../src/shared/errors.js";
 
 function createDealRepository(): { [K in keyof DealRepository]: ReturnType<typeof vi.fn> } {
   return {
@@ -13,6 +14,8 @@ function createDealRepository(): { [K in keyof DealRepository]: ReturnType<typeo
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    listOpenForScoring: vi.fn(),
+    findByIdForScoring: vi.fn(),
   };
 }
 
@@ -54,14 +57,36 @@ function dealInStage(stage: DealStage): Deal {
   };
 }
 
+function resultWithScore(score: number): PriorityResult {
+  return { score, reason: `r${score}`, nextAction: `a${score}`, factors: [], scoredBy: "rules" };
+}
+
+function candidate(
+  id: string,
+  overrides: { expectedCloseDate?: string | null; stage?: DealStage } = {},
+): ScoringCandidate {
+  return {
+    deal: {
+      ...dealInStage(overrides.stage ?? "LEAD"),
+      id,
+      expectedCloseDate: overrides.expectedCloseDate ?? null,
+    },
+    companyName: "Acme",
+    interactionCount: 7,
+    recentInteractions: [{ type: "CALL", notes: "hi", occurredAt: new Date("2026-06-01T00:00:00Z") }],
+  };
+}
+
 function setup() {
   const dealRepository = createDealRepository();
   const companyRepository = createCompanyRepository();
+  const scorer = { score: vi.fn() };
   const service = new DealService(
     dealRepository as unknown as DealRepository,
     companyRepository as unknown as CompanyRepository,
+    scorer,
   );
-  return { dealRepository, companyRepository, service };
+  return { dealRepository, companyRepository, scorer, service };
 }
 
 beforeEach(() => {
@@ -290,6 +315,152 @@ describe("DealService", () => {
       dealRepository.delete.mockResolvedValue(false);
 
       await expect(service.delete(dealId)).rejects.toBeInstanceOf(NotFoundError);
+    });
+  });
+
+  describe("listPrioritized", () => {
+    function scoresById(
+      scorer: { score: ReturnType<typeof vi.fn> },
+      scores: Record<string, number>,
+    ): void {
+      const byId = (ctx: { deal: { id: string } }): Promise<PriorityResult> =>
+        Promise.resolve(resultWithScore(scores[ctx.deal.id] ?? 0));
+      scorer.score.mockImplementation(byId as (...args: unknown[]) => unknown);
+    }
+
+    it("sorts by score desc, then close date asc with null last, then id asc", async () => {
+      const { dealRepository, scorer, service } = setup();
+      dealRepository.listOpenForScoring.mockResolvedValue([
+        candidate("id-e"), // 50, null date
+        candidate("id-d", { expectedCloseDate: "2026-07-01" }), // 50
+        candidate("id-c", { expectedCloseDate: "2026-06-01" }), // 50, same date as id-b
+        candidate("id-b", { expectedCloseDate: "2026-06-01" }), // 50
+        candidate("id-a", { expectedCloseDate: "2026-12-31" }), // 10
+        candidate("id-f", { expectedCloseDate: "2026-01-01" }), // 90
+      ]);
+      scoresById(scorer, { "id-a": 10, "id-b": 50, "id-c": 50, "id-d": 50, "id-e": 50, "id-f": 90 });
+
+      const result = await service.listPrioritized(pagination);
+
+      expect(result.data.map((item) => item.deal.id)).toEqual([
+        "id-f",
+        "id-b",
+        "id-c",
+        "id-d",
+        "id-e",
+        "id-a",
+      ]);
+    });
+
+    it("paginates the sorted list and reports the number of candidates as total", async () => {
+      const { dealRepository, scorer, service } = setup();
+      dealRepository.listOpenForScoring.mockResolvedValue([
+        candidate("id-1"),
+        candidate("id-2"),
+        candidate("id-3"),
+        candidate("id-4"),
+        candidate("id-5"),
+      ]);
+      scoresById(scorer, { "id-1": 50, "id-2": 40, "id-3": 30, "id-4": 20, "id-5": 10 });
+
+      const page2 = await service.listPrioritized({ page: 2, pageSize: 2 });
+      const page3 = await service.listPrioritized({ page: 3, pageSize: 2 });
+      const page4 = await service.listPrioritized({ page: 4, pageSize: 2 });
+
+      expect(page2.data.map((i) => i.deal.id)).toEqual(["id-3", "id-4"]);
+      expect(page2.meta).toEqual({ page: 2, pageSize: 2, total: 5 });
+      expect(page3.data.map((i) => i.deal.id)).toEqual(["id-5"]);
+      expect(page4.data).toEqual([]);
+      expect(page4.meta.total).toBe(5);
+    });
+
+    it("passes the scorer a context with company name, interaction count and recent interactions", async () => {
+      const { dealRepository, scorer, service } = setup();
+      const entry = candidate("id-1", { expectedCloseDate: "2026-08-01", stage: "PROPOSAL" });
+      dealRepository.listOpenForScoring.mockResolvedValue([entry]);
+      scorer.score.mockResolvedValue(resultWithScore(42));
+
+      const result = await service.listPrioritized(pagination);
+
+      expect(scorer.score).toHaveBeenCalledWith({
+        deal: {
+          id: "id-1",
+          title: entry.deal.title,
+          value: entry.deal.value,
+          stage: "PROPOSAL",
+          expectedCloseDate: "2026-08-01",
+          createdAt: entry.deal.createdAt,
+        },
+        companyName: "Acme",
+        interactionCount: 7,
+        recentInteractions: entry.recentInteractions,
+      });
+      expect(result.data[0]).toEqual({
+        deal: { ...entry.deal, companyName: "Acme" },
+        priority: resultWithScore(42),
+      });
+    });
+
+    it("returns an empty page when there are no open deals", async () => {
+      const { dealRepository, service } = setup();
+      dealRepository.listOpenForScoring.mockResolvedValue([]);
+
+      await expect(service.listPrioritized(pagination)).resolves.toEqual({
+        data: [],
+        meta: { page: 1, pageSize: 20, total: 0 },
+      });
+    });
+
+    it("skips a closed deal returned by the repository without scoring it", async () => {
+      const { dealRepository, scorer, service } = setup();
+      dealRepository.listOpenForScoring.mockResolvedValue([candidate("id-1", { stage: "WON" })]);
+
+      const result = await service.listPrioritized(pagination);
+
+      expect(result.data).toEqual([]);
+      expect(scorer.score).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getNextAction", () => {
+    it("throws NotFoundError without scoring when the deal does not exist", async () => {
+      const { dealRepository, scorer, service } = setup();
+      dealRepository.findByIdForScoring.mockResolvedValue(null);
+
+      const error: unknown = await service.getNextAction(dealId).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(NotFoundError);
+      expect(error).toMatchObject({ statusCode: 404, message: `Deal ${dealId} not found` });
+      expect(scorer.score).not.toHaveBeenCalled();
+    });
+
+    it.each(["WON", "LOST"] as const)(
+      "throws DealClosedError (409, DEAL_CLOSED) without scoring for a %s deal",
+      async (stage) => {
+        const { dealRepository, scorer, service } = setup();
+        dealRepository.findByIdForScoring.mockResolvedValue(candidate(dealId, { stage }));
+
+        const error: unknown = await service.getNextAction(dealId).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(DealClosedError);
+        expect(error).toMatchObject({
+          statusCode: 409,
+          code: "DEAL_CLOSED",
+          message: `Deal ${dealId} is closed (${stage})`,
+        });
+        expect(scorer.score).not.toHaveBeenCalled();
+      },
+    );
+
+    it("returns the dealId together with the scorer result", async () => {
+      const { dealRepository, scorer, service } = setup();
+      dealRepository.findByIdForScoring.mockResolvedValue(candidate(dealId));
+      scorer.score.mockResolvedValue(resultWithScore(33));
+
+      await expect(service.getNextAction(dealId)).resolves.toEqual({
+        dealId,
+        ...resultWithScore(33),
+      });
     });
   });
 });

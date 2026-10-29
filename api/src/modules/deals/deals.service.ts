@@ -1,15 +1,26 @@
-import { NotFoundError } from "../../shared/errors.js";
-import { type Paginated, type Pagination, toPaginated } from "../../shared/pagination.js";
+import type { DealContext, PriorityScorer } from "../../scoring/priority-scorer.js";
+import { DealClosedError, NotFoundError } from "../../shared/errors.js";
+import {
+  type Paginated,
+  type Pagination,
+  toPaginated,
+  toSkipTake,
+} from "../../shared/pagination.js";
 import type { CompanyRepository } from "../companies/companies.repository.js";
 import type { DealRepository } from "./deals.repository.js";
 import type {
   CreateDealInput,
   Deal,
   DealListFilter,
+  DealNextAction,
   DealStage,
+  OpenDealStage,
+  PrioritizedDeal,
+  ScoringCandidate,
   UpdateDealData,
   UpdateDealInput,
 } from "./deals.schemas.js";
+import { isOpenStage } from "./deals.schemas.js";
 
 const CLOSED_STAGES: ReadonlySet<DealStage> = new Set<DealStage>(["WON", "LOST"]);
 
@@ -17,6 +28,7 @@ export class DealService {
   constructor(
     private readonly dealRepository: DealRepository,
     private readonly companyRepository: CompanyRepository,
+    private readonly priorityScorer: PriorityScorer,
   ) {}
 
   async listForCompany(companyId: string, pagination: Pagination): Promise<Paginated<Deal>> {
@@ -63,6 +75,38 @@ export class DealService {
     }
   }
 
+  // Scores every open deal in memory, sorts, then slices the requested page.
+  async listPrioritized(pagination: Pagination): Promise<Paginated<PrioritizedDeal>> {
+    const candidates = await this.dealRepository.listOpenForScoring();
+    const scored = await Promise.all(candidates.map((candidate) => this.scoreCandidate(candidate)));
+    const sorted = scored.filter((item) => item !== null).sort(comparePrioritized);
+    const { skip, take } = toSkipTake(pagination);
+    return toPaginated({ items: sorted.slice(skip, skip + take), total: sorted.length }, pagination);
+  }
+
+  async getNextAction(id: string): Promise<DealNextAction> {
+    const candidate = await this.dealRepository.findByIdForScoring(id);
+    if (!candidate) {
+      throw dealNotFound(id);
+    }
+    const { stage } = candidate.deal;
+    if (!isOpenStage(stage)) {
+      throw new DealClosedError(`Deal ${id} is closed (${stage})`);
+    }
+    const result = await this.priorityScorer.score(toDealContext(candidate, stage));
+    return { dealId: id, ...result };
+  }
+
+  // Returns null for a closed deal (defensive: the query already excludes them).
+  private async scoreCandidate(candidate: ScoringCandidate): Promise<PrioritizedDeal | null> {
+    const { stage } = candidate.deal;
+    if (!isOpenStage(stage)) {
+      return null;
+    }
+    const priority = await this.priorityScorer.score(toDealContext(candidate, stage));
+    return { deal: { ...candidate.deal, companyName: candidate.companyName }, priority };
+  }
+
   // closedAt depends on the previous stage, so the current deal is read only when
   // the stage is part of the update.
   private async buildUpdateData(id: string, input: UpdateDealInput): Promise<UpdateDealData> {
@@ -102,6 +146,46 @@ function withClosedAtForStageChange(
     return { ...input, closedAt: null };
   }
   return input;
+}
+
+function toDealContext(candidate: ScoringCandidate, stage: OpenDealStage): DealContext {
+  const { deal } = candidate;
+  return {
+    deal: {
+      id: deal.id,
+      title: deal.title,
+      value: deal.value,
+      stage,
+      expectedCloseDate: deal.expectedCloseDate,
+      createdAt: deal.createdAt,
+    },
+    companyName: candidate.companyName,
+    interactionCount: candidate.interactionCount,
+    recentInteractions: candidate.recentInteractions,
+  };
+}
+
+// Plain string comparison is valid for YYYY-MM-DD dates and for ids.
+function compareStrings(a: string, b: string): number {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
+
+// A missing close date sorts last.
+function compareCloseDates(a: string | null, b: string | null): number {
+  if (a === null || b === null) {
+    return Number(a === null) - Number(b === null);
+  }
+  return compareStrings(a, b);
+}
+
+// Score desc, then close date asc (no date last), then id asc.
+function comparePrioritized(a: PrioritizedDeal, b: PrioritizedDeal): number {
+  return (
+    b.priority.score - a.priority.score ||
+    compareCloseDates(a.deal.expectedCloseDate, b.deal.expectedCloseDate) ||
+    compareStrings(a.deal.id, b.deal.id)
+  );
 }
 
 function companyNotFound(companyId: string): NotFoundError {

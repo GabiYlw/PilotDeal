@@ -12,6 +12,7 @@ import { DealService } from "../../src/modules/deals/deals.service.js";
 import { InteractionController } from "../../src/modules/interactions/interactions.controller.js";
 import { PrismaInteractionRepository } from "../../src/modules/interactions/interactions.repository.js";
 import { InteractionService } from "../../src/modules/interactions/interactions.service.js";
+import type { PriorityResult, PriorityScorer } from "../../src/scoring/priority-scorer.js";
 import { createTestPrisma, resetDatabase } from "./database.js";
 import { bodyOf } from "./http.js";
 import { loadTestConfig } from "./test-env.js";
@@ -19,6 +20,11 @@ import { loadTestConfig } from "./test-env.js";
 const config = loadTestConfig();
 const container = createContainer(config);
 const prisma = createTestPrisma(config.databaseUrl);
+
+// These races never reach scoring, so the stub fails loudly if one does.
+const unusedScorer: PriorityScorer = {
+  score: (): Promise<PriorityResult> => Promise.reject(new Error("scorer must not be called")),
+};
 
 // Each subclass reads the row, then deletes it, so the next step runs against a vanished parent.
 class CompanyDeletedAfterLookupRepository extends PrismaCompanyRepository {
@@ -41,6 +47,7 @@ function createDealRacingApp() {
   const dealService = new DealService(
     new PrismaDealRepository(prisma),
     new CompanyDeletedAfterLookupRepository(prisma),
+    unusedScorer,
   );
   return createApp({ ...container.controllers, dealController: new DealController(dealService) });
 }
@@ -49,6 +56,7 @@ function createStagePatchRacingApp() {
   const dealService = new DealService(
     new DealDeletedAfterLookupRepository(prisma),
     new PrismaCompanyRepository(prisma),
+    unusedScorer,
   );
   return createApp({ ...container.controllers, dealController: new DealController(dealService) });
 }

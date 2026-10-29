@@ -1,9 +1,18 @@
 import { z } from "zod";
+import type { PriorityResult } from "../../scoring/priority-scorer.js";
 import { paginationQuerySchema } from "../../shared/pagination.js";
+import type { InteractionType } from "../interactions/interactions.schemas.js";
 
 export const DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"] as const;
 export const dealStageSchema = z.enum(DEAL_STAGES);
 export type DealStage = z.output<typeof dealStageSchema>;
+
+export const OPEN_DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION"] as const;
+export type OpenDealStage = (typeof OPEN_DEAL_STAGES)[number];
+
+export function isOpenStage(stage: DealStage): stage is OpenDealStage {
+  return (OPEN_DEAL_STAGES as readonly DealStage[]).includes(stage);
+}
 
 const titleSchema = z.string().trim().min(1).max(200);
 
@@ -79,3 +88,26 @@ export interface Deal {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ScoringInteraction {
+  type: InteractionType;
+  notes: string;
+  occurredAt: Date;
+}
+
+// What the repository loads for scoring: the deal, its company name and interaction data.
+export interface ScoringCandidate {
+  deal: Deal;
+  companyName: string;
+  interactionCount: number;
+  recentInteractions: ScoringInteraction[];
+}
+
+export type DealWithCompany = Deal & { companyName: string };
+
+export interface PrioritizedDeal {
+  deal: DealWithCompany;
+  priority: PriorityResult;
+}
+
+export type DealNextAction = { dealId: string } & PriorityResult;
