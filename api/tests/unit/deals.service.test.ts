@@ -80,13 +80,15 @@ function candidate(
 function setup() {
   const dealRepository = createDealRepository();
   const companyRepository = createCompanyRepository();
-  const scorer = { score: vi.fn() };
+  const listScorer = { score: vi.fn() };
+  const actionScorer = { score: vi.fn() };
   const service = new DealService(
     dealRepository as unknown as DealRepository,
     companyRepository as unknown as CompanyRepository,
-    scorer,
+    listScorer,
+    actionScorer,
   );
-  return { dealRepository, companyRepository, scorer, service };
+  return { dealRepository, companyRepository, listScorer, actionScorer, service };
 }
 
 beforeEach(() => {
@@ -320,16 +322,16 @@ describe("DealService", () => {
 
   describe("listPrioritized", () => {
     function scoresById(
-      scorer: { score: ReturnType<typeof vi.fn> },
+      listScorer: { score: ReturnType<typeof vi.fn> },
       scores: Record<string, number>,
     ): void {
       const byId = (ctx: { deal: { id: string } }): Promise<PriorityResult> =>
         Promise.resolve(resultWithScore(scores[ctx.deal.id] ?? 0));
-      scorer.score.mockImplementation(byId as (...args: unknown[]) => unknown);
+      listScorer.score.mockImplementation(byId as (...args: unknown[]) => unknown);
     }
 
     it("sorts by score desc, then close date asc with null last, then id asc", async () => {
-      const { dealRepository, scorer, service } = setup();
+      const { dealRepository, listScorer, service } = setup();
       dealRepository.listOpenForScoring.mockResolvedValue([
         candidate("id-e"), // 50, null date
         candidate("id-d", { expectedCloseDate: "2026-07-01" }), // 50
@@ -338,7 +340,7 @@ describe("DealService", () => {
         candidate("id-a", { expectedCloseDate: "2026-12-31" }), // 10
         candidate("id-f", { expectedCloseDate: "2026-01-01" }), // 90
       ]);
-      scoresById(scorer, { "id-a": 10, "id-b": 50, "id-c": 50, "id-d": 50, "id-e": 50, "id-f": 90 });
+      scoresById(listScorer, { "id-a": 10, "id-b": 50, "id-c": 50, "id-d": 50, "id-e": 50, "id-f": 90 });
 
       const result = await service.listPrioritized(pagination);
 
@@ -353,7 +355,7 @@ describe("DealService", () => {
     });
 
     it("paginates the sorted list and reports the number of candidates as total", async () => {
-      const { dealRepository, scorer, service } = setup();
+      const { dealRepository, listScorer, service } = setup();
       dealRepository.listOpenForScoring.mockResolvedValue([
         candidate("id-1"),
         candidate("id-2"),
@@ -361,7 +363,7 @@ describe("DealService", () => {
         candidate("id-4"),
         candidate("id-5"),
       ]);
-      scoresById(scorer, { "id-1": 50, "id-2": 40, "id-3": 30, "id-4": 20, "id-5": 10 });
+      scoresById(listScorer, { "id-1": 50, "id-2": 40, "id-3": 30, "id-4": 20, "id-5": 10 });
 
       const page2 = await service.listPrioritized({ page: 2, pageSize: 2 });
       const page3 = await service.listPrioritized({ page: 3, pageSize: 2 });
@@ -374,15 +376,15 @@ describe("DealService", () => {
       expect(page4.meta.total).toBe(5);
     });
 
-    it("passes the scorer a context with company name, interaction count and recent interactions", async () => {
-      const { dealRepository, scorer, service } = setup();
+    it("passes the listScorer a context with company name, interaction count and recent interactions", async () => {
+      const { dealRepository, listScorer, service } = setup();
       const entry = candidate("id-1", { expectedCloseDate: "2026-08-01", stage: "PROPOSAL" });
       dealRepository.listOpenForScoring.mockResolvedValue([entry]);
-      scorer.score.mockResolvedValue(resultWithScore(42));
+      listScorer.score.mockResolvedValue(resultWithScore(42));
 
       const result = await service.listPrioritized(pagination);
 
-      expect(scorer.score).toHaveBeenCalledWith({
+      expect(listScorer.score).toHaveBeenCalledWith({
         deal: {
           id: "id-1",
           title: entry.deal.title,
@@ -401,6 +403,17 @@ describe("DealService", () => {
       });
     });
 
+    it("scores every candidate with the listScorer and never calls the actionScorer", async () => {
+      const { dealRepository, listScorer, actionScorer, service } = setup();
+      dealRepository.listOpenForScoring.mockResolvedValue([candidate("id-1"), candidate("id-2")]);
+      listScorer.score.mockResolvedValue(resultWithScore(10));
+
+      await service.listPrioritized(pagination);
+
+      expect(listScorer.score).toHaveBeenCalledTimes(2);
+      expect(actionScorer.score).not.toHaveBeenCalled();
+    });
+
     it("returns an empty page when there are no open deals", async () => {
       const { dealRepository, service } = setup();
       dealRepository.listOpenForScoring.mockResolvedValue([]);
@@ -412,32 +425,32 @@ describe("DealService", () => {
     });
 
     it("skips a closed deal returned by the repository without scoring it", async () => {
-      const { dealRepository, scorer, service } = setup();
+      const { dealRepository, listScorer, service } = setup();
       dealRepository.listOpenForScoring.mockResolvedValue([candidate("id-1", { stage: "WON" })]);
 
       const result = await service.listPrioritized(pagination);
 
       expect(result.data).toEqual([]);
-      expect(scorer.score).not.toHaveBeenCalled();
+      expect(listScorer.score).not.toHaveBeenCalled();
     });
   });
 
   describe("getNextAction", () => {
     it("throws NotFoundError without scoring when the deal does not exist", async () => {
-      const { dealRepository, scorer, service } = setup();
+      const { dealRepository, actionScorer, service } = setup();
       dealRepository.findByIdForScoring.mockResolvedValue(null);
 
       const error: unknown = await service.getNextAction(dealId).catch((e: unknown) => e);
 
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error).toMatchObject({ statusCode: 404, message: `Deal ${dealId} not found` });
-      expect(scorer.score).not.toHaveBeenCalled();
+      expect(actionScorer.score).not.toHaveBeenCalled();
     });
 
     it.each(["WON", "LOST"] as const)(
       "throws DealClosedError (409, DEAL_CLOSED) without scoring for a %s deal",
       async (stage) => {
-        const { dealRepository, scorer, service } = setup();
+        const { dealRepository, actionScorer, service } = setup();
         dealRepository.findByIdForScoring.mockResolvedValue(candidate(dealId, { stage }));
 
         const error: unknown = await service.getNextAction(dealId).catch((e: unknown) => e);
@@ -448,19 +461,28 @@ describe("DealService", () => {
           code: "DEAL_CLOSED",
           message: `Deal ${dealId} is closed (${stage})`,
         });
-        expect(scorer.score).not.toHaveBeenCalled();
+        expect(actionScorer.score).not.toHaveBeenCalled();
       },
     );
 
-    it("returns the dealId together with the scorer result", async () => {
-      const { dealRepository, scorer, service } = setup();
+    it("returns the dealId with the actionScorer result unchanged and never calls the listScorer", async () => {
+      const { dealRepository, listScorer, actionScorer, service } = setup();
+      const llmResult: PriorityResult = {
+        score: 72,
+        reason: "Buyer asked for a contract",
+        nextAction: "Send the contract",
+        factors: [
+          { name: "stage", points: 60 },
+          { name: "AI adjustment from interaction notes", points: 12 },
+        ],
+        scoredBy: "llm",
+      };
       dealRepository.findByIdForScoring.mockResolvedValue(candidate(dealId));
-      scorer.score.mockResolvedValue(resultWithScore(33));
+      actionScorer.score.mockResolvedValue(llmResult);
 
-      await expect(service.getNextAction(dealId)).resolves.toEqual({
-        dealId,
-        ...resultWithScore(33),
-      });
+      await expect(service.getNextAction(dealId)).resolves.toEqual({ dealId, ...llmResult });
+      expect(actionScorer.score).toHaveBeenCalledTimes(1);
+      expect(listScorer.score).not.toHaveBeenCalled();
     });
   });
 });

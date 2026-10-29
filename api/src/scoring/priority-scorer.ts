@@ -26,22 +26,34 @@ export interface DealContext {
   recentInteractions: RecentInteraction[];
 }
 
-export type PriorityFactorName = "daysSinceContact" | "closeDate" | "stage" | "value";
+export type RuleFactorName = "daysSinceContact" | "closeDate" | "stage" | "value";
+
+export const AI_ADJUSTMENT_FACTOR_NAME = "AI adjustment from interaction notes";
+
+export type PriorityFactorName = RuleFactorName | typeof AI_ADJUSTMENT_FACTOR_NAME;
+
+// Factor produced by RuleBasedScorer; its exhaustive switch only needs the rule names.
+export interface RuleFactor {
+  name: RuleFactorName;
+  points: number;
+}
 
 export interface PriorityFactor {
   name: PriorityFactorName;
   points: number;
 }
 
+export type ScoredBy = "rules" | "llm";
+
 export interface PriorityResult {
   score: number;
   reason: string;
   nextAction: string;
   factors: PriorityFactor[];
-  scoredBy: "rules";
+  scoredBy: ScoredBy;
 }
 
-// Strategy interface. score() is async because the planned LlmScorer will call the network.
+// Strategy interface. score() is async because LlmScorer calls the network.
 export interface PriorityScorer {
   score(context: DealContext): Promise<PriorityResult>;
 }

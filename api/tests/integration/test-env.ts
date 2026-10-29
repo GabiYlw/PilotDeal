@@ -11,5 +11,6 @@ export function loadTestConfig(): Config {
   if (testUrl === config.databaseUrl) {
     throw new Error("DATABASE_URL_TEST must differ from DATABASE_URL");
   }
-  return { ...config, databaseUrl: testUrl };
+  // Drop the API key so integration tests never call the real Claude API.
+  return { ...config, databaseUrl: testUrl, anthropicApiKey: undefined };
 }

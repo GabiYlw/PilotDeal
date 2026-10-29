@@ -28,7 +28,8 @@ export class DealService {
   constructor(
     private readonly dealRepository: DealRepository,
     private readonly companyRepository: CompanyRepository,
-    private readonly priorityScorer: PriorityScorer,
+    private readonly listScorer: PriorityScorer,
+    private readonly actionScorer: PriorityScorer,
   ) {}
 
   async listForCompany(companyId: string, pagination: Pagination): Promise<Paginated<Deal>> {
@@ -93,7 +94,7 @@ export class DealService {
     if (!isOpenStage(stage)) {
       throw new DealClosedError(`Deal ${id} is closed (${stage})`);
     }
-    const result = await this.priorityScorer.score(toDealContext(candidate, stage));
+    const result = await this.actionScorer.score(toDealContext(candidate, stage));
     return { dealId: id, ...result };
   }
 
@@ -103,7 +104,7 @@ export class DealService {
     if (!isOpenStage(stage)) {
       return null;
     }
-    const priority = await this.priorityScorer.score(toDealContext(candidate, stage));
+    const priority = await this.listScorer.score(toDealContext(candidate, stage));
     return { deal: { ...candidate.deal, companyName: candidate.companyName }, priority };
   }
 

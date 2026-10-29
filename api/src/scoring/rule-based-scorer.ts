@@ -2,10 +2,10 @@ import type { OpenDealStage } from "../modules/deals/deals.schemas.js";
 import type { Clock } from "../shared/clock.js";
 import type {
   DealContext,
-  PriorityFactor,
-  PriorityFactorName,
   PriorityResult,
   PriorityScorer,
+  RuleFactor,
+  RuleFactorName,
 } from "./priority-scorer.js";
 
 const DAY_MS = 86_400_000;
@@ -89,8 +89,8 @@ function computeMetrics(context: DealContext, today: number): Metrics {
   };
 }
 
-function buildFactors(metrics: Metrics): PriorityFactor[] {
-  const all: PriorityFactor[] = [
+function buildFactors(metrics: Metrics): RuleFactor[] {
+  const all: RuleFactor[] = [
     { name: "daysSinceContact", points: daysSinceContactPoints(metrics.daysSinceContact) },
     { name: "closeDate", points: closeDatePoints(metrics.daysUntilClose) },
     { name: "stage", points: STAGE_POINTS[metrics.stage] },
@@ -107,7 +107,7 @@ function closeDatePhrase(daysUntilClose: number): string {
   return `the expected close date is in ${daysUntilClose} days`;
 }
 
-function factorPhrase(name: PriorityFactorName, metrics: Metrics): string {
+function factorPhrase(name: RuleFactorName, metrics: Metrics): string {
   switch (name) {
     case "daysSinceContact":
       return `no contact for ${metrics.daysSinceContact} days`;
@@ -121,7 +121,7 @@ function factorPhrase(name: PriorityFactorName, metrics: Metrics): string {
 }
 
 // Factors are already in tie-break order and Array.sort is stable, so equal points keep that order.
-function buildReason(factors: PriorityFactor[], metrics: Metrics): string {
+function buildReason(factors: RuleFactor[], metrics: Metrics): string {
   const sentence = [...factors]
     .sort((a, b) => b.points - a.points)
     .slice(0, 2)

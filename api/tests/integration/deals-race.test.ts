@@ -48,6 +48,7 @@ function createDealRacingApp() {
     new PrismaDealRepository(prisma),
     new CompanyDeletedAfterLookupRepository(prisma),
     unusedScorer,
+    unusedScorer,
   );
   return createApp({ ...container.controllers, dealController: new DealController(dealService) });
 }
@@ -56,6 +57,7 @@ function createStagePatchRacingApp() {
   const dealService = new DealService(
     new DealDeletedAfterLookupRepository(prisma),
     new PrismaCompanyRepository(prisma),
+    unusedScorer,
     unusedScorer,
   );
   return createApp({ ...container.controllers, dealController: new DealController(dealService) });
