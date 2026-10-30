@@ -8,7 +8,7 @@ const container = createContainer(config);
 const app = createApp(container.controllers);
 
 const server = app.listen(config.port, () => {
-  console.log(`DealPilot API listening on http://localhost:${config.port}`);
+  console.log(`PilotDeal API listening on http://localhost:${config.port}`);
 });
 
 function shutdown(): void {

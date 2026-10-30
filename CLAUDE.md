@@ -1,4 +1,4 @@
-# DealPilot
+# PilotDeal
 
 AI-assisted mini CRM. Tracks companies, contacts, deals and interactions, ranks deals by priority with a "next best action", and answers natural-language questions about CRM data ("Ask your CRM") using retrieval over interaction notes.
 
@@ -47,9 +47,13 @@ Run from the repository root.
 | New migration | `npm --prefix api run migrate -- --name <name>` |
 | Seed data (also embeds notes; first run downloads the embedding model) | `npm --prefix api run seed` |
 | Embed interactions missing an embedding | `npm --prefix api run embed:backfill` |
-| Web dev server | `npm --prefix web run dev` |
+| Install web deps | `npm --prefix web install` |
+| Web dev server (port 3000, needs the API on 3001) | `npm --prefix web run dev` |
+| Web tests | `npm --prefix web run test` |
+| Web lint and typecheck | `npm --prefix web run lint` and `npm --prefix web run typecheck` |
+| Web production build | `npm --prefix web run build` |
 
-Before reporting a task as done, run lint, typecheck and all API tests.
+Before reporting a task as done, run lint, typecheck and all API tests. If `web/` changed, also run web lint, typecheck, test and build.
 
 ## Architecture rules
 
@@ -66,6 +70,17 @@ Before reporting a task as done, run lint, typecheck and all API tests.
 - **Errors:** throw typed errors from `shared/errors.ts` (`NotFoundError`, `ValidationError`, ...). A single error middleware maps them to status codes. Response shape: `{ error: { code, message, details? } }`.
 - **HTTP conventions:** plural resource nouns (`/companies`, `/deals/:id/interactions`), 201 on create with the created resource, 204 on delete, 404 for missing resources.
 - Keep functions small and names explicit. No `any`. TypeScript strict mode stays on.
+
+## Web rules
+
+- Next.js 16 (App Router, Cache Components on). Read the guides in `web/node_modules/next/dist/docs/` before using a Next.js API: this version differs from older ones.
+- **Data is fetched only on the server**, in Server Components and Server Actions, through `web/src/lib/api.ts`. No direct `fetch` calls in components, and no API calls from the browser. `api.ts` imports `server-only` and reads the base URL from `API_URL`.
+- **Mutations use Server Actions** that call `lib/api.ts`.
+- **Types in `web/src/lib/types.ts` mirror the API response shapes.** Update them when an API response changes.
+- API failures surface as `ApiError` (`status`, `code`). `status` 0 with code `API_UNREACHABLE` means the API did not answer.
+- Wrap components that fetch request-time data in `<Suspense>` with a fallback, so the rest of the page can be prerendered.
+- Components stay small. There is no business logic in the web app: the API owns all rules, including scoring. The web app only fetches, displays and submits.
+- Tests (`web/tests/unit/`): Vitest and React Testing Library, with a mocked `fetch` or a mocked `lib/api.ts`. They never call a real API.
 
 ## AI integration
 
