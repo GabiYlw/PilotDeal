@@ -65,6 +65,8 @@ describe("POST /ask", () => {
     expect(response.status).toBe(200);
     expect(bodyOf(response).answer).toBeNull();
     expect(bodyOf(response).answeredBy).toBe("none");
+    expect(bodyOf(response).insufficientInformation).toBe(false);
+    expect(bodyOf(response).citedInteractionIds).toEqual([]);
     expect(bodyOf(response).sources).toHaveLength(1);
     const source = bodyOf(response).sources[0];
     expect(Object.keys(source ?? {}).sort()).toEqual(
@@ -74,12 +76,14 @@ describe("POST /ask", () => {
         "dealTitle",
         "excerpt",
         "interactionId",
+        "label",
         "occurredAt",
         "similarity",
         "type",
       ].sort(),
     );
     expect(source).toEqual({
+      label: "S1",
       interactionId: id,
       dealId,
       dealTitle: "Renewal",
@@ -99,6 +103,7 @@ describe("POST /ask", () => {
 
     expect(notesOf(response)).toEqual(["price", "price budget", "price budget timeline"]);
     expect(bodyOf(response).sources.map((source) => source.similarity)).toEqual([1, 0.707, 0.577]);
+    expect(bodyOf(response).sources.map((source) => source.label)).toEqual(["S1", "S2", "S3"]);
   });
 
   it("returns similarity 0.316 and excludes 0.243 and 0 with the 0.25 threshold", async () => {
@@ -200,7 +205,13 @@ describe("POST /ask", () => {
     const response = await ask({ question: "price" });
 
     expect(response.status).toBe(200);
-    expect(bodyOf(response)).toMatchObject({ answer: null, answeredBy: "none", sources: [] });
+    expect(bodyOf(response)).toMatchObject({
+      answer: null,
+      answeredBy: "none",
+      insufficientInformation: false,
+      citedInteractionIds: [],
+      sources: [],
+    });
   });
 
   it("cuts a 400-character note to a 300-character excerpt", async () => {

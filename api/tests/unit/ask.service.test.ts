@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { AnswerDraft, AnswerGenerator } from "../../src/ai/answer-generator.js";
 import type { EmbeddingProvider } from "../../src/ai/embedding-provider.js";
 import type { InteractionSearchRow } from "../../src/modules/ask/ask.schemas.js";
 import { AskService, EXCERPT_LENGTH, MIN_SIMILARITY } from "../../src/modules/ask/ask.service.js";
@@ -22,7 +23,10 @@ function row(overrides: Partial<InteractionSearchRow> = {}): InteractionSearchRo
   };
 }
 
-function setup(provider: EmbeddingProvider = new FakeEmbeddingProvider()) {
+function setup(
+  provider: EmbeddingProvider = new FakeEmbeddingProvider(),
+  generate: AnswerGenerator["generate"] = vi.fn().mockResolvedValue(null),
+) {
   const askRepository = { searchInteractions: vi.fn().mockResolvedValue([]) };
   const dealRepository = { findById: vi.fn().mockResolvedValue({ id: dealId }) };
   const logger = { warn: vi.fn() };
@@ -30,9 +34,10 @@ function setup(provider: EmbeddingProvider = new FakeEmbeddingProvider()) {
     askRepository,
     dealRepository as unknown as DealRepository,
     provider,
+    { generate },
     logger,
   );
-  return { askRepository, dealRepository, logger, service };
+  return { askRepository, dealRepository, logger, service, generate: vi.mocked(generate) };
 }
 
 describe("AskService", () => {
@@ -93,6 +98,7 @@ describe("AskService", () => {
     expect(response.answeredBy).toBe("none");
     expect(response.sources).toEqual([
       {
+        label: "S1",
         interactionId: "a",
         dealId,
         dealTitle: "Renewal",
@@ -103,6 +109,7 @@ describe("AskService", () => {
         similarity: 0.9,
       },
       {
+        label: "S2",
         interactionId: "b",
         dealId,
         dealTitle: "Renewal",
@@ -122,7 +129,181 @@ describe("AskService", () => {
     await expect(service.ask({ question: "price", limit: 5 })).resolves.toEqual({
       answer: null,
       answeredBy: "none",
+      insufficientInformation: false,
+      citedInteractionIds: [],
       sources: [],
+    });
+  });
+
+  it("does not call the generator when no sources are found", async () => {
+    const { generate, service } = setup();
+
+    await service.ask({ question: "price", limit: 5 });
+
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  describe("answer generation", () => {
+    const first = row({ interactionId: "a", notes: "first", similarity: 0.9 });
+    const second = row({ interactionId: "b", notes: "second", similarity: 0.5 });
+
+    function setupWithDraft(draft: AnswerDraft | null) {
+      const context = setup(undefined, vi.fn().mockResolvedValue(draft));
+      context.askRepository.searchInteractions.mockResolvedValue([first, second]);
+      return context;
+    }
+
+    function draftOf(overrides: Partial<AnswerDraft> = {}): AnswerDraft {
+      return {
+        answer: "It is [S1].",
+        citedLabels: ["S1"],
+        insufficientInformation: false,
+        ...overrides,
+      };
+    }
+
+    it("passes the question and the labelled sources with their full notes to the generator", async () => {
+      const longNotes = "x".repeat(EXCERPT_LENGTH + 50);
+      const { askRepository, generate, service } = setup();
+      askRepository.searchInteractions.mockResolvedValue([
+        { ...first, notes: longNotes },
+        second,
+      ]);
+
+      await service.ask({ question: "what happened?", limit: 5 });
+
+      expect(generate).toHaveBeenCalledTimes(1);
+      expect(generate).toHaveBeenCalledWith("what happened?", [
+        {
+          label: "S1",
+          dealTitle: "Renewal",
+          companyName: "Acme",
+          type: "CALL",
+          occurredAt: first.occurredAt,
+          notes: longNotes,
+        },
+        {
+          label: "S2",
+          dealTitle: "Renewal",
+          companyName: "Acme",
+          type: "CALL",
+          occurredAt: second.occurredAt,
+          notes: "second",
+        },
+      ]);
+    });
+
+    it("returns the llm answer with the cited interaction ids and labelled sources", async () => {
+      const { service, logger } = setupWithDraft(draftOf());
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response).toMatchObject({
+        answer: "It is [S1].",
+        answeredBy: "llm",
+        insufficientInformation: false,
+        citedInteractionIds: ["a"],
+      });
+      expect(response.sources.map((source) => source.label)).toEqual(["S1", "S2"]);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["a single label", ["S1"], ["a"]],
+      ["labels in reverse order", ["S2", "S1"], ["a", "b"]],
+      ["duplicate labels", ["S1", "S1"], ["a"]],
+      [
+        "unknown, padded, lowercase, bracketed and empty labels",
+        ["S1", "S9", " S2 ", "s2", "[S1]", ""],
+        ["a", "b"],
+      ],
+    ])("maps %s to interaction ids in source order", async (_name, citedLabels, expected) => {
+      const { service } = setupWithDraft(draftOf({ citedLabels }));
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response.citedInteractionIds).toEqual(expected);
+    });
+
+    it.each([
+      ["no citations", []],
+      ["only unknown citations", ["S9"]],
+    ])("falls back with one warning when the answer has %s", async (_name, citedLabels) => {
+      const { service, logger } = setupWithDraft(draftOf({ citedLabels }));
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response).toMatchObject({
+        answer: null,
+        answeredBy: "none",
+        insufficientInformation: false,
+        citedInteractionIds: [],
+      });
+      expect(response.sources).toHaveLength(2);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        "LLM answer cited no retrieved source, returning sources only",
+        { sourceCount: 2, citedLabelCount: citedLabels.length },
+      );
+    });
+
+    it("returns the llm answer without ids or a warning when the information is insufficient", async () => {
+      const { service, logger } = setupWithDraft(
+        draftOf({ answer: "The notes do not say.", citedLabels: [], insufficientInformation: true }),
+      );
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response).toMatchObject({
+        answer: "The notes do not say.",
+        answeredBy: "llm",
+        insufficientInformation: true,
+        citedInteractionIds: [],
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it("keeps valid citations when the information is insufficient", async () => {
+      const { service } = setupWithDraft(
+        draftOf({ citedLabels: ["S2", "S9"], insufficientInformation: true }),
+      );
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response.citedInteractionIds).toEqual(["b"]);
+    });
+
+    it("falls back with one warning and without the question when the generator rejects", async () => {
+      const { askRepository, logger, service } = setup(
+        undefined,
+        vi.fn().mockRejectedValue(new Error("boom")),
+      );
+      askRepository.searchInteractions.mockResolvedValue([first]);
+
+      const response = await service.ask({ question: "secret question", limit: 5 });
+
+      expect(response).toMatchObject({ answer: null, answeredBy: "none", citedInteractionIds: [] });
+      expect(response.sources).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith("Answer generation failed, returning sources only", {
+        error: "Error: boom",
+      });
+      expect(JSON.stringify(logger.warn.mock.calls)).not.toContain("secret question");
+    });
+
+    it("falls back without a warning when the generator returns null", async () => {
+      const { service, logger } = setupWithDraft(null);
+
+      const response = await service.ask({ question: "price", limit: 5 });
+
+      expect(response).toMatchObject({
+        answer: null,
+        answeredBy: "none",
+        insufficientInformation: false,
+        citedInteractionIds: [],
+      });
+      expect(response.sources).toHaveLength(2);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 

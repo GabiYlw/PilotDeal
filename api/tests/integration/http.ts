@@ -9,6 +9,7 @@ export interface ApiPriority {
 }
 
 export interface ApiSource {
+  label: string;
   interactionId: string;
   dealId: string;
   dealTitle: string;
@@ -70,6 +71,8 @@ export interface ApiBody {
   meta: { page: number; pageSize: number; total: number };
   answer: string | null;
   answeredBy: string;
+  insufficientInformation: boolean;
+  citedInteractionIds: string[];
   sources: ApiSource[];
   error: { code: string; message: string; details?: unknown };
 }

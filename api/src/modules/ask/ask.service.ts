@@ -1,3 +1,4 @@
+import type { AnswerGenerator, AnswerSource, GeneratedAnswer } from "../../ai/answer-generator.js";
 import { type EmbeddingProvider, embedText } from "../../ai/embedding-provider.js";
 import { describeError } from "../../shared/describe-error.js";
 import { EmbeddingUnavailableError, NotFoundError } from "../../shared/errors.js";
@@ -9,11 +10,17 @@ import type { AskInput, AskResponse, AskSource, InteractionSearchRow } from "./a
 export const MIN_SIMILARITY = 0.25;
 export const EXCERPT_LENGTH = 300;
 
+interface LabelledRow {
+  label: string;
+  row: InteractionSearchRow;
+}
+
 export class AskService {
   constructor(
     private readonly askRepository: AskRepository,
     private readonly dealRepository: DealRepository,
     private readonly embeddingProvider: EmbeddingProvider,
+    private readonly answerGenerator: AnswerGenerator,
     private readonly logger: Logger,
   ) {}
 
@@ -29,7 +36,45 @@ export class AskService {
       maxDistance: 1 - MIN_SIMILARITY,
       limit: input.limit,
     });
-    return { answer: null, answeredBy: "none", sources: rows.map(toSource) };
+    // Nothing to answer from, so the generator (and the LLM) is never called.
+    if (rows.length === 0) {
+      return sourcesOnly([]);
+    }
+    const labelled = rows.map((row, index) => ({ label: `S${index + 1}`, row }));
+    const sources = labelled.map(toSource);
+    const draft = await this.generateAnswer(input.question, labelled);
+    if (draft === null) {
+      return sourcesOnly(sources);
+    }
+    const citedInteractionIds = mapCitations(draft.citedLabels, labelled);
+    // An answer without a single valid citation is not grounded in the sources, so it is dropped.
+    if (!draft.insufficientInformation && citedInteractionIds.length === 0) {
+      this.logger.warn("LLM answer cited no retrieved source, returning sources only", {
+        sourceCount: sources.length,
+        citedLabelCount: draft.citedLabels.length,
+      });
+      return sourcesOnly(sources);
+    }
+    return {
+      answer: draft.answer,
+      answeredBy: "llm",
+      insufficientInformation: draft.insufficientInformation,
+      citedInteractionIds,
+      sources,
+    };
+  }
+
+  // A failed answer must never fail the request: the sources are still useful.
+  private async generateAnswer(question: string, labelled: LabelledRow[]): Promise<GeneratedAnswer> {
+    try {
+      return await this.answerGenerator.generate(question, labelled.map(toAnswerSource));
+    } catch (error: unknown) {
+      // The question text is never logged.
+      this.logger.warn("Answer generation failed, returning sources only", {
+        error: describeError(error),
+      });
+      return null;
+    }
   }
 
   private async embedQuestion(question: string): Promise<number[]> {
@@ -52,12 +97,34 @@ export class AskService {
   }
 }
 
-function toSource({ notes, ...row }: InteractionSearchRow): AskSource {
+function toSource({ label, row: { notes, ...row } }: LabelledRow): AskSource {
   return {
+    label,
     ...row,
     // Array.from splits on code points, so a surrogate pair is never cut in half.
     excerpt: Array.from(notes).slice(0, EXCERPT_LENGTH).join(""),
     similarity: roundSimilarity(row.similarity),
+  };
+}
+
+function toAnswerSource({ label, row }: LabelledRow): AnswerSource {
+  const { dealTitle, companyName, type, occurredAt, notes } = row;
+  return { label, dealTitle, companyName, type, occurredAt, notes };
+}
+
+// Filtering the labelled rows removes duplicates and unknown labels and keeps source order.
+function mapCitations(citedLabels: string[], labelled: LabelledRow[]): string[] {
+  const cited = new Set(citedLabels.map((label) => label.trim()));
+  return labelled.filter(({ label }) => cited.has(label)).map(({ row }) => row.interactionId);
+}
+
+function sourcesOnly(sources: AskSource[]): AskResponse {
+  return {
+    answer: null,
+    answeredBy: "none",
+    insufficientInformation: false,
+    citedInteractionIds: [],
+    sources,
   };
 }
 

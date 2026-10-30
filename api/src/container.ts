@@ -1,8 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
+import { type AnswerGenerator, NoAnswerGenerator } from "./ai/answer-generator.js";
 import { EMBEDDING_DIMENSIONS, type EmbeddingProvider } from "./ai/embedding-provider.js";
-import { AnthropicLlmClient } from "./ai/llm-client.js";
+import { AnthropicLlmClient, type LlmClient } from "./ai/llm-client.js";
+import { LlmAnswerGenerator } from "./ai/llm-answer-generator.js";
 import { LOCAL_EMBEDDING_MODEL, LocalEmbeddingProvider } from "./ai/local-embedding-provider.js";
 import { loadTransformersExtractor } from "./ai/transformers-extractor.js";
 import type { Config } from "./config/env.js";
@@ -51,6 +53,8 @@ export interface ContainerOverrides {
   clock?: Clock;
   logger?: Logger;
   embeddingProvider?: EmbeddingProvider;
+  // Tests inject a fake so they never reach Claude.
+  llmClient?: LlmClient;
 }
 
 export interface PriorityScorers {
@@ -58,13 +62,34 @@ export interface PriorityScorers {
   actionScorer: PriorityScorer;
 }
 
-// The only place that checks for an API key. The list scorer is always rule-based:
-// one LLM call per listed deal would be slow and costly.
-export function createPriorityScorers(config: Config, clock: Clock, logger: Logger): PriorityScorers {
+// The only place that checks for an API key and builds the SDK.
+export function createLlmClient(config: Config): LlmClient | undefined {
+  if (!config.anthropicApiKey) {
+    return undefined;
+  }
+  const sdkClient = new Anthropic({ apiKey: config.anthropicApiKey });
+  return new AnthropicLlmClient(sdkClient, config.anthropicModel);
+}
+
+// Without an LLM client the answer step is skipped and /ask returns sources only.
+export function createAnswerGenerator(
+  llmClient: LlmClient | undefined,
+  clock: Clock,
+  logger: Logger,
+): AnswerGenerator {
+  return llmClient ? new LlmAnswerGenerator(llmClient, clock, logger) : new NoAnswerGenerator();
+}
+
+// The list scorer is always rule-based: one LLM call per listed deal would be slow and costly.
+export function createPriorityScorers(
+  llmClient: LlmClient | undefined,
+  clock: Clock,
+  logger: Logger,
+): PriorityScorers {
   const ruleBasedScorer = new RuleBasedScorer(clock);
   return {
     listScorer: ruleBasedScorer,
-    actionScorer: createActionScorer(config, ruleBasedScorer, clock, logger),
+    actionScorer: createActionScorer(llmClient, ruleBasedScorer, clock, logger),
   };
 }
 
@@ -83,17 +108,12 @@ function assertEmbeddingDimensions(provider: EmbeddingProvider): void {
 }
 
 function createActionScorer(
-  config: Config,
+  llmClient: LlmClient | undefined,
   ruleBasedScorer: PriorityScorer,
   clock: Clock,
   logger: Logger,
 ): PriorityScorer {
-  if (!config.anthropicApiKey) {
-    return ruleBasedScorer;
-  }
-  const sdkClient = new Anthropic({ apiKey: config.anthropicApiKey });
-  const llmClient = new AnthropicLlmClient(sdkClient, config.anthropicModel);
-  return new LlmScorer(llmClient, ruleBasedScorer, clock, logger);
+  return llmClient ? new LlmScorer(llmClient, ruleBasedScorer, clock, logger) : ruleBasedScorer;
 }
 
 // The only place where classes are instantiated and wired together.
@@ -102,6 +122,7 @@ export function createContainer(config: Config, overrides: ContainerOverrides = 
   const logger: Logger = overrides.logger ?? new ConsoleLogger();
   const embeddingProvider = overrides.embeddingProvider ?? createEmbeddingProvider();
   assertEmbeddingDimensions(embeddingProvider);
+  const llmClient = overrides.llmClient ?? createLlmClient(config);
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: config.databaseUrl }),
   });
@@ -119,7 +140,7 @@ export function createContainer(config: Config, overrides: ContainerOverrides = 
 
   const dealRepository = new PrismaDealRepository(prisma);
   const interactionRepository = new PrismaInteractionRepository(prisma);
-  const { listScorer, actionScorer } = createPriorityScorers(config, clock, logger);
+  const { listScorer, actionScorer } = createPriorityScorers(llmClient, clock, logger);
   const dealService = new DealService(dealRepository, companyRepository, listScorer, actionScorer);
   const interactionEmbeddings = new InteractionEmbeddingService(
     interactionRepository,
@@ -135,7 +156,14 @@ export function createContainer(config: Config, overrides: ContainerOverrides = 
   const interactionController = new InteractionController(interactionService);
 
   const askRepository = new PrismaAskRepository(prisma);
-  const askService = new AskService(askRepository, dealRepository, embeddingProvider, logger);
+  const answerGenerator = createAnswerGenerator(llmClient, clock, logger);
+  const askService = new AskService(
+    askRepository,
+    dealRepository,
+    embeddingProvider,
+    answerGenerator,
+    logger,
+  );
   const askController = new AskController(askService);
 
   return {

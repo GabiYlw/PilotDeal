@@ -15,9 +15,10 @@ export const askRequestSchema = z.strictObject({
 
 export type AskInput = z.output<typeof askRequestSchema>;
 
-export type AnsweredBy = "none"; // the next task adds "llm"
+export type AnsweredBy = "llm" | "none";
 
 export interface AskSource {
+  label: string;
   interactionId: string;
   dealId: string;
   dealTitle: string;
@@ -29,8 +30,10 @@ export interface AskSource {
 }
 
 export interface AskResponse {
-  answer: null;
+  answer: string | null;
   answeredBy: AnsweredBy;
+  insufficientInformation: boolean;
+  citedInteractionIds: string[];
   sources: AskSource[];
 }
 
