@@ -82,6 +82,16 @@ Before reporting a task as done, run lint, typecheck and all API tests. If `web/
 - Components stay small. There is no business logic in the web app: the API owns all rules, including scoring. The web app only fetches, displays and submits.
 - Tests (`web/tests/unit/`): Vitest and React Testing Library, with a mocked `fetch` or a mocked `lib/api.ts`. They never call a real API.
 
+## UI rules
+
+- Style: minimalist, Linear-like. Compact, 1px borders, almost no shadows, generous whitespace, 14px base text, Geist font (from the `geist` npm package, no network at build time).
+- **Pages are built only from the components in `web/src/components/ui/`** (Button, ButtonLink, TextLink, Card, Badge, Table parts, Input, Select, Textarea, Label, FieldError, ScoreBar, PageHeader, EmptyState) plus layout utilities (flex, grid, gap, spacing, width). If something is missing, add a small component to `components/ui/` instead of styling it inline in a page.
+- **Colors come only from the design tokens** in `web/src/app/globals.css`, through their Tailwind names: `bg-background`, `bg-surface`, `bg-surface-hover`, `border-border`, `border-border-strong`, `text-foreground`, `text-muted`, `bg-accent` / `text-accent-foreground`, `text-link`, and `success`, `warning`, `danger` (with `-subtle` backgrounds). No raw hex, rgb or Tailwind palette colors (`slate-500`, `red-50`, ...) in components.
+- State colors (success, warning, danger) are for states only: WON, LOST, overdue, errors, health. Not for decoration.
+- **Every page must work in both themes.** Tokens switch automatically; check new UI in light and dark. Any new token needs a light and a dark value, both meeting WCAG AA (4.5:1 for text).
+- Theme: no `data-theme` on `<html>` means "follow the system". The inline script in `app/layout.tsx` applies a stored choice before first paint; `lib/theme.ts` owns the storage key and logic.
+- `className` on a ui component is for layout only (margins, width, flex). It is joined with `cn`, which does not resolve conflicting Tailwind classes.
+
 ## AI integration
 
 - **LLM:** Claude via `@anthropic-ai/sdk`. Model name comes from `ANTHROPIC_MODEL` (default `claude-haiku-5-5`). The API key comes from `ANTHROPIC_API_KEY`.

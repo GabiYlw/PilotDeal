@@ -1,1 +1,121 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens. Components use the Tailwind names mapped in @theme below
+ * (bg-surface, text-muted, border-border, ...), never raw hex values.
+ *
+ * Theme selection:
+ * - No data-theme attribute: follow the system preference (the media query below).
+ * - data-theme="light" or "dark": the user's explicit choice, set before first paint
+ *   by the inline script in app/layout.tsx.
+ *
+ * Every text/background pair meets WCAG AA (4.5:1) in both themes.
+ */
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --surface: #f5f7fa;
+  --surface-hover: #ebeff5;
+  --border: #dde3eb;
+  --border-strong: #c3ccd9;
+  --text: #0b132b;
+  --text-muted: #3a506b;
+  --accent: #5bc0be;
+  --accent-hover: #4eaeac;
+  --accent-foreground: #0b132b;
+  --link: #1f7472;
+  --ring: #1f7472;
+  --success: #1e6b45;
+  --success-subtle: #e7f4ec;
+  --warning: #7a5100;
+  --warning-subtle: #fbf1dc;
+  --danger: #a8283a;
+  --danger-subtle: #fbeaec;
+}
+
+/* The dark set is listed twice: once for an explicit choice, once for the system preference. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0b132b;
+  --surface: #1c2541;
+  --surface-hover: #243052;
+  --border: #3a506b;
+  --border-strong: #4d6585;
+  --text: #ffffff;
+  --text-muted: #a3b3c9;
+  --accent: #5bc0be;
+  --accent-hover: #74cccb;
+  --accent-foreground: #0b132b;
+  --link: #5bc0be;
+  --ring: #5bc0be;
+  --success: #74d3a0;
+  --success-subtle: #163330;
+  --warning: #e8bf6a;
+  --warning-subtle: #2f2b22;
+  --danger: #f3949c;
+  --danger-subtle: #36202d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #0b132b;
+    --surface: #1c2541;
+    --surface-hover: #243052;
+    --border: #3a506b;
+    --border-strong: #4d6585;
+    --text: #ffffff;
+    --text-muted: #a3b3c9;
+    --accent: #5bc0be;
+    --accent-hover: #74cccb;
+    --accent-foreground: #0b132b;
+    --link: #5bc0be;
+    --ring: #5bc0be;
+    --success: #74d3a0;
+    --success-subtle: #163330;
+    --warning: #e8bf6a;
+    --warning-subtle: #2f2b22;
+    --danger: #f3949c;
+    --danger-subtle: #36202d;
+  }
+}
+
+/* "inline" makes utilities reference the variables directly, so they follow the active theme. */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-link: var(--link);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}

@@ -1,30 +1,25 @@
 import Link from "next/link";
-
-const LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/deals", label: "Deals" },
-  { href: "/companies", label: "Companies" },
-  { href: "/ask", label: "Ask" },
-] as const;
+import { SidebarNav } from "./sidebar-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
   return (
-    <aside className="border-b border-slate-200 bg-white md:w-56 md:shrink-0 md:border-r md:border-b-0">
-      <div className="px-5 py-4 text-lg font-semibold text-slate-900">PilotDeal</div>
-      <nav aria-label="Main">
-        <ul className="flex gap-1 px-3 pb-3 md:flex-col">
-          {LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="block rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <aside className="flex flex-col gap-4 border-b border-border bg-surface px-3 py-3 md:sticky md:top-0 md:h-screen md:w-56 md:shrink-0 md:border-r md:border-b-0 md:py-4">
+      <div className="flex items-center justify-between gap-2 md:contents">
+        <Link href="/" className="flex items-center gap-2 px-2 text-sm font-semibold text-foreground">
+          <span
+            aria-hidden="true"
+            className="flex h-5 w-5 items-center justify-center rounded bg-accent text-[11px] font-bold text-accent-foreground"
+          >
+            P
+          </span>
+          PilotDeal
+        </Link>
+        <div className="md:order-last md:mt-auto md:px-2">
+          <ThemeToggle />
+        </div>
+      </div>
+      <SidebarNav />
     </aside>
   );
 }
