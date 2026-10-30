@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { SidebarNav } from "./sidebar-nav";
+import { Suspense } from "react";
+import { NavLinks, SidebarNav } from "./sidebar-nav";
 import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
@@ -19,7 +20,12 @@ export function Sidebar() {
           <ThemeToggle />
         </div>
       </div>
-      <SidebarNav />
+      {/* usePathname() is request-time data on dynamic routes, so it must sit inside Suspense.
+          The fallback renders the same links without the highlight, so the nav is in the static
+          shell and never appears late or shifts the page. */}
+      <Suspense fallback={<NavLinks />}>
+        <SidebarNav />
+      </Suspense>
     </aside>
   );
 }

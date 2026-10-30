@@ -32,3 +32,15 @@ export function FieldError({ id, message }: { id?: string; message?: string }) {
     </p>
   );
 }
+
+// A form-level message (not tied to one field). role="alert" announces it when it appears.
+export function FormError({ message }: { message?: string }) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <p role="alert" className="text-xs text-danger">
+      {message}
+    </p>
+  );
+}

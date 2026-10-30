@@ -11,13 +11,13 @@ const LINKS = [
   { href: "/ask", label: "Ask" },
 ] as const;
 
-function isActive(pathname: string, href: string): boolean {
+function isActive(pathname: string | undefined, href: string): boolean {
+  if (pathname === undefined) return false;
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-// Client Component only to read the current path for the active link.
-export function SidebarNav() {
-  const pathname = usePathname();
+// No hooks, so it can render in the static shell. Without a pathname no link is highlighted.
+export function NavLinks({ pathname }: { pathname?: string }) {
   return (
     <nav aria-label="Main">
       <ul className="flex gap-0.5 md:flex-col">
@@ -43,4 +43,9 @@ export function SidebarNav() {
       </ul>
     </nav>
   );
+}
+
+// Adds the active highlight once the current path is known.
+export function SidebarNav() {
+  return <NavLinks pathname={usePathname()} />;
 }

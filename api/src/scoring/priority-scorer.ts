@@ -26,7 +26,7 @@ export interface DealContext {
   recentInteractions: RecentInteraction[];
 }
 
-export type RuleFactorName = "daysSinceContact" | "closeDate" | "stage" | "value";
+export type RuleFactorName = "daysSinceContact" | "closeDate" | "closeDatePassed" | "stage" | "value";
 
 export const AI_ADJUSTMENT_FACTOR_NAME = "AI adjustment from interaction notes";
 

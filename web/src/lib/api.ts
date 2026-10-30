@@ -1,10 +1,25 @@
 import "server-only";
-import type { ApiErrorBody, HealthStatus } from "./types";
+import type {
+  ApiErrorBody,
+  Company,
+  CreateInteractionBody,
+  Deal,
+  DealNextAction,
+  HealthStatus,
+  Interaction,
+  PageQuery,
+  Paginated,
+  PrioritizedDeal,
+  UpdateDealBody,
+} from "./types";
 
 // status 0 means no HTTP response was received (API not running, DNS, refused connection).
 export const API_UNREACHABLE = "API_UNREACHABLE";
 // The API answered with an error status but not with its usual { error } body.
 export const UNEXPECTED_RESPONSE = "UNEXPECTED_RESPONSE";
+
+// The next-action endpoint answers 409 with this code for a WON or LOST deal.
+export const DEAL_CLOSED = "DEAL_CLOSED";
 
 export class ApiError extends Error {
   constructor(
@@ -96,4 +111,46 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
 export function getHealth(): Promise<HealthStatus> {
   return apiRequest<HealthStatus>("/health", { acceptStatuses: [503] });
+}
+
+function pageQuery({ page, pageSize }: PageQuery): string {
+  return `?page=${page}&pageSize=${pageSize}`;
+}
+
+function dealPath(id: string): string {
+  return `/deals/${encodeURIComponent(id)}`;
+}
+
+export function getPrioritizedDeals(query: PageQuery): Promise<Paginated<PrioritizedDeal>> {
+  return apiRequest<Paginated<PrioritizedDeal>>(`/deals/prioritized${pageQuery(query)}`);
+}
+
+export function getDeal(id: string): Promise<Deal> {
+  return apiRequest<Deal>(dealPath(id));
+}
+
+export function getDealNextAction(id: string): Promise<DealNextAction> {
+  return apiRequest<DealNextAction>(`${dealPath(id)}/next-action`);
+}
+
+export function getCompany(id: string): Promise<Company> {
+  return apiRequest<Company>(`/companies/${encodeURIComponent(id)}`);
+}
+
+export function getDealInteractions(
+  dealId: string,
+  query: PageQuery,
+): Promise<Paginated<Interaction>> {
+  return apiRequest<Paginated<Interaction>>(`${dealPath(dealId)}/interactions${pageQuery(query)}`);
+}
+
+export function createDealInteraction(
+  dealId: string,
+  body: CreateInteractionBody,
+): Promise<Interaction> {
+  return apiRequest<Interaction>(`${dealPath(dealId)}/interactions`, { method: "POST", body });
+}
+
+export function updateDeal(id: string, body: UpdateDealBody): Promise<Deal> {
+  return apiRequest<Deal>(dealPath(id), { method: "PATCH", body });
 }

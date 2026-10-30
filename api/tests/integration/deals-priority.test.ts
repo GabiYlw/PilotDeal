@@ -279,6 +279,18 @@ describe("GET /deals/:id/next-action", () => {
     });
   });
 
+  it("marks an overdue deal with a closeDatePassed factor", async () => {
+    const companyId = await createCompany("Acme");
+    const dealId = await createDeal(companyId, { stage: "PROPOSAL", closeInDays: -1 });
+
+    const response = await request(app).get(`/deals/${dealId}/next-action`);
+
+    expect(response.status).toBe(200);
+    const factors = bodyOf(response).factors as { name: string; points: number }[];
+    expect(factors).toContainEqual({ name: "closeDatePassed", points: 25 });
+    expect(factors.map((f) => f.name)).not.toContain("closeDate");
+  });
+
   it("uses the company name in the follow-up action for a stale deal", async () => {
     const companyId = await createCompany("Initech");
     const dealId = await createDeal(companyId, { stage: "LEAD", interactionDaysAgo: [20] });

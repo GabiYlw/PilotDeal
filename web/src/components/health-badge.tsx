@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
+import { API_NOT_RUNNING_MESSAGE } from "@/lib/messages";
 
 export type ApiHealth = { api: "up"; database: "up" | "down" } | { api: "down" };
 
@@ -13,7 +14,7 @@ function lookFor(health: ApiHealth): Look {
   if (health.api === "down") {
     return {
       variant: "danger",
-      text: "API is not running. Start it with npm --prefix api run dev.",
+      text: API_NOT_RUNNING_MESSAGE,
     };
   }
   if (health.database === "down") {

@@ -89,17 +89,25 @@ function computeMetrics(context: DealContext, today: number): Metrics {
   };
 }
 
+// A past close date gets its own factor name so clients can show "overdue" without comparing dates.
+function closeDateFactorName(daysUntilClose: number | null): "closeDate" | "closeDatePassed" {
+  return daysUntilClose !== null && daysUntilClose < 0 ? "closeDatePassed" : "closeDate";
+}
+
 function buildFactors(metrics: Metrics): RuleFactor[] {
   const all: RuleFactor[] = [
     { name: "daysSinceContact", points: daysSinceContactPoints(metrics.daysSinceContact) },
-    { name: "closeDate", points: closeDatePoints(metrics.daysUntilClose) },
+    {
+      name: closeDateFactorName(metrics.daysUntilClose),
+      points: closeDatePoints(metrics.daysUntilClose),
+    },
     { name: "stage", points: STAGE_POINTS[metrics.stage] },
     { name: "value", points: valuePoints(metrics.value) },
   ];
   return all.filter((factor) => factor.points > 0);
 }
 
-// The closeDate factor only exists when there is a date; null cannot reach this point.
+// The close-date factors (closeDate, closeDatePassed) only exist when there is a date; null cannot reach this point.
 function closeDatePhrase(daysUntilClose: number): string {
   if (daysUntilClose < 0) {
     return `the expected close date passed ${-daysUntilClose} days ago`;
@@ -112,6 +120,7 @@ function factorPhrase(name: RuleFactorName, metrics: Metrics): string {
     case "daysSinceContact":
       return `no contact for ${metrics.daysSinceContact} days`;
     case "closeDate":
+    case "closeDatePassed":
       return closeDatePhrase(metrics.daysUntilClose ?? 0);
     case "stage":
       return `the deal is in the ${metrics.stage.toLowerCase()} stage`;

@@ -1,6 +1,20 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { API_UNREACHABLE, ApiError, apiRequest, getHealth, UNEXPECTED_RESPONSE } from "@/lib/api";
+import {
+  API_UNREACHABLE,
+  ApiError,
+  apiRequest,
+  createDealInteraction,
+  DEAL_CLOSED,
+  getCompany,
+  getDeal,
+  getDealInteractions,
+  getDealNextAction,
+  getHealth,
+  getPrioritizedDeals,
+  UNEXPECTED_RESPONSE,
+  updateDeal,
+} from "@/lib/api";
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -116,5 +130,74 @@ describe("getHealth", () => {
     const error = await rejectionOf(getHealth());
 
     expect(error).toMatchObject({ status: 500, code: "INTERNAL_ERROR" });
+  });
+});
+
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+describe("deal endpoints", () => {
+  it.each<[string, () => Promise<unknown>, string, RequestInit]>([
+    [
+      "getPrioritizedDeals",
+      () => getPrioritizedDeals({ page: 2, pageSize: 20 }),
+      "/deals/prioritized?page=2&pageSize=20",
+      { method: "GET" },
+    ],
+    ["getDeal", () => getDeal("d1"), "/deals/d1", { method: "GET" }],
+    ["getDealNextAction", () => getDealNextAction("d1"), "/deals/d1/next-action", { method: "GET" }],
+    ["getCompany", () => getCompany("c1"), "/companies/c1", { method: "GET" }],
+    [
+      "getDealInteractions",
+      () => getDealInteractions("d1", { page: 1, pageSize: 100 }),
+      "/deals/d1/interactions?page=1&pageSize=100",
+      { method: "GET" },
+    ],
+    [
+      "createDealInteraction",
+      () => createDealInteraction("d1", { type: "CALL", notes: "Hi" }),
+      "/deals/d1/interactions",
+      { method: "POST", headers: JSON_HEADERS, body: '{"type":"CALL","notes":"Hi"}' },
+    ],
+    [
+      "updateDeal",
+      () => updateDeal("d1", { stage: "WON" }),
+      "/deals/d1",
+      { method: "PATCH", headers: JSON_HEADERS, body: '{"stage":"WON"}' },
+    ],
+  ])("%s calls the right URL and method and returns the parsed body", async (_name, call, path, init) => {
+    const body = { marker: path };
+    fetchMock.mockResolvedValue(jsonResponse(200, body));
+
+    await expect(call()).resolves.toEqual(body);
+
+    expect(fetchMock).toHaveBeenCalledWith(`http://api.test${path}`, expect.objectContaining(init));
+  });
+
+  it("encodes path ids so they cannot change the route", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, {}));
+
+    await getDeal("a/b?c");
+
+    expect(fetchMock).toHaveBeenCalledWith("http://api.test/deals/a%2Fb%3Fc", expect.anything());
+  });
+
+  it.each<[string, () => Promise<unknown>, number, string]>([
+    ["getDeal", () => getDeal("d1"), 404, "NOT_FOUND"],
+    ["getDealNextAction", () => getDealNextAction("d1"), 409, DEAL_CLOSED],
+  ])("%s turns status %i into an ApiError with the API code", async (_name, call, status, code) => {
+    fetchMock.mockResolvedValue(jsonResponse(status, { error: { code, message: "nope" } }));
+
+    expect(await rejectionOf(call())).toMatchObject({ status, code });
+  });
+
+  it("createDealInteraction keeps the validation details of a 400", async () => {
+    const details = [{ path: ["notes"], message: "Too small" }];
+    fetchMock.mockResolvedValue(
+      jsonResponse(400, { error: { code: "VALIDATION_ERROR", message: "Invalid request body", details } }),
+    );
+
+    const error = await rejectionOf(createDealInteraction("d1", { type: "NOTE", notes: "" }));
+
+    expect(error).toMatchObject({ status: 400, code: "VALIDATION_ERROR", details });
   });
 });

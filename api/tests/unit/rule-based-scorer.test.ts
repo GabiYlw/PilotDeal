@@ -114,25 +114,37 @@ describe("RuleBasedScorer", () => {
 
   describe("close date", () => {
     it.each([
-      [-1, 25],
-      [0, 20],
-      [7, 20],
-      [8, 10],
-      [30, 10],
-      [31, 0],
-    ])("gives a close date %i days from today %i points", async (offset, expected) => {
-      const ctx = context({ expectedCloseDate: isoDaysFromToday(offset) });
-      expect(await pointsOf(ctx, "closeDate")).toBe(expected);
+      [-1, "closeDatePassed", "closeDate", 25],
+      [0, "closeDate", "closeDatePassed", 20],
+      [7, "closeDate", "closeDatePassed", 20],
+      [8, "closeDate", "closeDatePassed", 10],
+      [30, "closeDate", "closeDatePassed", 10],
+    ] as const)(
+      "gives a close date %i days from today the %s factor with %i points",
+      async (offset, name, otherName, points) => {
+        const result = await scorer.score(context({ expectedCloseDate: isoDaysFromToday(offset) }));
+        expect(result.factors).toContainEqual({ name, points });
+        expect(result.factors.map((f) => f.name)).not.toContain(otherName);
+      },
+    );
+
+    it("gives no close date factor for a close date 31 days from today", async () => {
+      const result = await scorer.score(context({ expectedCloseDate: isoDaysFromToday(31) }));
+      const names = result.factors.map((f) => f.name);
+      expect(names).not.toContain("closeDate");
+      expect(names).not.toContain("closeDatePassed");
     });
 
     it("gives 0 points and no factor when there is no close date", async () => {
       const result = await scorer.score(context({ expectedCloseDate: null }));
-      expect(result.factors.map((f) => f.name)).not.toContain("closeDate");
+      const names = result.factors.map((f) => f.name);
+      expect(names).not.toContain("closeDate");
+      expect(names).not.toContain("closeDatePassed");
     });
 
     it("gives 25 points and a large n for a very old close date", async () => {
       const result = await scorer.score(context({ expectedCloseDate: "1900-01-01" }));
-      expect(result.factors).toContainEqual({ name: "closeDate", points: 25 });
+      expect(result.factors).toContainEqual({ name: "closeDatePassed", points: 25 });
       expect(result.nextAction).toBe("Confirm a new close date or push for a decision with Acme.");
     });
   });
