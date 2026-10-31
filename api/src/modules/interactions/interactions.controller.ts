@@ -4,14 +4,11 @@ import {
   INVALID_BODY_MESSAGE,
   INVALID_PARAMS_MESSAGE,
   INVALID_QUERY_MESSAGE,
+  dealIdParamsSchema,
   idParamsSchema,
   parseOrThrow,
 } from "../../shared/validation.js";
-import {
-  createInteractionSchema,
-  dealIdParamsSchema,
-  updateInteractionSchema,
-} from "./interactions.schemas.js";
+import { createInteractionSchema, updateInteractionSchema } from "./interactions.schemas.js";
 import type { InteractionService } from "./interactions.service.js";
 
 export class InteractionController {

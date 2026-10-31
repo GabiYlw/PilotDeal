@@ -12,6 +12,10 @@ export interface FormState<F extends string> {
 
 export type InteractionField = "type" | "notes" | "occurredAt";
 export type StageField = "stage";
+export type CompanyField = "name" | "industry" | "website";
+export type ContactField = "name" | "email" | "phone" | "role";
+export type DealField = "title" | "value" | "stage" | "expectedCloseDate";
+export type DealEditField = Exclude<DealField, "stage">;
 // For actions without form fields (confirmed deletes): only a status and an optional message.
 export type ActionState = FormState<never>;
 

@@ -92,14 +92,14 @@ describe("editInteraction", () => {
   it("returns field errors and the submitted values without revalidating on a 400", async () => {
     updateMock.mockRejectedValue(
       new ApiError("Invalid request body", 400, "VALIDATION_ERROR", [
-        { path: ["notes"], message: "Too small" },
+        { path: ["notes"], message: "Notes is required" },
       ]),
     );
     const fields = { type: "CALL", notes: "  ", occurredAt: "2026-10-20" };
 
     const result = await edit(fields);
 
-    expect(result.fieldErrors.notes).toBe("Too small");
+    expect(result.fieldErrors.notes).toBe("Notes is required");
     expect(result.values).toEqual(fields);
     expect(revalidateMock).not.toHaveBeenCalled();
   });

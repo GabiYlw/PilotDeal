@@ -1,4 +1,4 @@
-import type { Deal, Interaction } from "./types";
+import type { Contact, Deal, Interaction } from "./types";
 
 // 32-bit FNV-1a: a short stable fingerprint, so the Client Component gets a few characters
 // instead of every id and timestamp on the page.
@@ -20,6 +20,18 @@ export function pageVersion(
   interactions: readonly Pick<Interaction, "id" | "updatedAt">[],
   total: number,
 ): string {
-  const items = interactions.map((item) => `${item.id}@${item.updatedAt}`);
-  return fingerprint([deal.updatedAt, total, ...items].join("|"));
+  return fingerprint([deal.updatedAt, total, ...stamps(interactions)].join("|"));
+}
+
+// The same for the Contacts card: an add or delete changes the total and the ids, an edit changes
+// that contact's updatedAt. The add form uses it for its "Contact added." message.
+export function contactsVersion(
+  contacts: readonly Pick<Contact, "id" | "updatedAt">[],
+  total: number,
+): string {
+  return fingerprint([total, ...stamps(contacts)].join("|"));
+}
+
+function stamps(items: readonly { id: string; updatedAt: string }[]): string[] {
+  return items.map((item) => `${item.id}@${item.updatedAt}`);
 }

@@ -4,17 +4,27 @@ import {
   API_UNREACHABLE,
   ApiError,
   apiRequest,
+  createCompany,
+  createCompanyContact,
+  createCompanyDeal,
   createDealInteraction,
   DEAL_CLOSED,
+  deleteCompany,
+  deleteContact,
   deleteDeal,
   deleteInteraction,
+  getCompanies,
   getCompany,
+  getCompanyContacts,
+  getCompanyDeals,
   getDeal,
   getDealInteractions,
   getDealNextAction,
   getHealth,
   getPrioritizedDeals,
   UNEXPECTED_RESPONSE,
+  updateCompany,
+  updateContact,
   updateDeal,
   updateInteraction,
 } from "@/lib/api";
@@ -72,7 +82,7 @@ describe("apiRequest", () => {
   });
 
   it("turns the API error shape into an ApiError with status, code, message and details", async () => {
-    const details = [{ path: ["name"], message: "Required" }];
+    const details = [{ path: ["name"], message: "Name is required" }];
     fetchMock.mockResolvedValue(
       jsonResponse(400, { error: { code: "VALIDATION_ERROR", message: "Invalid body", details } }),
     );
@@ -150,6 +160,70 @@ describe("deal endpoints", () => {
     ["getDealNextAction", () => getDealNextAction("d1"), "/deals/d1/next-action", { method: "GET" }],
     ["getCompany", () => getCompany("c1"), "/companies/c1", { method: "GET" }],
     [
+      "getCompanies",
+      () => getCompanies({ page: 2, pageSize: 20 }),
+      "/companies?page=2&pageSize=20",
+      { method: "GET" },
+    ],
+    [
+      "createCompany",
+      () => createCompany({ name: "Acme", industry: null, website: null }),
+      "/companies",
+      {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: '{"name":"Acme","industry":null,"website":null}',
+      },
+    ],
+    [
+      "updateCompany",
+      () => updateCompany("c1", { name: "Acme", industry: "SaaS", website: null }),
+      "/companies/c1",
+      {
+        method: "PATCH",
+        headers: JSON_HEADERS,
+        body: '{"name":"Acme","industry":"SaaS","website":null}',
+      },
+    ],
+    [
+      "getCompanyContacts",
+      () => getCompanyContacts("c1", { page: 1, pageSize: 100 }),
+      "/companies/c1/contacts?page=1&pageSize=100",
+      { method: "GET" },
+    ],
+    [
+      "createCompanyContact",
+      () => createCompanyContact("c1", { name: "Ann", email: null, phone: null, role: null }),
+      "/companies/c1/contacts",
+      {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: '{"name":"Ann","email":null,"phone":null,"role":null}',
+      },
+    ],
+    [
+      "updateContact",
+      () => updateContact("p1", { name: "Ann", email: "a@b.co", phone: null, role: null }),
+      "/contacts/p1",
+      {
+        method: "PATCH",
+        headers: JSON_HEADERS,
+        body: '{"name":"Ann","email":"a@b.co","phone":null,"role":null}',
+      },
+    ],
+    [
+      "getCompanyDeals",
+      () => getCompanyDeals("c1", { page: 1, pageSize: 100 }),
+      "/companies/c1/deals?page=1&pageSize=100",
+      { method: "GET" },
+    ],
+    [
+      "createCompanyDeal",
+      () => createCompanyDeal("c1", { title: "Big", value: 10, stage: "LEAD" }),
+      "/companies/c1/deals",
+      { method: "POST", headers: JSON_HEADERS, body: '{"title":"Big","value":10,"stage":"LEAD"}' },
+    ],
+    [
       "getDealInteractions",
       () => getDealInteractions("d1", { page: 1, pageSize: 100 }),
       "/deals/d1/interactions?page=1&pageSize=100",
@@ -183,16 +257,30 @@ describe("deal endpoints", () => {
   });
 
   it("encodes path ids so they cannot change the route", async () => {
-    fetchMock.mockResolvedValue(jsonResponse(200, {}));
+    fetchMock.mockImplementation(async () => jsonResponse(200, {}));
 
     await getDeal("a/b?c");
+    await getCompany("a/b?c");
+    await updateContact("a/b?c", { name: "A", email: null, phone: null, role: null });
+    await getCompanyDeals("a/b?c", { page: 1, pageSize: 100 });
 
     expect(fetchMock).toHaveBeenCalledWith("http://api.test/deals/a%2Fb%3Fc", expect.anything());
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/companies/a%2Fb%3Fc",
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith("http://api.test/contacts/a%2Fb%3Fc", expect.anything());
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/companies/a%2Fb%3Fc/deals?page=1&pageSize=100",
+      expect.anything(),
+    );
   });
 
   it.each<[string, () => Promise<unknown>, string]>([
     ["deleteInteraction", () => deleteInteraction("i1"), "/interactions/i1"],
     ["deleteDeal", () => deleteDeal("d1"), "/deals/d1"],
+    ["deleteCompany", () => deleteCompany("c1"), "/companies/c1"],
+    ["deleteContact", () => deleteContact("p1"), "/contacts/p1"],
   ])("%s sends DELETE and resolves to undefined on an empty 204", async (_name, call, path) => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 
@@ -208,6 +296,7 @@ describe("deal endpoints", () => {
     ["getDeal", () => getDeal("d1"), 404, "NOT_FOUND"],
     ["deleteInteraction", () => deleteInteraction("i1"), 404, "NOT_FOUND"],
     ["deleteDeal", () => deleteDeal("d1"), 404, "NOT_FOUND"],
+    ["deleteCompany", () => deleteCompany("c1"), 404, "NOT_FOUND"],
     ["updateInteraction", () => updateInteraction("i1", { type: "NOTE", notes: "x" }), 404, "NOT_FOUND"],
     ["getDealNextAction", () => getDealNextAction("d1"), 409, DEAL_CLOSED],
   ])("%s turns status %i into an ApiError with the API code", async (_name, call, status, code) => {
@@ -217,7 +306,7 @@ describe("deal endpoints", () => {
   });
 
   it("createDealInteraction keeps the validation details of a 400", async () => {
-    const details = [{ path: ["notes"], message: "Too small" }];
+    const details = [{ path: ["notes"], message: "Notes is required" }];
     fetchMock.mockResolvedValue(
       jsonResponse(400, { error: { code: "VALIDATION_ERROR", message: "Invalid request body", details } }),
     );

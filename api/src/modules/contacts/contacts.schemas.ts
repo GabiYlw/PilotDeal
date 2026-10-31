@@ -1,24 +1,26 @@
 import { z } from "zod";
-import { nameSchema, optionalText } from "../../shared/validation.js";
+import { nameSchema, optionalText, strictBody } from "../../shared/validation.js";
 
-const emailSchema = z.email().max(320).nullable().optional();
+const emailSchema = z
+  .email({ error: "Enter a valid email address" })
+  .max(320, { error: "Email must be at most 320 characters" })
+  .nullable()
+  .optional();
 
-export const createContactSchema = z.strictObject({
+export const createContactSchema = strictBody({
   name: nameSchema,
   email: emailSchema,
-  phone: optionalText(50),
-  role: optionalText(100),
+  phone: optionalText("Phone", 50),
+  role: optionalText("Role", 100),
 });
 
 // companyId is deliberately absent: a contact cannot be moved between companies.
-export const updateContactSchema = z
-  .strictObject({
-    name: nameSchema.optional(),
-    email: emailSchema,
-    phone: optionalText(50),
-    role: optionalText(100),
-  })
-  .refine((body) => Object.keys(body).length > 0, {
+export const updateContactSchema = strictBody({
+  name: nameSchema.optional(),
+  email: emailSchema,
+  phone: optionalText("Phone", 50),
+  role: optionalText("Role", 100),
+}).refine((body) => Object.keys(body).length > 0, {
     message: "At least one field must be provided",
   });
 

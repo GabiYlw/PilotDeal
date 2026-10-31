@@ -1,4 +1,5 @@
 export const DEALS_PAGE_SIZE = 20;
+export const COMPANIES_PAGE_SIZE = 20;
 
 const PAGE_PARAM = /^[1-9]\d{0,5}$/;
 

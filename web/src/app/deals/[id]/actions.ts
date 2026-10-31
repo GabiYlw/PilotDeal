@@ -13,22 +13,20 @@ import {
 import { type DealDeletedOutcome, dealDeletedUrl } from "@/lib/deal-deleted";
 import {
   type ActionState,
+  type DealEditField,
   type FormState,
   type InteractionField,
   type StageField,
   toFormErrors,
 } from "@/lib/form-state";
+import { text, toDealValue } from "@/lib/form-data";
 import { toDateInputValue } from "@/lib/format";
 import { DELETE_FAILED_MESSAGE, INTERACTION_NOT_FOUND_MESSAGE } from "@/lib/messages";
 
 const INTERACTION_FIELDS = ["type", "notes", "occurredAt"] as const;
 const STAGE_FIELDS = ["stage"] as const;
+const DEAL_EDIT_FIELDS = ["title", "value", "expectedCloseDate"] as const;
 const NO_FIELDS = [] as const;
-
-function text(formData: FormData, name: string): string {
-  const value = formData.get(name);
-  return typeof value === "string" ? value : "";
-}
 
 // The date input gives YYYY-MM-DD; the API wants a timestamp with an offset. Anything else is
 // passed through unchanged so the API reports it.
@@ -90,6 +88,37 @@ export async function updateDealStage(
     throw error;
   }
   revalidateDeal(dealId);
+  return { status: "success", fieldErrors: {} };
+}
+
+// Sends title, value and the date, never the stage (that has its own form). An empty date is null,
+// which clears it; an untouched empty date is already null, so that is a no-op.
+export async function editDeal(
+  dealId: string,
+  companyId: string,
+  _previous: FormState<DealEditField>,
+  formData: FormData,
+): Promise<FormState<DealEditField>> {
+  const values = {
+    title: text(formData, "title"),
+    value: text(formData, "value"),
+    expectedCloseDate: text(formData, "expectedCloseDate"),
+  };
+  const value = toDealValue(values.value);
+  try {
+    await updateDeal(dealId, {
+      title: values.title,
+      ...(value !== undefined && { value }),
+      expectedCloseDate: values.expectedCloseDate === "" ? null : values.expectedCloseDate,
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: "error", ...toFormErrors(error, DEAL_EDIT_FIELDS), values };
+    }
+    throw error;
+  }
+  revalidateDeal(dealId);
+  revalidatePath(`/companies/${companyId}`);
   return { status: "success", fieldErrors: {} };
 }
 

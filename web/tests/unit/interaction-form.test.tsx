@@ -41,7 +41,7 @@ describe("InteractionForm", () => {
         pageVersion="v1"
         action={stateAction({
           status: "error",
-          fieldErrors: { notes: "Too small" },
+          fieldErrors: { notes: "Notes is required" },
           values: { type: "CALL", notes: "   ", occurredAt: "" },
         })}
       />,
@@ -50,7 +50,7 @@ describe("InteractionForm", () => {
 
     await submit();
 
-    const message = await screen.findByText("Too small");
+    const message = await screen.findByText("Notes is required");
     const notes = screen.getByLabelText("Notes");
     expect(notes.getAttribute("aria-invalid")).toBe("true");
     expect(notes.getAttribute("aria-describedby")).toBe(message.id);
@@ -63,7 +63,7 @@ describe("InteractionForm", () => {
         pageVersion="v1"
         action={stateAction({
           status: "error",
-          fieldErrors: { notes: "Too small" },
+          fieldErrors: { notes: "Notes is required" },
           values: { type: "CALL", notes: "draft text", occurredAt: "2026-10-22" },
         })}
       />,
@@ -72,7 +72,7 @@ describe("InteractionForm", () => {
 
     await submit();
 
-    await screen.findByText("Too small");
+    await screen.findByText("Notes is required");
     expect(screen.getByLabelText<HTMLTextAreaElement>("Notes").value).toBe("draft text");
     expect(screen.getByLabelText<HTMLSelectElement>("Type").value).toBe("CALL");
   });

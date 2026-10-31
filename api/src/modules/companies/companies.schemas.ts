@@ -1,21 +1,23 @@
 import { z } from "zod";
-import { nameSchema, optionalText } from "../../shared/validation.js";
+import { nameSchema, optionalText, strictBody } from "../../shared/validation.js";
 
-const websiteSchema = z.url({ protocol: /^https?$/ }).max(2048).nullable().optional();
+const websiteSchema = z
+  .url({ protocol: /^https?$/, error: "Enter a valid URL starting with http:// or https://" })
+  .max(2048, { error: "Website must be at most 2048 characters" })
+  .nullable()
+  .optional();
 
-export const createCompanySchema = z.strictObject({
+export const createCompanySchema = strictBody({
   name: nameSchema,
-  industry: optionalText(100),
+  industry: optionalText("Industry", 100),
   website: websiteSchema,
 });
 
-export const updateCompanySchema = z
-  .strictObject({
-    name: nameSchema.optional(),
-    industry: optionalText(100),
-    website: websiteSchema,
-  })
-  .refine((body) => Object.keys(body).length > 0, {
+export const updateCompanySchema = strictBody({
+  name: nameSchema.optional(),
+  industry: optionalText("Industry", 100),
+  website: websiteSchema,
+}).refine((body) => Object.keys(body).length > 0, {
     message: "At least one field must be provided",
   });
 

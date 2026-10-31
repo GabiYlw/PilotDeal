@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import {
   addInteraction,
+  editDeal,
   editInteraction,
   removeDeal,
   removeInteraction,
@@ -9,6 +10,7 @@ import {
 import { ApiUnavailable } from "@/components/api-unavailable";
 import { DealDetailsCard } from "@/components/deals/deal-details-card";
 import { NextActionSkeleton } from "@/components/deals/deal-detail-skeleton";
+import { DealEditForm } from "@/components/deals/deal-edit-form";
 import { DeleteDealButton } from "@/components/deals/delete-deal-button";
 import { InteractionForm } from "@/components/deals/interaction-form";
 import { InteractionTimeline } from "@/components/deals/interaction-timeline";
@@ -77,6 +79,10 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
           </Card>
         </div>
         <div className="flex flex-col gap-6">
+          <Card className="flex flex-col gap-4">
+            <CardTitle>Edit deal</CardTitle>
+            <DealEditForm deal={deal} action={editDeal.bind(null, id, deal.companyId)} />
+          </Card>
           <Card>
             <StageForm
               key={deal.stage}

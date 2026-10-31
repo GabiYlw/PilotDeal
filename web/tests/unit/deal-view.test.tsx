@@ -20,6 +20,7 @@ vi.mock("@/lib/api", async (importOriginal) => ({
 }));
 vi.mock("@/app/deals/[id]/actions", () => ({
   addInteraction: vi.fn(),
+  editDeal: vi.fn(),
   updateDealStage: vi.fn(),
   editInteraction: vi.fn(),
   removeInteraction: vi.fn(),
@@ -79,6 +80,13 @@ describe("DealView", () => {
     expect(screen.getByText("60,000")).toBeTruthy();
     expect(screen.getByText("Closed on")).toBeTruthy();
     expect(screen.getByText("No interactions yet")).toBeTruthy();
+  });
+
+  it("shows the edit deal form next to the stage form", async () => {
+    await renderView();
+
+    expect(screen.getByRole("form", { name: "Edit deal" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Update stage" })).toBeTruthy();
   });
 
   it("offers to delete the deal from the header", async () => {

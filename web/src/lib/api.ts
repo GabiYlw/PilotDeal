@@ -2,6 +2,10 @@ import "server-only";
 import type {
   ApiErrorBody,
   Company,
+  CompanyBody,
+  Contact,
+  ContactBody,
+  CreateDealBody,
   CreateInteractionBody,
   Deal,
   DealNextAction,
@@ -134,8 +138,59 @@ export function getDealNextAction(id: string): Promise<DealNextAction> {
   return apiRequest<DealNextAction>(`${dealPath(id)}/next-action`);
 }
 
+function companyPath(id: string): string {
+  return `/companies/${encodeURIComponent(id)}`;
+}
+
+function contactPath(id: string): string {
+  return `/contacts/${encodeURIComponent(id)}`;
+}
+
+export function getCompanies(query: PageQuery): Promise<Paginated<Company>> {
+  return apiRequest<Paginated<Company>>(`/companies${pageQuery(query)}`);
+}
+
 export function getCompany(id: string): Promise<Company> {
-  return apiRequest<Company>(`/companies/${encodeURIComponent(id)}`);
+  return apiRequest<Company>(companyPath(id));
+}
+
+export function createCompany(body: CompanyBody): Promise<Company> {
+  return apiRequest<Company>("/companies", { method: "POST", body });
+}
+
+export function updateCompany(id: string, body: CompanyBody): Promise<Company> {
+  return apiRequest<Company>(companyPath(id), { method: "PATCH", body });
+}
+
+export function deleteCompany(id: string): Promise<void> {
+  return apiRequest<void>(companyPath(id), { method: "DELETE" });
+}
+
+export function getCompanyContacts(
+  companyId: string,
+  query: PageQuery,
+): Promise<Paginated<Contact>> {
+  return apiRequest<Paginated<Contact>>(`${companyPath(companyId)}/contacts${pageQuery(query)}`);
+}
+
+export function createCompanyContact(companyId: string, body: ContactBody): Promise<Contact> {
+  return apiRequest<Contact>(`${companyPath(companyId)}/contacts`, { method: "POST", body });
+}
+
+export function updateContact(id: string, body: ContactBody): Promise<Contact> {
+  return apiRequest<Contact>(contactPath(id), { method: "PATCH", body });
+}
+
+export function deleteContact(id: string): Promise<void> {
+  return apiRequest<void>(contactPath(id), { method: "DELETE" });
+}
+
+export function getCompanyDeals(companyId: string, query: PageQuery): Promise<Paginated<Deal>> {
+  return apiRequest<Paginated<Deal>>(`${companyPath(companyId)}/deals${pageQuery(query)}`);
+}
+
+export function createCompanyDeal(companyId: string, body: CreateDealBody): Promise<Deal> {
+  return apiRequest<Deal>(`${companyPath(companyId)}/deals`, { method: "POST", body });
 }
 
 export function getDealInteractions(

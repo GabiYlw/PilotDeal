@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldError, FormError, Input, Label, Select, Textarea } from "@/components/ui/field";
 import { errorProps, useBrowserErrors } from "@/lib/browser-validation";
 import { INTERACTION_TYPE_LABELS } from "@/lib/deal-display";
 import { type FormState, type InteractionField, initialFormState } from "@/lib/form-state";
 import { INTERACTION_TYPES } from "@/lib/types";
+import { CHANGES_FROM_OWN_ADD, usePageChanges } from "@/lib/use-page-changes";
 
 type InteractionAction = (
   state: FormState<InteractionField>,
@@ -28,17 +29,12 @@ export function InteractionForm({
   );
   const { browserErrors, blockedBy, clearBrowserError, resetBrowserErrors } =
     useBrowserErrors<InteractionField>();
-  // How many times the page data changed since the last submit. React's "adjust state while
-  // rendering" pattern, not an effect: the count updates in the same render that sees the prop.
-  const [tracking, setTracking] = useState({ version: pageVersion, changes: 0 });
-  if (tracking.version !== pageVersion) {
-    setTracking({ version: pageVersion, changes: tracking.changes + 1 });
-  }
+  const { changes, resetChanges } = usePageChanges(pageVersion);
 
   // onSubmit only fires once every field passes the browser's checks.
   function handleSubmit() {
     resetBrowserErrors();
-    setTracking({ version: pageVersion, changes: 0 });
+    resetChanges();
   }
 
   const fieldErrors = { ...state.fieldErrors, ...browserErrors };
@@ -46,11 +42,7 @@ export function InteractionForm({
   // After an error the fields keep the submitted values; after a success (no values) the form
   // reset clears them. The select needs a key: React ignores a new defaultValue on a mounted select.
   const type = values?.type ?? "NOTE";
-  // The user's own add changes the page data exactly once (the new interaction), and that change
-  // can arrive before or after the action result, so one change is allowed. A second change (a
-  // stage update, an interaction edit or delete) means the message no longer describes what the
-  // user just did.
-  const showAdded = state.status === "success" && tracking.changes <= 1;
+  const showAdded = state.status === "success" && changes <= CHANGES_FROM_OWN_ADD;
   return (
     <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">

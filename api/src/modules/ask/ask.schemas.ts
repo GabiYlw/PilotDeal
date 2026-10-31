@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { strictBody } from "../../shared/validation.js";
 import type { InteractionType } from "../interactions/interactions.schemas.js";
 
 export const ASK_QUESTION_MIN_LENGTH = 3;
@@ -7,10 +8,27 @@ export const ASK_DEFAULT_LIMIT = 5;
 export const ASK_MAX_LIMIT = 10;
 
 // limit must be a JSON integer (no string coercion), like numbers elsewhere in the API.
-export const askRequestSchema = z.strictObject({
-  question: z.string().trim().min(ASK_QUESTION_MIN_LENGTH).max(ASK_QUESTION_MAX_LENGTH),
-  dealId: z.uuid().optional(),
-  limit: z.number().int().min(1).max(ASK_MAX_LIMIT).default(ASK_DEFAULT_LIMIT),
+const LIMIT_ERROR = `Limit must be a whole number from 1 to ${ASK_MAX_LIMIT}`;
+
+export const askRequestSchema = strictBody({
+  question: z
+    .string({
+      error: (issue) => (issue.input === undefined ? "Question is required" : "Question must be text"),
+    })
+    .trim()
+    .min(ASK_QUESTION_MIN_LENGTH, {
+      error: `Question must be at least ${ASK_QUESTION_MIN_LENGTH} characters`,
+    })
+    .max(ASK_QUESTION_MAX_LENGTH, {
+      error: `Question must be at most ${ASK_QUESTION_MAX_LENGTH} characters`,
+    }),
+  dealId: z.uuid({ error: "dealId must be a valid UUID" }).optional(),
+  limit: z
+    .number({ error: LIMIT_ERROR })
+    .int({ error: LIMIT_ERROR })
+    .min(1, { error: LIMIT_ERROR })
+    .max(ASK_MAX_LIMIT, { error: LIMIT_ERROR })
+    .default(ASK_DEFAULT_LIMIT),
 });
 
 export type AskInput = z.output<typeof askRequestSchema>;

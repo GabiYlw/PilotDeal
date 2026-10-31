@@ -71,7 +71,7 @@ describe("addInteraction", () => {
   });
 
   it("returns field errors and the submitted values without revalidating on a 400", async () => {
-    createMock.mockRejectedValue(validationError("notes", "Too small"));
+    createMock.mockRejectedValue(validationError("notes", "Notes is required"));
 
     const result = await addInteraction(
       "d1",
@@ -79,7 +79,7 @@ describe("addInteraction", () => {
       form({ type: "CALL", notes: "", occurredAt: "" }),
     );
 
-    expect(result.fieldErrors.notes).toBe("Too small");
+    expect(result.fieldErrors.notes).toBe("Notes is required");
     expect(result.values).toEqual({ type: "CALL", notes: "", occurredAt: "" });
     expect(revalidateMock).not.toHaveBeenCalled();
   });

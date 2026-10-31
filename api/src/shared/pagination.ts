@@ -1,17 +1,18 @@
 import { z } from "zod";
 
-function positiveIntString(max: number) {
+function positiveIntString(name: string, max: number) {
+  const error = `${name} must be a whole number from 1 to ${max}`;
   return z
-    .string()
-    .regex(/^[0-9]+$/)
+    .string({ error })
+    .regex(/^[0-9]+$/, { error })
     .transform(Number)
-    .pipe(z.number().int().min(1).max(max));
+    .pipe(z.number().int({ error }).min(1, { error }).max(max, { error }));
 }
 
 // Not strict on purpose: unknown query parameters are ignored.
 export const paginationQuerySchema = z.object({
-  page: positiveIntString(1_000_000).default(1),
-  pageSize: positiveIntString(100).default(20),
+  page: positiveIntString("page", 1_000_000).default(1),
+  pageSize: positiveIntString("pageSize", 100).default(20),
 });
 
 export type Pagination = z.output<typeof paginationQuerySchema>;

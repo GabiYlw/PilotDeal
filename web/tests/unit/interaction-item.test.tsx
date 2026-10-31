@@ -68,7 +68,7 @@ describe("InteractionItem editing", () => {
     setup({
       editResult: {
         status: "error",
-        fieldErrors: { notes: "Too small" },
+        fieldErrors: { notes: "Notes is required" },
         values: { type: "EMAIL", notes: "   ", occurredAt: "2026-10-23" },
       },
     });
@@ -78,7 +78,7 @@ describe("InteractionItem editing", () => {
       fireEvent.click(screen.getByRole("button", { name: "Save" }));
     });
 
-    const message = screen.getByText("Too small");
+    const message = screen.getByText("Notes is required");
     const notes = screen.getByLabelText<HTMLTextAreaElement>("Notes");
     expect(notes.getAttribute("aria-invalid")).toBe("true");
     expect(notes.getAttribute("aria-describedby")).toBe(message.id);
@@ -122,7 +122,7 @@ describe("InteractionItem editing", () => {
     setup({
       editResult: {
         status: "error",
-        fieldErrors: { notes: "Too small" },
+        fieldErrors: { notes: "Notes is required" },
         values: { type: "EMAIL", notes: "draft", occurredAt: "2026-10-23" },
       },
     });
@@ -135,7 +135,7 @@ describe("InteractionItem editing", () => {
     openEditor();
 
     expect(screen.getByLabelText<HTMLTextAreaElement>("Notes").value).toBe("Called the buyer");
-    expect(screen.queryByText("Too small")).toBeNull();
+    expect(screen.queryByText("Notes is required")).toBeNull();
   });
 
   it("closes the form and focuses Edit after a successful save", async () => {

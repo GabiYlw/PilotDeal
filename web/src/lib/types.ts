@@ -120,8 +120,44 @@ export interface UpdateInteractionBody {
   occurredAt?: string;
 }
 
-export interface UpdateDealBody {
+export interface Contact {
+  id: string;
+  companyId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Optional text fields are null when empty: null clears them on update.
+export interface CompanyBody {
+  name: string;
+  industry: string | null;
+  website: string | null;
+}
+
+export interface ContactBody {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+}
+
+// value is a number, or the raw string when it is not numeric so the API reports it.
+export interface CreateDealBody {
+  title: string;
+  value?: number | string;
   stage: string;
+  expectedCloseDate?: string;
+}
+
+export interface UpdateDealBody {
+  stage?: string;
+  title?: string;
+  value?: number | string;
+  expectedCloseDate?: string | null;
 }
 
 export interface PageQuery {

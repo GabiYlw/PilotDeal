@@ -1,10 +1,13 @@
 import { z } from "zod";
 import type { PriorityResult } from "../../scoring/priority-scorer.js";
 import { paginationQuerySchema } from "../../shared/pagination.js";
+import { requiredText, strictBody } from "../../shared/validation.js";
 import type { InteractionType } from "../interactions/interactions.schemas.js";
 
 export const DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"] as const;
-export const dealStageSchema = z.enum(DEAL_STAGES);
+export const dealStageSchema = z.enum(DEAL_STAGES, {
+  error: `Stage must be one of ${DEAL_STAGES.join(", ")}`,
+});
 export type DealStage = z.output<typeof dealStageSchema>;
 
 export const OPEN_DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION"] as const;
@@ -14,7 +17,7 @@ export function isOpenStage(stage: DealStage): stage is OpenDealStage {
   return (OPEN_DEAL_STAGES as readonly DealStage[]).includes(stage);
 }
 
-const titleSchema = z.string().trim().min(1).max(200);
+const titleSchema = requiredText("Title", 200);
 
 // DECIMAL(12,2) holds at most 10 integer digits and 2 decimals.
 export const MAX_DEAL_VALUE = 9_999_999_999.99;
@@ -24,20 +27,24 @@ function hasAtMostTwoDecimals(value: number): boolean {
   return /^\d+(\.\d{1,2})?$/.test(String(value));
 }
 
+// abort stops at the first failed bound, so a negative value is not also reported as having
+// too many decimals.
 const dealValueSchema = z
-  .number()
-  .min(0)
-  .max(MAX_DEAL_VALUE)
-  .refine(hasAtMostTwoDecimals, { message: "Value must have at most 2 decimal places" });
+  .number({
+    error: (issue) => (issue.input === undefined ? "Value is required" : "Value must be a number"),
+  })
+  .min(0, { error: "Value must be 0 or more", abort: true })
+  .max(MAX_DEAL_VALUE, { error: "Value must be at most 9,999,999,999.99", abort: true })
+  .refine(hasAtMostTwoDecimals, { error: "Use at most 2 decimal places" });
 
 // Plain string comparison is valid for YYYY-MM-DD.
 const expectedCloseDateSchema = z.iso
-  .date()
-  .refine((value) => value >= "1900-01-01", { message: "Date must be on or after 1900-01-01" })
+  .date({ error: "Enter a valid date (YYYY-MM-DD)" })
+  .refine((value) => value >= "1900-01-01", { error: "Date must be on or after 1900-01-01" })
   .nullable()
   .optional();
 
-export const createDealSchema = z.strictObject({
+export const createDealSchema = strictBody({
   title: titleSchema,
   value: dealValueSchema,
   stage: dealStageSchema.default("LEAD"),
@@ -46,21 +53,19 @@ export const createDealSchema = z.strictObject({
 
 // companyId and closedAt are deliberately absent: a deal cannot be moved between
 // companies, and closedAt is derived from stage changes by DealService.
-export const updateDealSchema = z
-  .strictObject({
-    title: titleSchema.optional(),
-    value: dealValueSchema.optional(),
-    stage: dealStageSchema.optional(),
-    expectedCloseDate: expectedCloseDateSchema,
-  })
-  .refine((body) => Object.keys(body).length > 0, {
+export const updateDealSchema = strictBody({
+  title: titleSchema.optional(),
+  value: dealValueSchema.optional(),
+  stage: dealStageSchema.optional(),
+  expectedCloseDate: expectedCloseDateSchema,
+}).refine((body) => Object.keys(body).length > 0, {
     message: "At least one field must be provided",
   });
 
 // Not strict on purpose: unknown query parameters are ignored.
 export const listDealsQuerySchema = paginationQuerySchema.extend({
   stage: dealStageSchema.optional(),
-  companyId: z.uuid().optional(),
+  companyId: z.uuid({ error: "companyId must be a valid UUID" }).optional(),
 });
 
 export type CreateDealInput = z.output<typeof createDealSchema>;
