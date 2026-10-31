@@ -82,6 +82,14 @@ describe("DealView", () => {
     expect(screen.getByText("No interactions yet")).toBeTruthy();
   });
 
+  it("links to Ask your CRM scoped to this deal", async () => {
+    await renderView();
+
+    expect(screen.getByRole("link", { name: "Ask about this deal" }).getAttribute("href")).toBe(
+      "/ask?dealId=d1",
+    );
+  });
+
   it("shows the edit deal form next to the stage form", async () => {
     await renderView();
 

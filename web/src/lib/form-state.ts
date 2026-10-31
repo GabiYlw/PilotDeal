@@ -10,6 +10,7 @@ export interface FormState<F extends string> {
   values?: Partial<Record<F, string>>;
 }
 
+export type AskField = "question";
 export type InteractionField = "type" | "notes" | "occurredAt";
 export type StageField = "stage";
 export type CompanyField = "name" | "industry" | "website";

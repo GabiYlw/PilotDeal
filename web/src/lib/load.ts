@@ -27,6 +27,21 @@ export async function loadResource<T>(request: Promise<T>): Promise<LoadResult<T
   }
 }
 
+export type OptionalLoadResult<T> = LoadResult<T> | { status: "missing" };
+
+// Like loadResource, but a missing or malformed id is a normal result, not a 404 page.
+export async function loadOptionalResource<T>(
+  request: Promise<T>,
+): Promise<OptionalLoadResult<T>> {
+  try {
+    return { status: "ok", data: await request };
+  } catch (error) {
+    if (isMissing(error)) return { status: "missing" };
+    if (isUnreachable(error)) return { status: "unreachable" };
+    throw error;
+  }
+}
+
 // Lists: API down -> "unreachable"; anything else is rethrown.
 export async function loadCollection<T>(request: Promise<T>): Promise<LoadResult<T>> {
   try {

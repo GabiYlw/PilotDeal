@@ -1,6 +1,8 @@
 import "server-only";
 import type {
   ApiErrorBody,
+  AskBody,
+  AskResponse,
   Company,
   CompanyBody,
   Contact,
@@ -25,6 +27,9 @@ export const UNEXPECTED_RESPONSE = "UNEXPECTED_RESPONSE";
 
 // The next-action endpoint answers 409 with this code for a WON or LOST deal.
 export const DEAL_CLOSED = "DEAL_CLOSED";
+
+// /ask answers 503 with this code while the embedding model cannot be used.
+export const EMBEDDING_UNAVAILABLE = "EMBEDDING_UNAVAILABLE";
 
 export class ApiError extends Error {
   constructor(
@@ -225,4 +230,8 @@ export function deleteInteraction(id: string): Promise<void> {
 
 export function deleteDeal(id: string): Promise<void> {
   return apiRequest<void>(dealPath(id), { method: "DELETE" });
+}
+
+export function askCrm(body: AskBody): Promise<AskResponse> {
+  return apiRequest<AskResponse>("/ask", { method: "POST", body });
 }

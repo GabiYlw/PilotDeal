@@ -19,6 +19,7 @@ import { StageForm } from "@/components/deals/stage-form";
 import { Card, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
+import { askHref } from "@/lib/ask-display";
 import { getCompany, getDeal, getDealInteractions } from "@/lib/api";
 import { loadResource } from "@/lib/load";
 import { pageVersion } from "@/lib/page-version";
@@ -52,6 +53,9 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
         }
         actions={
           <>
+            <TextLink href={askHref({ dealId: id })} className="text-sm">
+              Ask about this deal
+            </TextLink>
             <TextLink href="/deals" className="text-sm">
               All deals
             </TextLink>

@@ -4,6 +4,7 @@ import {
   API_UNREACHABLE,
   ApiError,
   apiRequest,
+  askCrm,
   createCompany,
   createCompanyContact,
   createCompanyDeal,
@@ -314,5 +315,30 @@ describe("deal endpoints", () => {
     const error = await rejectionOf(createDealInteraction("d1", { type: "NOTE", notes: "" }));
 
     expect(error).toMatchObject({ status: 400, code: "VALIDATION_ERROR", details });
+  });
+});
+
+describe("askCrm", () => {
+  it("posts the question as JSON to /ask without a dealId key when unscoped", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, { sources: [] }));
+
+    await askCrm({ question: "Who is worried?" });
+
+    expect(fetchMock).toHaveBeenCalledWith("http://api.test/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: '{"question":"Who is worried?"}',
+    });
+  });
+
+  it("includes the dealId when scoped", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, { sources: [] }));
+
+    await askCrm({ question: "abc", dealId: "d1" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/ask",
+      expect.objectContaining({ body: '{"question":"abc","dealId":"d1"}' }),
+    );
   });
 });

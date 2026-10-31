@@ -1,7 +1,7 @@
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
-// Deals, Companies and Ask are linked from the sidebar before they exist, so this page says so.
+// Missing routes and missing records both land here.
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-xl">

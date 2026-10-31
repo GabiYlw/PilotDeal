@@ -164,3 +164,32 @@ export interface PageQuery {
   page: number;
   pageSize: number;
 }
+
+// Mirrors the /ask response in api/src/modules/ask/ask.schemas.ts.
+export type AnsweredBy = "llm" | "none";
+
+export interface AskSource {
+  label: string;
+  interactionId: string;
+  dealId: string;
+  dealTitle: string;
+  companyName: string;
+  type: InteractionType;
+  occurredAt: string;
+  excerpt: string;
+  similarity: number;
+}
+
+export interface AskResponse {
+  answer: string | null;
+  answeredBy: AnsweredBy;
+  insufficientInformation: boolean;
+  citedInteractionIds: string[];
+  sources: AskSource[];
+}
+
+// Raw form string: the API trims and validates it.
+export interface AskBody {
+  question: string;
+  dealId?: string;
+}

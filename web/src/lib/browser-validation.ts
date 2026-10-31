@@ -2,10 +2,7 @@ import { type InvalidEvent, useState } from "react";
 
 export type ValidatedField = HTMLInputElement | HTMLTextAreaElement;
 
-// aria-invalid and aria-describedby are only set when the field has an error.
-export function errorProps(id: string, message: string | undefined) {
-  return message ? { "aria-invalid": true, "aria-describedby": `${id}-error` } : {};
-}
+export { errorProps } from "./error-props";
 
 // The browser blocks the submit when a field fails its HTML constraints (empty notes, a
 // half-typed date). preventDefault hides the native popup so the error shows next to the field
