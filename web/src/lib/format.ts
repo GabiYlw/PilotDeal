@@ -22,3 +22,9 @@ const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 export function formatDate(value: string): string {
   return DATE.format(new Date(DATE_ONLY.test(value) ? `${value}T00:00:00.000Z` : value));
 }
+
+// The UTC day of a timestamp (YYYY-MM-DD), the same day formatDate shows. It does not depend on
+// the browser's time zone, so it is safe in Client Components.
+export function toDateInputValue(iso: string): string {
+  return new Date(iso).toISOString().slice(0, 10);
+}

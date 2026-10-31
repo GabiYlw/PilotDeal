@@ -114,6 +114,12 @@ export interface CreateInteractionBody {
   occurredAt?: string;
 }
 
+export interface UpdateInteractionBody {
+  type: string;
+  notes: string;
+  occurredAt?: string;
+}
+
 export interface UpdateDealBody {
   stage: string;
 }

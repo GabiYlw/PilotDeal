@@ -1,31 +1,27 @@
-import { Badge } from "@/components/ui/badge";
+import {
+  type EditInteractionAction,
+  InteractionItem,
+  type RemoveInteractionAction,
+} from "@/components/deals/interaction-item";
 import { EmptyState } from "@/components/ui/empty-state";
-import { INTERACTION_TYPE_LABELS } from "@/lib/deal-display";
 import { formatDate } from "@/lib/format";
 import type { Interaction } from "@/lib/types";
 
-function TimelineItem({ interaction }: { interaction: Interaction }) {
-  return (
-    <li className="flex flex-col gap-1.5 border-b border-border pb-4 last:border-b-0 last:pb-0">
-      <div className="flex items-center gap-2">
-        <Badge>{INTERACTION_TYPE_LABELS[interaction.type]}</Badge>
-        <time dateTime={interaction.occurredAt} className="text-xs text-muted">
-          {formatDate(interaction.occurredAt)}
-        </time>
-      </div>
-      <p className="text-sm break-words whitespace-pre-line text-foreground">
-        {interaction.notes}
-      </p>
-    </li>
-  );
+export interface InteractionItemActions {
+  edit: EditInteractionAction;
+  remove: RemoveInteractionAction;
 }
 
 export function InteractionTimeline({
   interactions,
   total,
+  actionsFor,
 }: {
   interactions: Interaction[];
   total: number;
+  // Binds the Server Actions for one interaction. Called on the server, so the timeline does not
+  // import the actions file.
+  actionsFor: (interaction: Interaction) => InteractionItemActions;
 }) {
   if (interactions.length === 0) {
     return <EmptyState title="No interactions yet" />;
@@ -34,7 +30,16 @@ export function InteractionTimeline({
     <div className="flex flex-col gap-3">
       <ol className="flex flex-col gap-4">
         {interactions.map((interaction) => (
-          <TimelineItem key={interaction.id} interaction={interaction} />
+          <li
+            key={interaction.id}
+            className="flex flex-col gap-1.5 border-b border-border pb-4 last:border-b-0 last:pb-0"
+          >
+            <InteractionItem
+              interaction={interaction}
+              dateLabel={formatDate(interaction.occurredAt)}
+              {...actionsFor(interaction)}
+            />
+          </li>
         ))}
       </ol>
       {total > interactions.length && (

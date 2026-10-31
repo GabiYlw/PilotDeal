@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { formatDate, formatValue } from "@/lib/format";
+import { formatDate, formatValue, toDateInputValue } from "@/lib/format";
 
 // Pin a zone far from UTC (UTC+14) so the formatDate tests fail if it stops forcing UTC, even
 // on a machine that runs in UTC. format.ts builds its formatter at import time, so the zone is
@@ -37,5 +37,14 @@ describe("formatDate", () => {
     ["an early-morning UTC timestamp", "2026-10-22T00:30:00.000Z", "Oct 22, 2026"],
   ])("formats %s as its UTC day", (_name, value, expected) => {
     expect(formatDate(value)).toBe(expected);
+  });
+});
+
+describe("toDateInputValue", () => {
+  it.each([
+    ["a late-evening UTC timestamp", "2026-10-22T23:30:00.000Z", "2026-10-22"],
+    ["UTC midnight", "2026-10-01T00:00:00.000Z", "2026-10-01"],
+  ])("gives the UTC day of %s", (_name, value, expected) => {
+    expect(toDateInputValue(value)).toBe(expected);
   });
 });

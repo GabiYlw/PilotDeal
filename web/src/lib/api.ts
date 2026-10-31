@@ -11,6 +11,7 @@ import type {
   Paginated,
   PrioritizedDeal,
   UpdateDealBody,
+  UpdateInteractionBody,
 } from "./types";
 
 // status 0 means no HTTP response was received (API not running, DNS, refused connection).
@@ -153,4 +154,20 @@ export function createDealInteraction(
 
 export function updateDeal(id: string, body: UpdateDealBody): Promise<Deal> {
   return apiRequest<Deal>(dealPath(id), { method: "PATCH", body });
+}
+
+function interactionPath(id: string): string {
+  return `/interactions/${encodeURIComponent(id)}`;
+}
+
+export function updateInteraction(id: string, body: UpdateInteractionBody): Promise<Interaction> {
+  return apiRequest<Interaction>(interactionPath(id), { method: "PATCH", body });
+}
+
+export function deleteInteraction(id: string): Promise<void> {
+  return apiRequest<void>(interactionPath(id), { method: "DELETE" });
+}
+
+export function deleteDeal(id: string): Promise<void> {
+  return apiRequest<void>(dealPath(id), { method: "DELETE" });
 }

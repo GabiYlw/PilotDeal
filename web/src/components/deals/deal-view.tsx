@@ -1,8 +1,15 @@
 import { Suspense } from "react";
-import { addInteraction, updateDealStage } from "@/app/deals/[id]/actions";
+import {
+  addInteraction,
+  editInteraction,
+  removeDeal,
+  removeInteraction,
+  updateDealStage,
+} from "@/app/deals/[id]/actions";
 import { ApiUnavailable } from "@/components/api-unavailable";
 import { DealDetailsCard } from "@/components/deals/deal-details-card";
 import { NextActionSkeleton } from "@/components/deals/deal-detail-skeleton";
+import { DeleteDealButton } from "@/components/deals/delete-deal-button";
 import { InteractionForm } from "@/components/deals/interaction-form";
 import { InteractionTimeline } from "@/components/deals/interaction-timeline";
 import { NextActionPanel } from "@/components/deals/next-action-panel";
@@ -12,6 +19,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { TextLink } from "@/components/ui/text-link";
 import { getCompany, getDeal, getDealInteractions } from "@/lib/api";
 import { loadResource } from "@/lib/load";
+import { pageVersion } from "@/lib/page-version";
 
 const TIMELINE_PAGE = { page: 1, pageSize: 100 };
 
@@ -41,9 +49,12 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
           </>
         }
         actions={
-          <TextLink href="/deals" className="text-sm">
-            All deals
-          </TextLink>
+          <>
+            <TextLink href="/deals" className="text-sm">
+              All deals
+            </TextLink>
+            <DeleteDealButton dealTitle={deal.title} action={removeDeal.bind(null, id)} />
+          </>
         }
       />
       <div className="grid items-start gap-6 lg:grid-cols-2">
@@ -51,8 +62,18 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
           <DealDetailsCard deal={deal} />
           <Card className="flex flex-col gap-5">
             <CardTitle>Interactions</CardTitle>
-            <InteractionForm action={addInteraction.bind(null, id)} dealUpdatedAt={deal.updatedAt} />
-            <InteractionTimeline interactions={interactions} total={meta.total} />
+            <InteractionForm
+              action={addInteraction.bind(null, id)}
+              pageVersion={pageVersion(deal, interactions, meta.total)}
+            />
+            <InteractionTimeline
+              interactions={interactions}
+              total={meta.total}
+              actionsFor={(interaction) => ({
+                edit: editInteraction.bind(null, id, interaction.id, interaction.occurredAt),
+                remove: removeInteraction.bind(null, id, interaction.id),
+              })}
+            />
           </Card>
         </div>
         <div className="flex flex-col gap-6">

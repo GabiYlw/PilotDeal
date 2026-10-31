@@ -1,7 +1,7 @@
 // Type-only import: this module is also bundled for Client Components, which must not pull in
 // the server-only API client.
 import type { ApiError } from "./api";
-import { API_NOT_RUNNING_MESSAGE } from "./messages";
+import { API_NOT_RUNNING_MESSAGE, DEAL_NOT_FOUND_MESSAGE, SAVE_FAILED_MESSAGE } from "./messages";
 
 export interface FormState<F extends string> {
   status: "idle" | "success" | "error";
@@ -12,6 +12,8 @@ export interface FormState<F extends string> {
 
 export type InteractionField = "type" | "notes" | "occurredAt";
 export type StageField = "stage";
+// For actions without form fields (confirmed deletes): only a status and an optional message.
+export type ActionState = FormState<never>;
 
 export function initialFormState<F extends string>(): FormState<F> {
   return { status: "idle", fieldErrors: {} };
@@ -60,14 +62,22 @@ function validationErrors<F extends string>(
   return { fieldErrors, formError };
 }
 
+interface ErrorMessages {
+  notFound: string;
+  failed: string;
+}
+
 export function toFormErrors<F extends string>(
   error: ApiError,
   fields: readonly F[],
+  messages: Partial<ErrorMessages> = {},
 ): FormErrors<F> {
   if (error.status === 400) {
     return validationErrors(error.details, fields, error.message);
   }
   if (error.status === 0) return { fieldErrors: {}, formError: API_NOT_RUNNING_MESSAGE };
-  if (error.status === 404) return { fieldErrors: {}, formError: "This deal no longer exists." };
-  return { fieldErrors: {}, formError: "Could not save. Please try again." };
+  if (error.status === 404) {
+    return { fieldErrors: {}, formError: messages.notFound ?? DEAL_NOT_FOUND_MESSAGE };
+  }
+  return { fieldErrors: {}, formError: messages.failed ?? SAVE_FAILED_MESSAGE };
 }

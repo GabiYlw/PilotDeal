@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md";
 
 const BASE =
@@ -12,6 +12,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary: "border-transparent bg-accent text-accent-foreground hover:bg-accent-hover",
   secondary: "border-border bg-surface text-foreground hover:bg-surface-hover",
   ghost: "border-transparent bg-transparent text-muted hover:bg-surface-hover hover:text-foreground",
+  // Only for the confirm button of a destructive action.
+  danger: "border-transparent bg-danger text-danger-foreground hover:bg-danger-hover",
 };
 
 const SIZES: Record<ButtonSize, string> = {

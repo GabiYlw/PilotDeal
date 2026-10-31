@@ -18,7 +18,13 @@ vi.mock("@/lib/api", async (importOriginal) => ({
   getDealInteractions: vi.fn(),
   getDealNextAction: vi.fn(),
 }));
-vi.mock("@/app/deals/[id]/actions", () => ({ addInteraction: vi.fn(), updateDealStage: vi.fn() }));
+vi.mock("@/app/deals/[id]/actions", () => ({
+  addInteraction: vi.fn(),
+  updateDealStage: vi.fn(),
+  editInteraction: vi.fn(),
+  removeInteraction: vi.fn(),
+  removeDeal: vi.fn(),
+}));
 const NOT_FOUND = new Error("NEXT_NOT_FOUND");
 vi.mock("next/navigation", () => ({
   notFound: vi.fn(() => {
@@ -73,6 +79,12 @@ describe("DealView", () => {
     expect(screen.getByText("60,000")).toBeTruthy();
     expect(screen.getByText("Closed on")).toBeTruthy();
     expect(screen.getByText("No interactions yet")).toBeTruthy();
+  });
+
+  it("offers to delete the deal from the header", async () => {
+    await renderView();
+
+    expect(screen.getByRole("button", { name: "Delete deal" })).toBeTruthy();
   });
 
   it("fetches the interactions with page 1 and pageSize 100", async () => {

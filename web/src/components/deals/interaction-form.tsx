@@ -1,8 +1,9 @@
 "use client";
 
-import { type InvalidEvent, useActionState, useState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldError, FormError, Input, Label, Select, Textarea } from "@/components/ui/field";
+import { errorProps, useBrowserErrors } from "@/lib/browser-validation";
 import { INTERACTION_TYPE_LABELS } from "@/lib/deal-display";
 import { type FormState, type InteractionField, initialFormState } from "@/lib/form-state";
 import { INTERACTION_TYPES } from "@/lib/types";
@@ -12,73 +13,44 @@ type InteractionAction = (
   formData: FormData,
 ) => Promise<FormState<InteractionField>>;
 
-type BrowserErrors = Partial<Record<InteractionField, string>>;
-
-// aria-invalid and aria-describedby are only set when the field has an error.
-function errorProps(id: string, message: string | undefined) {
-  return message ? { "aria-invalid": true, "aria-describedby": `${id}-error` } : {};
-}
-
-// The browser blocks the submit when a field fails its HTML constraints (empty notes, a
-// half-typed date). preventDefault hides the native popup so the error shows next to the field
-// like the API's errors, and the first invalid field gets focus as the popup would have given it.
-// It reads validity instead of matching ":invalid", which in some DOMs runs checkValidity and
-// fires this event again.
-type ValidatedField = HTMLInputElement | HTMLTextAreaElement;
-
-function showInline(event: InvalidEvent<ValidatedField>): void {
-  event.preventDefault();
-  const fields = Array.from(event.currentTarget.form?.elements ?? []);
-  const firstInvalid = fields.find(
-    (field): field is ValidatedField =>
-      (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) &&
-      !field.validity.valid,
-  );
-  firstInvalid?.focus();
-}
-
 export function InteractionForm({
   action,
-  dealUpdatedAt,
+  pageVersion,
 }: {
   action: InteractionAction;
-  // Changes when the deal itself changes (a stage update), not when an interaction is added.
-  dealUpdatedAt: string;
+  // Changes whenever the data on the page changes: a stage update, an added, edited or deleted
+  // interaction (see lib/page-version.ts).
+  pageVersion: string;
 }) {
   const [state, formAction, pending] = useActionState(
     action,
     initialFormState<InteractionField>(),
   );
-  const [browserErrors, setBrowserErrors] = useState<BrowserErrors>({});
-  const [submittedAt, setSubmittedAt] = useState(dealUpdatedAt);
-
-  function blockedBy(field: InteractionField, message: string) {
-    return (event: InvalidEvent<ValidatedField>) => {
-      showInline(event);
-      setBrowserErrors((errors) => ({ ...errors, [field]: message }));
-    };
-  }
-
-  function clearBrowserError(field: InteractionField) {
-    if (browserErrors[field]) {
-      setBrowserErrors((errors) => ({ ...errors, [field]: undefined }));
-    }
+  const { browserErrors, blockedBy, clearBrowserError, resetBrowserErrors } =
+    useBrowserErrors<InteractionField>();
+  // How many times the page data changed since the last submit. React's "adjust state while
+  // rendering" pattern, not an effect: the count updates in the same render that sees the prop.
+  const [tracking, setTracking] = useState({ version: pageVersion, changes: 0 });
+  if (tracking.version !== pageVersion) {
+    setTracking({ version: pageVersion, changes: tracking.changes + 1 });
   }
 
   // onSubmit only fires once every field passes the browser's checks.
   function handleSubmit() {
-    setBrowserErrors({});
-    setSubmittedAt(dealUpdatedAt);
+    resetBrowserErrors();
+    setTracking({ version: pageVersion, changes: 0 });
   }
 
-  const fieldErrors: BrowserErrors = { ...state.fieldErrors, ...browserErrors };
+  const fieldErrors = { ...state.fieldErrors, ...browserErrors };
   const { values } = state;
   // After an error the fields keep the submitted values; after a success (no values) the form
   // reset clears them. The select needs a key: React ignores a new defaultValue on a mounted select.
   const type = values?.type ?? "NOTE";
-  // The message belongs to that submit: once the page shows newer deal data for another reason
-  // (a stage update), it no longer describes what the user just did.
-  const showAdded = state.status === "success" && submittedAt === dealUpdatedAt;
+  // The user's own add changes the page data exactly once (the new interaction), and that change
+  // can arrive before or after the action result, so one change is allowed. A second change (a
+  // stage update, an interaction edit or delete) means the message no longer describes what the
+  // user just did.
+  const showAdded = state.status === "success" && tracking.changes <= 1;
   return (
     <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">

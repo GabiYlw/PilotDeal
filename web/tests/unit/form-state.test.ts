@@ -41,6 +41,13 @@ describe("toFormErrors", () => {
     });
   });
 
+  it("uses the given not-found and failure messages", () => {
+    const messages = { notFound: "X", failed: "Y" };
+
+    expect(toFormErrors(new ApiError("m", 404, "X"), FIELDS, messages).formError).toBe("X");
+    expect(toFormErrors(new ApiError("m", 500, "X"), FIELDS, messages).formError).toBe("Y");
+  });
+
   it.each<[number, string]>([
     [0, API_NOT_RUNNING_MESSAGE],
     [404, "This deal no longer exists."],

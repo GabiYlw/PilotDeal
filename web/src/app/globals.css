@@ -32,6 +32,9 @@
   --warning-subtle: #fbf1dc;
   --danger: #a8283a;
   --danger-subtle: #fbeaec;
+  --danger-foreground: #ffffff;
+  --danger-hover: #8c2131;
+  --overlay: rgb(11 19 43 / 0.35);
 }
 
 /* The dark set is listed twice: once for an explicit choice, once for the system preference. */
@@ -55,6 +58,9 @@
   --warning-subtle: #2f2b22;
   --danger: #f3949c;
   --danger-subtle: #36202d;
+  --danger-foreground: #0b132b;
+  --danger-hover: #f6aab1;
+  --overlay: rgb(0 0 0 / 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -78,6 +84,9 @@
     --warning-subtle: #2f2b22;
     --danger: #f3949c;
     --danger-subtle: #36202d;
+    --danger-foreground: #0b132b;
+    --danger-hover: #f6aab1;
+    --overlay: rgb(0 0 0 / 0.55);
   }
 }
 
@@ -101,6 +110,9 @@
   --color-warning-subtle: var(--warning-subtle);
   --color-danger: var(--danger);
   --color-danger-subtle: var(--danger-subtle);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-hover: var(--danger-hover);
+  --color-overlay: var(--overlay);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 

@@ -8,6 +8,7 @@ describe("Button", () => {
     ["primary", "bg-accent"],
     ["secondary", "bg-surface"],
     ["ghost", "bg-transparent"],
+    ["danger", "bg-danger"],
   ])("renders the %s variant with %s", (variant, expectedClass) => {
     render(<Button variant={variant}>Save</Button>);
 

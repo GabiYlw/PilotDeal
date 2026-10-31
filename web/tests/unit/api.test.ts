@@ -6,6 +6,8 @@ import {
   apiRequest,
   createDealInteraction,
   DEAL_CLOSED,
+  deleteDeal,
+  deleteInteraction,
   getCompany,
   getDeal,
   getDealInteractions,
@@ -14,6 +16,7 @@ import {
   getPrioritizedDeals,
   UNEXPECTED_RESPONSE,
   updateDeal,
+  updateInteraction,
 } from "@/lib/api";
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -164,6 +167,12 @@ describe("deal endpoints", () => {
       "/deals/d1",
       { method: "PATCH", headers: JSON_HEADERS, body: '{"stage":"WON"}' },
     ],
+    [
+      "updateInteraction",
+      () => updateInteraction("i1", { type: "CALL", notes: "Hi" }),
+      "/interactions/i1",
+      { method: "PATCH", headers: JSON_HEADERS, body: '{"type":"CALL","notes":"Hi"}' },
+    ],
   ])("%s calls the right URL and method and returns the parsed body", async (_name, call, path, init) => {
     const body = { marker: path };
     fetchMock.mockResolvedValue(jsonResponse(200, body));
@@ -181,8 +190,25 @@ describe("deal endpoints", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://api.test/deals/a%2Fb%3Fc", expect.anything());
   });
 
+  it.each<[string, () => Promise<unknown>, string]>([
+    ["deleteInteraction", () => deleteInteraction("i1"), "/interactions/i1"],
+    ["deleteDeal", () => deleteDeal("d1"), "/deals/d1"],
+  ])("%s sends DELETE and resolves to undefined on an empty 204", async (_name, call, path) => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+
+    await expect(call()).resolves.toBeUndefined();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `http://api.test${path}`,
+      expect.objectContaining({ method: "DELETE", body: undefined }),
+    );
+  });
+
   it.each<[string, () => Promise<unknown>, number, string]>([
     ["getDeal", () => getDeal("d1"), 404, "NOT_FOUND"],
+    ["deleteInteraction", () => deleteInteraction("i1"), 404, "NOT_FOUND"],
+    ["deleteDeal", () => deleteDeal("d1"), 404, "NOT_FOUND"],
+    ["updateInteraction", () => updateInteraction("i1", { type: "NOTE", notes: "x" }), 404, "NOT_FOUND"],
     ["getDealNextAction", () => getDealNextAction("d1"), 409, DEAL_CLOSED],
   ])("%s turns status %i into an ApiError with the API code", async (_name, call, status, code) => {
     fetchMock.mockResolvedValue(jsonResponse(status, { error: { code, message: "nope" } }));
