@@ -59,6 +59,21 @@ Before reporting a task as done, run `format` in every package you changed, then
 
 Formatting is Prettier with one shared config at the repository root (`.prettierrc.json`, `.prettierignore`). ESLint extends `eslint-config-prettier`, so it never reports formatting; do not add stylistic ESLint rules.
 
+### Full stack in Docker
+
+Local development runs only `db` in Docker. The `api` and `web` services belong to the compose profile `full`, so they start only when the profile is named. Stop local dev servers first: the containers publish the same ports (3000, 3001).
+
+| Task | Command |
+|------|---------|
+| Build and start db, api and web (waits until all are healthy) | `docker compose --profile full up -d --build --wait` |
+| Seed the containerized database | `docker compose --profile full exec api node dist/prisma/seed.js` |
+| Stop the stack (keeps the database volume) | `docker compose --profile full down` |
+
+- The `full` profile uses the same `db` container and volume as local development, and seeding deletes all existing companies first.
+- The API container applies migrations (`prisma migrate deploy`) on start, then starts the server. The web container reaches it at `http://api:3001`.
+- The embedding model is downloaded during the image build into `/app/models`. The container runs with `EMBEDDING_OFFLINE=true`, so it never downloads at runtime.
+- `ANTHROPIC_API_KEY` (and `ANTHROPIC_MODEL`) are passed through from the shell or a root `.env` file. Without a key the stack still works with rule-based scoring.
+
 ## Architecture rules
 
 - **Layers, one direction only:** routes -> controller -> service -> repository -> Prisma.

@@ -3,9 +3,12 @@ import type { EmbeddingProvider } from "../../src/ai/embedding-provider.js";
 import { LocalEmbeddingProvider } from "../../src/ai/local-embedding-provider.js";
 import type { Config } from "../../src/config/env.js";
 
-const mocks = vi.hoisted(() => ({ pipeline: vi.fn() }));
+const mocks = vi.hoisted(() => {
+  const env: Record<string, unknown> = {};
+  return { pipeline: vi.fn(), env };
+});
 
-vi.mock("@huggingface/transformers", () => ({ pipeline: mocks.pipeline }));
+vi.mock("@huggingface/transformers", () => ({ pipeline: mocks.pipeline, env: mocks.env }));
 
 const { createContainer, createEmbeddingProvider } = await import("../../src/container.js");
 
@@ -15,15 +18,27 @@ const config: Config = {
   port: 3001,
   anthropicApiKey: undefined,
   anthropicModel: "claude-haiku-5-5",
+  embedding: { cacheDir: undefined, offline: false },
 };
 
 describe("createEmbeddingProvider", () => {
   it("returns a local provider with 384 dimensions and loads no model when built", () => {
-    const provider = createEmbeddingProvider();
+    const provider = createEmbeddingProvider(config.embedding);
 
     expect(provider).toBeInstanceOf(LocalEmbeddingProvider);
     expect(provider.dimensions).toBe(384);
     expect(mocks.pipeline).not.toHaveBeenCalled();
+  });
+
+  it("loads the model with the given embedding settings on the first embed()", async () => {
+    const settings = { cacheDir: "/models", offline: true };
+    mocks.pipeline.mockResolvedValue(() =>
+      Promise.resolve({ data: new Float32Array(384), dims: [1, 384] }),
+    );
+
+    await createEmbeddingProvider(settings).embed(["hello"]);
+
+    expect(mocks.env).toMatchObject({ cacheDir: "/models", allowRemoteModels: false });
   });
 });
 

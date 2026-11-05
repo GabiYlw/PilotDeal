@@ -7,7 +7,7 @@ import { AnthropicLlmClient, type LlmClient } from "./ai/llm-client.js";
 import { LlmAnswerGenerator } from "./ai/llm-answer-generator.js";
 import { LOCAL_EMBEDDING_MODEL, LocalEmbeddingProvider } from "./ai/local-embedding-provider.js";
 import { loadTransformersExtractor } from "./ai/transformers-extractor.js";
-import type { Config } from "./config/env.js";
+import type { Config, EmbeddingSettings } from "./config/env.js";
 import { AskController } from "./modules/ask/ask.controller.js";
 import { PrismaAskRepository } from "./modules/ask/ask.repository.js";
 import { AskService } from "./modules/ask/ask.service.js";
@@ -94,8 +94,11 @@ export function createPriorityScorers(
 }
 
 // The single place to switch embedding providers. The model is loaded lazily on the first embed().
-export function createEmbeddingProvider(): EmbeddingProvider {
-  return new LocalEmbeddingProvider(loadTransformersExtractor, LOCAL_EMBEDDING_MODEL);
+export function createEmbeddingProvider(settings: EmbeddingSettings): EmbeddingProvider {
+  return new LocalEmbeddingProvider(
+    (model) => loadTransformersExtractor(model, settings),
+    LOCAL_EMBEDDING_MODEL,
+  );
 }
 
 // Fail fast: a provider with another size would make every vector write fail.
@@ -120,7 +123,8 @@ function createActionScorer(
 export function createContainer(config: Config, overrides: ContainerOverrides = {}): Container {
   const clock: Clock = overrides.clock ?? new SystemClock();
   const logger: Logger = overrides.logger ?? new ConsoleLogger();
-  const embeddingProvider = overrides.embeddingProvider ?? createEmbeddingProvider();
+  const embeddingProvider =
+    overrides.embeddingProvider ?? createEmbeddingProvider(config.embedding);
   assertEmbeddingDimensions(embeddingProvider);
   const llmClient = overrides.llmClient ?? createLlmClient(config);
   const prisma = new PrismaClient({

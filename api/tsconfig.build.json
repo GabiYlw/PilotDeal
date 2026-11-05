@@ -1,0 +1,11 @@
+{
+  // Compiles the server, scripts, seed and generated Prisma client to dist/ for the Docker image.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true
+  },
+  "include": ["src", "generated", "prisma/seed.ts"]
+}

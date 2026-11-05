@@ -21,6 +21,7 @@ function config(anthropicApiKey: string | undefined): Config {
     port: 3001,
     anthropicApiKey,
     anthropicModel: "claude-haiku-5-5",
+    embedding: { cacheDir: undefined, offline: false },
   };
 }
 

@@ -1,0 +1,13 @@
+# Only the sources the Dockerfile copies explicitly are needed. Never send dependencies, secrets
+# or build output to the build context.
+node_modules
+dist
+generated
+coverage
+tests
+.env
+.env.*
+*.tsbuildinfo
+*.log
+Dockerfile
+.dockerignore

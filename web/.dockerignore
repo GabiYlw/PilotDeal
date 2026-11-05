@@ -1,0 +1,13 @@
+# Never send dependencies, secrets or build output to the build context.
+node_modules
+.next
+out
+coverage
+tests
+.env
+.env.*
+*.tsbuildinfo
+next-env.d.ts
+*.log
+Dockerfile
+.dockerignore
