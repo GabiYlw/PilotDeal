@@ -80,7 +80,10 @@ describe("InteractionForm", () => {
   it("shows a form-level error in an alert", async () => {
     const formError = "Could not save. Please try again.";
     render(
-      <InteractionForm pageVersion="v1" action={stateAction({ status: "error", fieldErrors: {}, formError })} />,
+      <InteractionForm
+        pageVersion="v1"
+        action={stateAction({ status: "error", fieldErrors: {}, formError })}
+      />,
     );
     typeNotes("Hello");
 
@@ -92,7 +95,10 @@ describe("InteractionForm", () => {
   it("disables the button and says Adding... while pending", async () => {
     let release: (state: FormState<InteractionField>) => void = () => {};
     const action = vi.fn<
-      (previous: FormState<InteractionField>, data: FormData) => Promise<FormState<InteractionField>>
+      (
+        previous: FormState<InteractionField>,
+        data: FormData,
+      ) => Promise<FormState<InteractionField>>
     >(
       () =>
         new Promise((resolve) => {
@@ -103,11 +109,13 @@ describe("InteractionForm", () => {
     typeNotes("Hello");
     await submit();
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Adding..." }).disabled).toBe(true);
-    await act(async () => release({ status: "success", fieldErrors: {} }));
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Add interaction" }).disabled).toBe(
-      false,
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Adding..." }).disabled).toBe(
+      true,
     );
+    await act(async () => release({ status: "success", fieldErrors: {} }));
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "Add interaction" }).disabled,
+    ).toBe(false);
   });
 
   function fillForm() {
@@ -123,7 +131,12 @@ describe("InteractionForm", () => {
   }
 
   it("clears the fields after a successful submit", async () => {
-    render(<InteractionForm pageVersion="v1" action={stateAction({ status: "success", fieldErrors: {} })} />);
+    render(
+      <InteractionForm
+        pageVersion="v1"
+        action={stateAction({ status: "success", fieldErrors: {} })}
+      />,
+    );
     fillForm();
 
     await submit();
@@ -198,7 +211,10 @@ describe("InteractionForm", () => {
     it("stays visible when the new page data arrives before the action result", async () => {
       let release: (state: FormState<InteractionField>) => void = () => {};
       const action = vi.fn<
-        (previous: FormState<InteractionField>, data: FormData) => Promise<FormState<InteractionField>>
+        (
+          previous: FormState<InteractionField>,
+          data: FormData,
+        ) => Promise<FormState<InteractionField>>
       >(
         () =>
           new Promise((resolve) => {

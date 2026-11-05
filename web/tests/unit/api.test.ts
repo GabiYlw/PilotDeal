@@ -102,13 +102,16 @@ describe("apiRequest", () => {
     ["an HTML page", new Response("<h1>Bad gateway</h1>", { status: 502 })],
     ["an empty body", new Response(null, { status: 502 })],
     ["JSON without the error shape", jsonResponse(502, { message: "upstream" })],
-  ])("returns an UNEXPECTED_RESPONSE ApiError when an error status has %s", async (_name, response) => {
-    fetchMock.mockResolvedValue(response);
+  ])(
+    "returns an UNEXPECTED_RESPONSE ApiError when an error status has %s",
+    async (_name, response) => {
+      fetchMock.mockResolvedValue(response);
 
-    const error = await rejectionOf(apiRequest("/companies"));
+      const error = await rejectionOf(apiRequest("/companies"));
 
-    expect(error).toMatchObject({ status: 502, code: UNEXPECTED_RESPONSE });
-  });
+      expect(error).toMatchObject({ status: 502, code: UNEXPECTED_RESPONSE });
+    },
+  );
 
   it("returns an API_UNREACHABLE ApiError with status 0 when fetch fails", async () => {
     fetchMock.mockRejectedValue(new TypeError("fetch failed"));
@@ -139,7 +142,9 @@ describe("getHealth", () => {
   });
 
   it("still throws for an error status other than 503", async () => {
-    fetchMock.mockResolvedValue(jsonResponse(500, { error: { code: "INTERNAL_ERROR", message: "boom" } }));
+    fetchMock.mockResolvedValue(
+      jsonResponse(500, { error: { code: "INTERNAL_ERROR", message: "boom" } }),
+    );
 
     const error = await rejectionOf(getHealth());
 
@@ -158,7 +163,12 @@ describe("deal endpoints", () => {
       { method: "GET" },
     ],
     ["getDeal", () => getDeal("d1"), "/deals/d1", { method: "GET" }],
-    ["getDealNextAction", () => getDealNextAction("d1"), "/deals/d1/next-action", { method: "GET" }],
+    [
+      "getDealNextAction",
+      () => getDealNextAction("d1"),
+      "/deals/d1/next-action",
+      { method: "GET" },
+    ],
     ["getCompany", () => getCompany("c1"), "/companies/c1", { method: "GET" }],
     [
       "getCompanies",
@@ -248,14 +258,20 @@ describe("deal endpoints", () => {
       "/interactions/i1",
       { method: "PATCH", headers: JSON_HEADERS, body: '{"type":"CALL","notes":"Hi"}' },
     ],
-  ])("%s calls the right URL and method and returns the parsed body", async (_name, call, path, init) => {
-    const body = { marker: path };
-    fetchMock.mockResolvedValue(jsonResponse(200, body));
+  ])(
+    "%s calls the right URL and method and returns the parsed body",
+    async (_name, call, path, init) => {
+      const body = { marker: path };
+      fetchMock.mockResolvedValue(jsonResponse(200, body));
 
-    await expect(call()).resolves.toEqual(body);
+      await expect(call()).resolves.toEqual(body);
 
-    expect(fetchMock).toHaveBeenCalledWith(`http://api.test${path}`, expect.objectContaining(init));
-  });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `http://api.test${path}`,
+        expect.objectContaining(init),
+      );
+    },
+  );
 
   it("encodes path ids so they cannot change the route", async () => {
     fetchMock.mockImplementation(async () => jsonResponse(200, {}));
@@ -298,7 +314,12 @@ describe("deal endpoints", () => {
     ["deleteInteraction", () => deleteInteraction("i1"), 404, "NOT_FOUND"],
     ["deleteDeal", () => deleteDeal("d1"), 404, "NOT_FOUND"],
     ["deleteCompany", () => deleteCompany("c1"), 404, "NOT_FOUND"],
-    ["updateInteraction", () => updateInteraction("i1", { type: "NOTE", notes: "x" }), 404, "NOT_FOUND"],
+    [
+      "updateInteraction",
+      () => updateInteraction("i1", { type: "NOTE", notes: "x" }),
+      404,
+      "NOT_FOUND",
+    ],
     ["getDealNextAction", () => getDealNextAction("d1"), 409, DEAL_CLOSED],
   ])("%s turns status %i into an ApiError with the API code", async (_name, call, status, code) => {
     fetchMock.mockResolvedValue(jsonResponse(status, { error: { code, message: "nope" } }));
@@ -309,7 +330,9 @@ describe("deal endpoints", () => {
   it("createDealInteraction keeps the validation details of a 400", async () => {
     const details = [{ path: ["notes"], message: "Notes is required" }];
     fetchMock.mockResolvedValue(
-      jsonResponse(400, { error: { code: "VALIDATION_ERROR", message: "Invalid request body", details } }),
+      jsonResponse(400, {
+        error: { code: "VALIDATION_ERROR", message: "Invalid request body", details },
+      }),
     );
 
     const error = await rejectionOf(createDealInteraction("d1", { type: "NOTE", notes: "" }));

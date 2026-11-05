@@ -13,7 +13,10 @@ describe("pageVersion", () => {
 
   it.each([
     ["a stage update", pageVersion({ updatedAt: "2026-10-09T00:00:00.000Z" }, [A, B], 2)],
-    ["an interaction edit", pageVersion(DEAL, [{ ...A, updatedAt: "2026-10-09T00:00:00.000Z" }, B], 2)],
+    [
+      "an interaction edit",
+      pageVersion(DEAL, [{ ...A, updatedAt: "2026-10-09T00:00:00.000Z" }, B], 2),
+    ],
     ["an interaction delete", pageVersion(DEAL, [B], 1)],
     ["an interaction add", pageVersion(DEAL, [{ id: "c", updatedAt: A.updatedAt }, A, B], 3)],
     ["an add beyond the listed page", pageVersion(DEAL, [A, B], 3)],

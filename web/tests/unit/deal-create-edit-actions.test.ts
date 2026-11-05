@@ -6,10 +6,7 @@ import { addDeal } from "@/app/companies/[id]/actions";
 import { editDeal } from "@/app/deals/[id]/actions";
 import { ApiError, createCompanyDeal, updateDeal } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
-import {
-  COMPANY_NOT_FOUND_MESSAGE,
-  DEAL_NOT_FOUND_MESSAGE,
-} from "@/lib/messages";
+import { COMPANY_NOT_FOUND_MESSAGE, DEAL_NOT_FOUND_MESSAGE } from "@/lib/messages";
 import type { Deal } from "@/lib/types";
 
 const REDIRECT = new Error("NEXT_REDIRECT");
@@ -71,7 +68,11 @@ describe("addDeal", () => {
     createMock.mockResolvedValue(DEAL);
 
     await expect(
-      addDeal("c1", initialFormState(), form({ ...CREATE_FIELDS, expectedCloseDate: "2026-12-01" })),
+      addDeal(
+        "c1",
+        initialFormState(),
+        form({ ...CREATE_FIELDS, expectedCloseDate: "2026-12-01" }),
+      ),
     ).rejects.toBe(REDIRECT);
 
     expect(createMock.mock.calls[0][1].expectedCloseDate).toBe("2026-12-01");

@@ -43,7 +43,11 @@ describe("addInteraction", () => {
   it("sends the date as a UTC timestamp", async () => {
     createMock.mockResolvedValue(INTERACTION);
 
-    await addInteraction("d1", state, form({ type: "CALL", notes: "Hi", occurredAt: "2026-10-22" }));
+    await addInteraction(
+      "d1",
+      state,
+      form({ type: "CALL", notes: "Hi", occurredAt: "2026-10-22" }),
+    );
 
     expect(createMock).toHaveBeenCalledWith("d1", {
       type: "CALL",
@@ -103,9 +107,9 @@ describe("addInteraction", () => {
   it("rethrows errors that are not ApiErrors", async () => {
     createMock.mockRejectedValue(new Error("API_URL is not set"));
 
-    await expect(
-      addInteraction("d1", state, form({ type: "NOTE", notes: "Hi" })),
-    ).rejects.toThrow("API_URL");
+    await expect(addInteraction("d1", state, form({ type: "NOTE", notes: "Hi" }))).rejects.toThrow(
+      "API_URL",
+    );
   });
 
   it("puts an unmapped validation path into the form error", async () => {

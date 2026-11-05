@@ -183,7 +183,10 @@ export async function removeDeal(dealId: string): Promise<ActionState> {
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     if (error.status !== 404) {
-      return { status: "error", ...toFormErrors(error, NO_FIELDS, { failed: DELETE_FAILED_MESSAGE }) };
+      return {
+        status: "error",
+        ...toFormErrors(error, NO_FIELDS, { failed: DELETE_FAILED_MESSAGE }),
+      };
     }
     // The deal is gone either way, and the user is on a page for a deal that no longer exists:
     // the list is where they need to be.

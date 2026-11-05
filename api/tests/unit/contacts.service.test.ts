@@ -101,7 +101,9 @@ describe("ContactService", () => {
       companyRepository.findById.mockResolvedValue(company);
       contactRepository.create.mockResolvedValue(contact);
 
-      await expect(service.createForCompany(companyId, { name: "Jane Doe" })).resolves.toBe(contact);
+      await expect(service.createForCompany(companyId, { name: "Jane Doe" })).resolves.toBe(
+        contact,
+      );
       expect(contactRepository.create).toHaveBeenCalledWith(companyId, { name: "Jane Doe" });
     });
 
@@ -149,7 +151,9 @@ describe("ContactService", () => {
       const { contactRepository, service } = setup();
       contactRepository.update.mockResolvedValue(null);
 
-      await expect(service.update(contact.id, { role: "CTO" })).rejects.toBeInstanceOf(NotFoundError);
+      await expect(service.update(contact.id, { role: "CTO" })).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
     });
   });
 

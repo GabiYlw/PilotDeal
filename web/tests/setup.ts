@@ -28,7 +28,10 @@ if (
     openModals.add(this);
   };
 
-  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement, returnValue?: string) {
+  HTMLDialogElement.prototype.close = function close(
+    this: HTMLDialogElement,
+    returnValue?: string,
+  ) {
     if (!this.open) return;
     this.removeAttribute("open");
     openModals.delete(this);

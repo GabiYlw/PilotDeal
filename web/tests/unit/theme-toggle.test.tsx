@@ -6,9 +6,7 @@ import { THEME_SCRIPT, THEME_STORAGE_KEY } from "@/lib/theme";
 const root = document.documentElement;
 
 function pressed(): string[] {
-  return screen
-    .getAllByRole("button", { pressed: true })
-    .map((button) => button.textContent ?? "");
+  return screen.getAllByRole("button", { pressed: true }).map((button) => button.textContent ?? "");
 }
 
 beforeEach(() => {
@@ -69,13 +67,16 @@ describe("THEME_SCRIPT", () => {
     expect(root.getAttribute("data-theme")).toBe("dark");
   });
 
-  it.each([null, "purple"])("leaves the system preference in place when the stored value is %s", (value) => {
-    if (value !== null) {
-      localStorage.setItem(THEME_STORAGE_KEY, value);
-    }
+  it.each([null, "purple"])(
+    "leaves the system preference in place when the stored value is %s",
+    (value) => {
+      if (value !== null) {
+        localStorage.setItem(THEME_STORAGE_KEY, value);
+      }
 
-    runScript();
+      runScript();
 
-    expect(root.hasAttribute("data-theme")).toBe(false);
-  });
+      expect(root.hasAttribute("data-theme")).toBe(false);
+    },
+  );
 });

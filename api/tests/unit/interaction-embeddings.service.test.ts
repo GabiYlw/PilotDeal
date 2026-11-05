@@ -34,7 +34,10 @@ function rows(count: number): { id: string; notes: string }[] {
 }
 
 // Serves the rows with keyset semantics: ids greater than afterId, at most limit.
-function serve(repository: ReturnType<typeof createRepository>, all: { id: string; notes: string }[]) {
+function serve(
+  repository: ReturnType<typeof createRepository>,
+  all: { id: string; notes: string }[],
+) {
   repository.listMissingEmbeddings.mockImplementation((afterId: string | null, limit: number) =>
     Promise.resolve(all.filter((row) => afterId === null || row.id > afterId).slice(0, limit)),
   );
@@ -46,7 +49,11 @@ describe("InteractionEmbeddingService.refreshEmbedding", () => {
 
     await service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES });
 
-    expect(repository.saveEmbedding).toHaveBeenCalledWith("i1", SECRET_NOTES, fakeEmbedding(SECRET_NOTES));
+    expect(repository.saveEmbedding).toHaveBeenCalledWith(
+      "i1",
+      SECRET_NOTES,
+      fakeEmbedding(SECRET_NOTES),
+    );
     expect(repository.clearEmbedding).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -56,7 +63,9 @@ describe("InteractionEmbeddingService.refreshEmbedding", () => {
     provider.failWith(new Error("model exploded"));
     const { repository, logger, service } = setup(provider);
 
-    await expect(service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES })).resolves.toBeUndefined();
+    await expect(
+      service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES }),
+    ).resolves.toBeUndefined();
 
     expect(repository.saveEmbedding).not.toHaveBeenCalled();
     expect(repository.clearEmbedding).toHaveBeenCalledWith("i1", SECRET_NOTES);
@@ -76,7 +85,9 @@ describe("InteractionEmbeddingService.refreshEmbedding", () => {
     const provider: EmbeddingProvider = { dimensions: 384, embed: () => Promise.resolve(vectors) };
     const { repository, logger, service } = setup(provider);
 
-    await expect(service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES })).resolves.toBeUndefined();
+    await expect(
+      service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES }),
+    ).resolves.toBeUndefined();
 
     expect(repository.saveEmbedding).not.toHaveBeenCalled();
     expect(repository.clearEmbedding).toHaveBeenCalledWith("i1", SECRET_NOTES);
@@ -89,7 +100,9 @@ describe("InteractionEmbeddingService.refreshEmbedding", () => {
     const { repository, logger, service } = setup(provider);
     repository.clearEmbedding.mockRejectedValue(new Error("db down"));
 
-    await expect(service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES })).resolves.toBeUndefined();
+    await expect(
+      service.refreshEmbedding({ id: "i1", notes: SECRET_NOTES }),
+    ).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledTimes(2);
     expect(logger.warn.mock.calls[1]?.[1]).toEqual({
@@ -181,7 +194,11 @@ describe("InteractionEmbeddingService.backfillMissing", () => {
     const result = await service.backfillMissing(2);
 
     expect(result).toEqual({ updated: 3, failed: 2 });
-    expect(repository.saveEmbedding.mock.calls.map((call: unknown[]) => call[0])).toEqual(["id1", "id2", "id5"]);
+    expect(repository.saveEmbedding.mock.calls.map((call: unknown[]) => call[0])).toEqual([
+      "id1",
+      "id2",
+      "id5",
+    ]);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn.mock.calls[0]?.[1]).toEqual({
       interactionIds: ["id3", "id4"],
@@ -240,11 +257,14 @@ describe("InteractionEmbeddingService.backfillMissing", () => {
     await expect(service.backfillMissing()).rejects.toThrow("write failed");
   });
 
-  it.each([[0], [-1], [1.5], [Number.NaN]])("rejects a batch size of %s with RangeError", async (size) => {
-    const { service } = setup();
+  it.each([[0], [-1], [1.5], [Number.NaN]])(
+    "rejects a batch size of %s with RangeError",
+    async (size) => {
+      const { service } = setup();
 
-    await expect(service.backfillMissing(size)).rejects.toBeInstanceOf(RangeError);
-  });
+      await expect(service.backfillMissing(size)).rejects.toBeInstanceOf(RangeError);
+    },
+  );
 });
 
 describe("formatBackfillResult", () => {

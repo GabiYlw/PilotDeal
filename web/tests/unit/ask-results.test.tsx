@@ -74,7 +74,11 @@ describe("AskResults", () => {
       new ApiError("x", 503, EMBEDDING_UNAVAILABLE),
       "Search is starting up, try again in a moment",
     ],
-    ["the scope deal was deleted", new ApiError("x", 404, "NOT_FOUND"), "This deal no longer exists."],
+    [
+      "the scope deal was deleted",
+      new ApiError("x", 404, "NOT_FOUND"),
+      "This deal no longer exists.",
+    ],
   ])("shows an alert and keeps the form when %s", async (_name, error, message) => {
     vi.mocked(askCrm).mockRejectedValue(error);
     await renderResults();

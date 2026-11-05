@@ -145,8 +145,7 @@ describe("DealView", () => {
     ],
     [
       "interactions",
-      () =>
-        vi.mocked(getDealInteractions).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE)),
+      () => vi.mocked(getDealInteractions).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE)),
     ],
   ])("renders the unreachable hint when the %s call cannot reach the API", async (_n, arrange) => {
     arrange();

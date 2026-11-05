@@ -19,18 +19,12 @@ describe("createDealSchema", () => {
     expect(createDealSchema.safeParse({ title: "T", value }).success).toBe(true);
   });
 
-  it.each([
-    -0.01,
-    10_000_000_000,
-    12.345,
-    0.1 + 0.2,
-    1e-7,
-    "100",
-    null,
-    undefined,
-  ])("rejects value %s", (value) => {
-    expect(createDealSchema.safeParse({ title: "T", value }).success).toBe(false);
-  });
+  it.each([-0.01, 10_000_000_000, 12.345, 0.1 + 0.2, 1e-7, "100", null, undefined])(
+    "rejects value %s",
+    (value) => {
+      expect(createDealSchema.safeParse({ title: "T", value }).success).toBe(false);
+    },
+  );
 
   it.each([
     ["an empty title", { title: "", value: 1 }],
@@ -51,9 +45,9 @@ describe("createDealSchema", () => {
   });
 
   it.each(["2024-02-29", "2026-12-31", "1900-01-01"])("accepts expectedCloseDate %s", (date) => {
-    expect(createDealSchema.safeParse({ title: "T", value: 1, expectedCloseDate: date }).success).toBe(
-      true,
-    );
+    expect(
+      createDealSchema.safeParse({ title: "T", value: 1, expectedCloseDate: date }).success,
+    ).toBe(true);
   });
 
   it.each([
@@ -65,9 +59,9 @@ describe("createDealSchema", () => {
     "2026-12-31T00:00:00Z",
     "1899-12-31",
   ])("rejects expectedCloseDate %s", (date) => {
-    expect(createDealSchema.safeParse({ title: "T", value: 1, expectedCloseDate: date }).success).toBe(
-      false,
-    );
+    expect(
+      createDealSchema.safeParse({ title: "T", value: 1, expectedCloseDate: date }).success,
+    ).toBe(false);
   });
 
   it("accepts a null expectedCloseDate", () => {

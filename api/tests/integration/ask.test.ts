@@ -48,7 +48,9 @@ async function addNotes(dealId: string, notes: string[], embed = true): Promise<
 }
 
 function ask(body: unknown) {
-  return request(app).post("/ask").send(body as object);
+  return request(app)
+    .post("/ask")
+    .send(body as object);
 }
 
 function notesOf(response: { body: unknown }): string[] {
@@ -127,9 +129,14 @@ describe("POST /ask", () => {
     ["limit 10", 10, 6],
   ])("returns the right number of sources for %s", async (_name, limit, expected) => {
     const dealId = await createDeal();
-    await addNotes(dealId, Array.from({ length: 6 }, () => "price"));
+    await addNotes(
+      dealId,
+      Array.from({ length: 6 }, () => "price"),
+    );
 
-    const response = await ask(limit === undefined ? { question: "price" } : { question: "price", limit });
+    const response = await ask(
+      limit === undefined ? { question: "price" } : { question: "price", limit },
+    );
 
     expect(response.status).toBe(200);
     expect(bodyOf(response).sources).toHaveLength(expected);
@@ -158,7 +165,9 @@ describe("POST /ask", () => {
     expect(
       bodyOf(scoped).sources.every(
         (source) =>
-          source.dealId === dealA && source.dealTitle === "Deal A" && source.companyName === "Company A",
+          source.dealId === dealA &&
+          source.dealTitle === "Deal A" &&
+          source.companyName === "Company A",
       ),
     ).toBe(true);
     expect(bodyOf(unscoped).sources).toHaveLength(4);

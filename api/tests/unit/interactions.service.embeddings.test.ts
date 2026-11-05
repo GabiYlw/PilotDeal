@@ -91,7 +91,10 @@ describe("InteractionService embeddings", () => {
     it.each([
       ["only type", { type: "EMAIL" as const }],
       ["only occurredAt", { occurredAt: new Date("2026-02-01T00:00:00Z") }],
-      ["type and occurredAt", { type: "EMAIL" as const, occurredAt: new Date("2026-02-01T00:00:00Z") }],
+      [
+        "type and occurredAt",
+        { type: "EMAIL" as const, occurredAt: new Date("2026-02-01T00:00:00Z") },
+      ],
     ])("does not embed when the input contains %s", async (_name, input) => {
       const { interactionEmbeddings, service } = setup();
 

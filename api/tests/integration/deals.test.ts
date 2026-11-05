@@ -28,7 +28,12 @@ async function createCompany(name = "Acme"): Promise<string> {
 
 async function createDeal(
   companyId: string,
-  overrides: { title?: string; stage?: "LEAD" | "WON" | "LOST" | "QUALIFIED"; day?: number; closedAt?: Date | null } = {},
+  overrides: {
+    title?: string;
+    stage?: "LEAD" | "WON" | "LOST" | "QUALIFIED";
+    day?: number;
+    closedAt?: Date | null;
+  } = {},
 ): Promise<string> {
   const deal = await prisma.deal.create({
     data: {
@@ -370,7 +375,9 @@ describe("GET /deals/:id", () => {
 
     expect(response.status).toBe(404);
     expect(bodyOf(response).error.message).toBe(`Deal ${missing} not found`);
-    expect((await request(app).get("/deals/00000000-0000-0000-0000-000000000000")).status).toBe(404);
+    expect((await request(app).get("/deals/00000000-0000-0000-0000-000000000000")).status).toBe(
+      404,
+    );
   });
 
   it("returns 400 for an invalid id", async () => {

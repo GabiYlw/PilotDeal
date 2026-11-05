@@ -15,13 +15,22 @@ const INTERACTION: Interaction = {
 };
 type Result = FormState<InteractionField>;
 
-function setup(action = vi.fn<(s: Result, d: FormData) => Promise<Result>>(async () => ({
-  status: "idle",
-  fieldErrors: {},
-}))) {
+function setup(
+  action = vi.fn<(s: Result, d: FormData) => Promise<Result>>(async () => ({
+    status: "idle",
+    fieldErrors: {},
+  })),
+) {
   const onCancel = vi.fn();
   const onSaved = vi.fn();
-  render(<InteractionEditForm interaction={INTERACTION} action={action} onCancel={onCancel} onSaved={onSaved} />);
+  render(
+    <InteractionEditForm
+      interaction={INTERACTION}
+      action={action}
+      onCancel={onCancel}
+      onSaved={onSaved}
+    />,
+  );
   return { action, onCancel, onSaved };
 }
 
@@ -34,17 +43,20 @@ describe("InteractionEditForm browser validation", () => {
   it.each([
     ["Notes", "", "Enter some notes."],
     ["Date", "", "Enter a date."],
-  ])("blocks the submit and shows an inline error when %s is empty", async (label, value, message) => {
-    const { action } = setup();
-    fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  ])(
+    "blocks the submit and shows an inline error when %s is empty",
+    async (label, value, message) => {
+      const { action } = setup();
+      fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
-    await save();
+      await save();
 
-    const text = screen.getByText(message);
-    expect(screen.getByLabelText(label).getAttribute("aria-describedby")).toBe(text.id);
-    expect(screen.getByLabelText(label).getAttribute("aria-invalid")).toBe("true");
-    expect(action).not.toHaveBeenCalled();
-  });
+      const text = screen.getByText(message);
+      expect(screen.getByLabelText(label).getAttribute("aria-describedby")).toBe(text.id);
+      expect(screen.getByLabelText(label).getAttribute("aria-invalid")).toBe("true");
+      expect(action).not.toHaveBeenCalled();
+    },
+  );
 
   it("clears the inline error once the user types in the field", async () => {
     setup();
@@ -75,12 +87,19 @@ describe("InteractionEditForm submit", () => {
   it("shows Saving... and disables Save and Cancel while the save is pending", async () => {
     let release: (s: Result) => void = () => {};
     const { onSaved } = setup(
-      vi.fn(() => new Promise<Result>((resolve) => { release = resolve; })),
+      vi.fn(
+        () =>
+          new Promise<Result>((resolve) => {
+            release = resolve;
+          }),
+      ),
     );
 
     await save();
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Saving..." }).disabled).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Saving..." }).disabled).toBe(
+      true,
+    );
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "Cancel" }).disabled).toBe(true);
     await act(async () => release({ status: "success", fieldErrors: {} }));
     expect(onSaved).toHaveBeenCalledOnce();

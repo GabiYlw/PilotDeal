@@ -13,7 +13,8 @@ const LIMIT_ERROR = `Limit must be a whole number from 1 to ${ASK_MAX_LIMIT}`;
 export const askRequestSchema = strictBody({
   question: z
     .string({
-      error: (issue) => (issue.input === undefined ? "Question is required" : "Question must be text"),
+      error: (issue) =>
+        issue.input === undefined ? "Question is required" : "Question must be text",
     })
     .trim()
     .min(ASK_QUESTION_MIN_LENGTH, {

@@ -45,7 +45,9 @@ describe("DealEditForm", () => {
   it("leaves the date empty when the deal has none", () => {
     renderForm(IDLE, { ...DEAL, expectedCloseDate: null });
 
-    expect(screen.getByLabelText<HTMLInputElement>("Expected close date (optional)").value).toBe("");
+    expect(screen.getByLabelText<HTMLInputElement>("Expected close date (optional)").value).toBe(
+      "",
+    );
   });
 
   it("shows Deal saved. after a successful save", async () => {
@@ -85,7 +87,9 @@ describe("DealEditForm", () => {
     expect((await screen.findByRole("alert")).textContent).toBe("This deal no longer exists.");
     expect(screen.getByLabelText<HTMLInputElement>("Title").value).toBe("Draft");
     expect(screen.getByLabelText<HTMLInputElement>("Value").value).toBe("7");
-    expect(screen.getByLabelText<HTMLInputElement>("Expected close date (optional)").value).toBe("");
+    expect(screen.getByLabelText<HTMLInputElement>("Expected close date (optional)").value).toBe(
+      "",
+    );
   });
 
   it("disables the submit button and shows the pending label while the action runs", async () => {
@@ -97,7 +101,9 @@ describe("DealEditForm", () => {
 
     await submit();
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Saving..." }).disabled).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Saving..." }).disabled).toBe(
+      true,
+    );
     await act(async () => finish(IDLE));
   });
 

@@ -20,7 +20,10 @@ export function createApp(controllers: Controllers): Express {
   app.use(express.json());
 
   app.use("/health", createHealthRouter(controllers.healthController));
-  app.use("/companies/:companyId/contacts", createCompanyContactsRouter(controllers.contactController));
+  app.use(
+    "/companies/:companyId/contacts",
+    createCompanyContactsRouter(controllers.contactController),
+  );
   app.use("/companies/:companyId/deals", createCompanyDealsRouter(controllers.dealController));
   app.use("/companies", createCompaniesRouter(controllers.companyController));
   app.use("/contacts", createContactsRouter(controllers.contactController));

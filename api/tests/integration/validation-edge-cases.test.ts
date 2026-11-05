@@ -47,14 +47,19 @@ describe("migration (criterion 1, requirement 4)", () => {
 });
 
 describe("pagination query validation (criteria 9, 10)", () => {
-  it.each(["pageSize=0", "pageSize=101", "pageSize=abc", "pageSize=", "pageSize=-5", "pageSize=1.5", "pageSize=10&pageSize=20"])(
-    "returns 400 VALIDATION_ERROR for GET /companies?%s",
-    async (query) => {
-      const response = await request(app).get(`/companies?${query}`);
-      expect(response.status).toBe(400);
-      expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
-    },
-  );
+  it.each([
+    "pageSize=0",
+    "pageSize=101",
+    "pageSize=abc",
+    "pageSize=",
+    "pageSize=-5",
+    "pageSize=1.5",
+    "pageSize=10&pageSize=20",
+  ])("returns 400 VALIDATION_ERROR for GET /companies?%s", async (query) => {
+    const response = await request(app).get(`/companies?${query}`);
+    expect(response.status).toBe(400);
+    expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
+  });
 
   it("accepts page=1000000 and pageSize=1", async () => {
     const response = await request(app).get("/companies?page=1000000&pageSize=1");
@@ -129,7 +134,10 @@ describe("error response shape (criterion 23)", () => {
     const id = randomUUID();
     const response = await request(app).get(`/companies/${id}`);
     expect(response.status).toBe(404);
-    expect(bodyOf(response).error).toEqual({ code: "NOT_FOUND", message: `Company ${id} not found` });
+    expect(bodyOf(response).error).toEqual({
+      code: "NOT_FOUND",
+      message: `Company ${id} not found`,
+    });
   });
 
   it("returns the company message for a missing company on the nested route", async () => {
@@ -141,7 +149,10 @@ describe("error response shape (criterion 23)", () => {
   it("returns the contact message for a missing contact", async () => {
     const id = randomUUID();
     const response = await request(app).delete(`/contacts/${id}`);
-    expect(bodyOf(response).error).toEqual({ code: "NOT_FOUND", message: `Contact ${id} not found` });
+    expect(bodyOf(response).error).toEqual({
+      code: "NOT_FOUND",
+      message: `Contact ${id} not found`,
+    });
   });
 });
 
@@ -157,30 +168,43 @@ describe("company body validation (requirements 18 to 25)", () => {
     ["string body", "just a string"],
     ["number body", 42],
   ])("returns 400 on POST for %s", async (_label, body) => {
-    const response = await request(app).post("/companies").set("Content-Type", "application/json").send(JSON.stringify(body));
+    const response = await request(app)
+      .post("/companies")
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify(body));
     expect(response.status).toBe(400);
     expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
   });
 
   it("accepts 100 character industry and trims it", async () => {
-    const response = await request(app).post("/companies").send({ name: "A", industry: ` ${"x".repeat(100)} ` });
+    const response = await request(app)
+      .post("/companies")
+      .send({ name: "A", industry: ` ${"x".repeat(100)} ` });
     expect(response.status).toBe(201);
     expect(bodyOf(response).industry).toBe("x".repeat(100));
   });
 
-  it.each([{ name: null }, { name: "   " }, { industry: "  " }, { id: randomUUID() }, { updatedAt: "2026-01-01T00:00:00.000Z" }, { foo: 1 }, { website: "ftp://x.com" }])(
-    "returns 400 on PATCH for %j",
-    async (body) => {
-      const id = await createCompany();
-      const response = await request(app).patch(`/companies/${id}`).send(body);
-      expect(response.status).toBe(400);
-      expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
-    },
-  );
+  it.each([
+    { name: null },
+    { name: "   " },
+    { industry: "  " },
+    { id: randomUUID() },
+    { updatedAt: "2026-01-01T00:00:00.000Z" },
+    { foo: 1 },
+    { website: "ftp://x.com" },
+  ])("returns 400 on PATCH for %j", async (body) => {
+    const id = await createCompany();
+    const response = await request(app).patch(`/companies/${id}`).send(body);
+    expect(response.status).toBe(400);
+    expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
+  });
 
   it.each([[[1, 2]], ["str"], [5]])("returns 400 on PATCH for non-object body %j", async (body) => {
     const id = await createCompany();
-    const response = await request(app).patch(`/companies/${id}`).set("Content-Type", "application/json").send(JSON.stringify(body));
+    const response = await request(app)
+      .patch(`/companies/${id}`)
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify(body));
     expect(response.status).toBe(400);
   });
 
@@ -192,7 +216,9 @@ describe("company body validation (requirements 18 to 25)", () => {
   });
 
   it("stores null when POST sends explicit null optionals", async () => {
-    const response = await request(app).post("/companies").send({ name: "A", industry: null, website: null });
+    const response = await request(app)
+      .post("/companies")
+      .send({ name: "A", industry: null, website: null });
     expect(response.status).toBe(201);
     expect(bodyOf(response)).toMatchObject({ industry: null, website: null });
     expect(bodyOf(response)).not.toHaveProperty("contacts");
@@ -227,26 +253,33 @@ describe("contact body validation (requirements 18 to 23)", () => {
 
   it("stores null for omitted and null optional fields", async () => {
     const companyId = await createCompany();
-    const response = await request(app).post(`/companies/${companyId}/contacts`).send({ name: "J", phone: null });
+    const response = await request(app)
+      .post(`/companies/${companyId}/contacts`)
+      .send({ name: "J", phone: null });
     expect(response.status).toBe(201);
     expect(bodyOf(response)).toMatchObject({ email: null, phone: null, role: null, companyId });
   });
 
   it("accepts 200 character name", async () => {
     const companyId = await createCompany();
-    const response = await request(app).post(`/companies/${companyId}/contacts`).send({ name: "n".repeat(200) });
+    const response = await request(app)
+      .post(`/companies/${companyId}/contacts`)
+      .send({ name: "n".repeat(200) });
     expect(response.status).toBe(201);
   });
 
-  it.each([{ id: randomUUID() }, { createdAt: "2026-01-01T00:00:00.000Z" }, { foo: 1 }, { name: null }, { phone: "" }])(
-    "returns 400 on contact PATCH for %j",
-    async (body) => {
-      const companyId = await createCompany();
-      const contact = await prisma.contact.create({ data: { companyId, name: "J" } });
-      const response = await request(app).patch(`/contacts/${contact.id}`).send(body);
-      expect(response.status).toBe(400);
-    },
-  );
+  it.each([
+    { id: randomUUID() },
+    { createdAt: "2026-01-01T00:00:00.000Z" },
+    { foo: 1 },
+    { name: null },
+    { phone: "" },
+  ])("returns 400 on contact PATCH for %j", async (body) => {
+    const companyId = await createCompany();
+    const contact = await prisma.contact.create({ data: { companyId, name: "J" } });
+    const response = await request(app).patch(`/contacts/${contact.id}`).send(body);
+    expect(response.status).toBe(400);
+  });
 
   it("returns 400 for contact PATCH with no body", async () => {
     const companyId = await createCompany();
@@ -285,21 +318,33 @@ describe("contact list pagination (requirements 35 to 37)", () => {
   it("breaks createdAt ties by id descending and returns an empty page past the end", async () => {
     const companyId = await createCompany();
     const createdAt = new Date(Date.UTC(2026, 0, 1));
-    const rows = await Promise.all([1, 2, 3].map((n) => prisma.contact.create({ data: { companyId, name: `C${n}`, createdAt } })));
-    const expected = rows.map((row) => row.id).sort().reverse();
+    const rows = await Promise.all(
+      [1, 2, 3].map((n) =>
+        prisma.contact.create({ data: { companyId, name: `C${n}`, createdAt } }),
+      ),
+    );
+    const expected = rows
+      .map((row) => row.id)
+      .sort()
+      .reverse();
     const response = await request(app).get(`/companies/${companyId}/contacts`);
-    expect((bodyOf(response).data as unknown as { id: string }[]).map((row) => row.id)).toEqual(expected);
+    expect((bodyOf(response).data as unknown as { id: string }[]).map((row) => row.id)).toEqual(
+      expected,
+    );
 
     const past = await request(app).get(`/companies/${companyId}/contacts?page=50`);
     expect(past.status).toBe(200);
     expect(bodyOf(past)).toMatchObject({ data: [], meta: { page: 50, pageSize: 20, total: 3 } });
   });
 
-  it.each(["pageSize=0", "pageSize=101", "page=1&page=2", "page="])("returns 400 for contacts list ?%s", async (query) => {
-    const companyId = await createCompany();
-    const response = await request(app).get(`/companies/${companyId}/contacts?${query}`);
-    expect(response.status).toBe(400);
-  });
+  it.each(["pageSize=0", "pageSize=101", "page=1&page=2", "page="])(
+    "returns 400 for contacts list ?%s",
+    async (query) => {
+      const companyId = await createCompany();
+      const response = await request(app).get(`/companies/${companyId}/contacts?${query}`);
+      expect(response.status).toBe(400);
+    },
+  );
 
   it("ignores unknown query parameters", async () => {
     const companyId = await createCompany();

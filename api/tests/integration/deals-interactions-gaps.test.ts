@@ -31,7 +31,13 @@ async function seedDeal(
 ): Promise<string> {
   return (
     await prisma.deal.create({
-      data: { companyId, title: "Deal", value: 100, stage: data.stage ?? "LEAD", closedAt: data.closedAt ?? null },
+      data: {
+        companyId,
+        title: "Deal",
+        value: 100,
+        stage: data.stage ?? "LEAD",
+        closedAt: data.closedAt ?? null,
+      },
     })
   ).id;
 }
@@ -51,7 +57,9 @@ describe("deal closedAt transitions not covered elsewhere", () => {
     const closedAt = new Date("2026-01-01T00:00:00.000Z");
     const id = await seedDeal(await createCompany(), { stage: "LOST", closedAt });
 
-    const response = await request(app).patch(`/deals/${id}`).send({ stage: "LOST", title: "renamed" });
+    const response = await request(app)
+      .patch(`/deals/${id}`)
+      .send({ stage: "LOST", title: "renamed" });
 
     expect(bodyOf(response).closedAt).toBe(closedAt.toISOString());
     expect(bodyOf(response).title).toBe("renamed");
@@ -98,23 +106,30 @@ describe("deal closedAt transitions not covered elsewhere", () => {
 });
 
 describe("deal value decimal handling", () => {
-  it.each([5, 5.1, 0.99, 1234567.89, 48500.5])("round-trips value %s through POST, GET and the list", async (value) => {
-    const companyId = await createCompany();
+  it.each([5, 5.1, 0.99, 1234567.89, 48500.5])(
+    "round-trips value %s through POST, GET and the list",
+    async (value) => {
+      const companyId = await createCompany();
 
-    const created = await request(app).post(`/companies/${companyId}/deals`).send({ title: "T", value });
-    const fetched = await request(app).get(`/deals/${bodyOf(created).id}`);
-    const listed = await request(app).get("/deals");
+      const created = await request(app)
+        .post(`/companies/${companyId}/deals`)
+        .send({ title: "T", value });
+      const fetched = await request(app).get(`/deals/${bodyOf(created).id}`);
+      const listed = await request(app).get("/deals");
 
-    expect(bodyOf(created).value).toBe(value);
-    expect(typeof bodyOf(created).value).toBe("number");
-    expect(bodyOf(fetched).value).toBe(value);
-    expect(bodyOf(listed).data[0]?.value).toBe(value);
-  });
+      expect(bodyOf(created).value).toBe(value);
+      expect(typeof bodyOf(created).value).toBe("number");
+      expect(bodyOf(fetched).value).toBe(value);
+      expect(bodyOf(listed).data[0]?.value).toBe(value);
+    },
+  );
 
   it("returns value as a JSON number in the raw response text (not a quoted string)", async () => {
     const companyId = await createCompany();
 
-    const response = await request(app).post(`/companies/${companyId}/deals`).send({ title: "T", value: 48500.5 });
+    const response = await request(app)
+      .post(`/companies/${companyId}/deals`)
+      .send({ title: "T", value: 48500.5 });
 
     expect(response.text).toContain('"value":48500.5');
   });
@@ -209,7 +224,9 @@ describe("expectedCloseDate date-only handling", () => {
     const id = await seedDeal(await createCompany());
 
     const set = await request(app).patch(`/deals/${id}`).send({ expectedCloseDate: "2026-03-01" });
-    const changed = await request(app).patch(`/deals/${id}`).send({ expectedCloseDate: "2024-02-29" });
+    const changed = await request(app)
+      .patch(`/deals/${id}`)
+      .send({ expectedCloseDate: "2024-02-29" });
     const cleared = await request(app).patch(`/deals/${id}`).send({ expectedCloseDate: null });
 
     expect(bodyOf(set).expectedCloseDate).toBe("2026-03-01");
@@ -224,7 +241,9 @@ describe("expectedCloseDate date-only handling", () => {
       .post(`/companies/${companyId}/deals`)
       .send({ title: "T", value: 1, expectedCloseDate: "2026-06-15" });
 
-    const rows = await prisma.$queryRaw<{ d: string }[]>`SELECT "expectedCloseDate"::text AS d FROM "Deal" WHERE id = ${bodyOf(created).id}::uuid`;
+    const rows = await prisma.$queryRaw<
+      { d: string }[]
+    >`SELECT "expectedCloseDate"::text AS d FROM "Deal" WHERE id = ${bodyOf(created).id}::uuid`;
     expect(rows[0]?.d).toBe("2026-06-15");
   });
 });
@@ -238,14 +257,26 @@ describe("deal response shape", () => {
     const response = await request(app).get(`/deals/${id}`);
 
     expect(Object.keys(response.body as object).sort()).toEqual(
-      ["closedAt", "companyId", "createdAt", "expectedCloseDate", "id", "stage", "title", "updatedAt", "value"].sort(),
+      [
+        "closedAt",
+        "companyId",
+        "createdAt",
+        "expectedCloseDate",
+        "id",
+        "stage",
+        "title",
+        "updatedAt",
+        "value",
+      ].sort(),
     );
   });
 
   it("returns ISO 8601 strings for createdAt and updatedAt", async () => {
     const companyId = await createCompany();
 
-    const response = await request(app).post(`/companies/${companyId}/deals`).send({ title: "T", value: 1 });
+    const response = await request(app)
+      .post(`/companies/${companyId}/deals`)
+      .send({ title: "T", value: 1 });
 
     expect(bodyOf(response).createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(bodyOf(response).updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
@@ -253,19 +284,27 @@ describe("deal response shape", () => {
 
   it("advances updatedAt on PATCH but keeps createdAt", async () => {
     const companyId = await createCompany();
-    const created = await request(app).post(`/companies/${companyId}/deals`).send({ title: "T", value: 1 });
+    const created = await request(app)
+      .post(`/companies/${companyId}/deals`)
+      .send({ title: "T", value: 1 });
     await new Promise((r) => setTimeout(r, 15));
 
-    const patched = await request(app).patch(`/deals/${bodyOf(created).id}`).send({ title: "U" });
+    const patched = await request(app)
+      .patch(`/deals/${bodyOf(created).id}`)
+      .send({ title: "U" });
 
     expect(bodyOf(patched).createdAt).toBe(bodyOf(created).createdAt);
-    expect(Date.parse(bodyOf(patched).updatedAt)).toBeGreaterThan(Date.parse(bodyOf(created).updatedAt));
+    expect(Date.parse(bodyOf(patched).updatedAt)).toBeGreaterThan(
+      Date.parse(bodyOf(created).updatedAt),
+    );
   });
 
   it("reports validation details as an array of path and message", async () => {
     const companyId = await createCompany();
 
-    const response = await request(app).post(`/companies/${companyId}/deals`).send({ title: "", value: -1 });
+    const response = await request(app)
+      .post(`/companies/${companyId}/deals`)
+      .send({ title: "", value: -1 });
 
     const details = bodyOf(response).error.details as { path: unknown[]; message: string }[];
     expect([...new Set(details.map((d) => d.path[0]))].sort()).toEqual(["title", "value"]);
@@ -341,9 +380,12 @@ describe("validation order and filters", () => {
     expect(bodyOf(page4).meta.total).toBe(5);
   });
 
-  it.each(["?page=0", "?pageSize=0", "?page=abc", "?page=-1"])("returns 400 for GET /deals%s", async (q) => {
-    expect((await request(app).get(`/deals${q}`)).status).toBe(400);
-  });
+  it.each(["?page=0", "?pageSize=0", "?page=abc", "?page=-1"])(
+    "returns 400 for GET /deals%s",
+    async (q) => {
+      expect((await request(app).get(`/deals${q}`)).status).toBe(400);
+    },
+  );
 
   it("accepts pageSize 100 on GET /deals", async () => {
     expect((await request(app).get("/deals?pageSize=100")).status).toBe(200);
@@ -408,8 +450,12 @@ describe("interactions edge cases", () => {
     const justBefore = new Date(Date.now() - 1000).toISOString();
     const minuteAhead = new Date(Date.now() + 60_000).toISOString();
 
-    const ok = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x", occurredAt: justBefore });
-    const bad = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x", occurredAt: minuteAhead });
+    const ok = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x", occurredAt: justBefore });
+    const bad = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x", occurredAt: minuteAhead });
 
     expect(ok.status).toBe(201);
     expect(bad.status).toBe(400);
@@ -470,8 +516,12 @@ describe("interactions edge cases", () => {
     const won = await seedDeal(companyId, { stage: "WON", closedAt: new Date() });
     const lost = await seedDeal(companyId, { stage: "LOST", closedAt: new Date() });
 
-    const a = await request(app).post(`/deals/${won}/interactions`).send({ type: "NOTE", notes: "x" });
-    const b = await request(app).post(`/deals/${lost}/interactions`).send({ type: "NOTE", notes: "x" });
+    const a = await request(app)
+      .post(`/deals/${won}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
+    const b = await request(app)
+      .post(`/deals/${lost}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
 
     expect([a.status, b.status]).toEqual([201, 201]);
   });
@@ -479,7 +529,9 @@ describe("interactions edge cases", () => {
   it.each(["EMAIL", "CALL", "MEETING", "NOTE"])("accepts type %s", async (type) => {
     const dealId = await createDealId();
 
-    const response = await request(app).post(`/deals/${dealId}/interactions`).send({ type, notes: "x" });
+    const response = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type, notes: "x" });
 
     expect(response.status).toBe(201);
     expect(bodyOf(response).type).toBe(type);
@@ -488,21 +540,38 @@ describe("interactions edge cases", () => {
   it("orders by occurredAt, not createdAt", async () => {
     const dealId = await createDealId();
     const oldOccurredNewCreated = await prisma.interaction.create({
-      data: { dealId, type: "NOTE", notes: "a", occurredAt: new Date("2025-01-01T00:00:00Z"), createdAt: new Date("2026-06-01T00:00:00Z") },
+      data: {
+        dealId,
+        type: "NOTE",
+        notes: "a",
+        occurredAt: new Date("2025-01-01T00:00:00Z"),
+        createdAt: new Date("2026-06-01T00:00:00Z"),
+      },
     });
     const newOccurredOldCreated = await prisma.interaction.create({
-      data: { dealId, type: "NOTE", notes: "b", occurredAt: new Date("2025-06-01T00:00:00Z"), createdAt: new Date("2026-01-01T00:00:00Z") },
+      data: {
+        dealId,
+        type: "NOTE",
+        notes: "b",
+        occurredAt: new Date("2025-06-01T00:00:00Z"),
+        createdAt: new Date("2026-01-01T00:00:00Z"),
+      },
     });
 
     const response = await request(app).get(`/deals/${dealId}/interactions`);
 
-    expect(bodyOf(response).data.map((i) => i.id)).toEqual([newOccurredOldCreated.id, oldOccurredNewCreated.id]);
+    expect(bodyOf(response).data.map((i) => i.id)).toEqual([
+      newOccurredOldCreated.id,
+      oldOccurredNewCreated.id,
+    ]);
   });
 
   it("returns exactly the documented interaction keys", async () => {
     const dealId = await createDealId();
 
-    const response = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x" });
+    const response = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
 
     expect(Object.keys(response.body as object).sort()).toEqual(
       ["createdAt", "dealId", "id", "notes", "occurredAt", "type", "updatedAt"].sort(),
@@ -511,22 +580,34 @@ describe("interactions edge cases", () => {
 
   it("keeps notes of exactly 5000 characters on PATCH and rejects 5001", async () => {
     const dealId = await createDealId();
-    const created = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x" });
+    const created = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
     const id = bodyOf(created).id;
 
-    const ok = await request(app).patch(`/interactions/${id}`).send({ notes: "a".repeat(5000) });
-    const bad = await request(app).patch(`/interactions/${id}`).send({ notes: "a".repeat(5001) });
+    const ok = await request(app)
+      .patch(`/interactions/${id}`)
+      .send({ notes: "a".repeat(5000) });
+    const bad = await request(app)
+      .patch(`/interactions/${id}`)
+      .send({ notes: "a".repeat(5001) });
 
     expect(ok.status).toBe(200);
     expect(bad.status).toBe(400);
-    expect((await prisma.interaction.findUniqueOrThrow({ where: { id } })).notes).toHaveLength(5000);
+    expect((await prisma.interaction.findUniqueOrThrow({ where: { id } })).notes).toHaveLength(
+      5000,
+    );
   });
 
   it("trims notes on PATCH", async () => {
     const dealId = await createDealId();
-    const created = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x" });
+    const created = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
 
-    const response = await request(app).patch(`/interactions/${bodyOf(created).id}`).send({ notes: "  trimmed  " });
+    const response = await request(app)
+      .patch(`/interactions/${bodyOf(created).id}`)
+      .send({ notes: "  trimmed  " });
 
     expect(bodyOf(response).notes).toBe("trimmed");
   });
@@ -534,10 +615,16 @@ describe("interactions edge cases", () => {
   it("keeps the dealId when PATCH is sent a dealId (400) and when only notes change", async () => {
     const dealId = await createDealId();
     const other = await createDealId();
-    const created = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes: "x" });
+    const created = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes: "x" });
 
-    const bad = await request(app).patch(`/interactions/${bodyOf(created).id}`).send({ dealId: other });
-    const ok = await request(app).patch(`/interactions/${bodyOf(created).id}`).send({ notes: "y" });
+    const bad = await request(app)
+      .patch(`/interactions/${bodyOf(created).id}`)
+      .send({ dealId: other });
+    const ok = await request(app)
+      .patch(`/interactions/${bodyOf(created).id}`)
+      .send({ notes: "y" });
 
     expect(bad.status).toBe(400);
     expect(bodyOf(ok).dealId).toBe(dealId);
@@ -556,7 +643,10 @@ describe("interactions edge cases", () => {
     const response = await request(app).get(`/deals/${missing}/interactions`);
 
     expect(response.status).toBe(404);
-    expect(bodyOf(response).error).toMatchObject({ code: "NOT_FOUND", message: `Deal ${missing} not found` });
+    expect(bodyOf(response).error).toMatchObject({
+      code: "NOT_FOUND",
+      message: `Deal ${missing} not found`,
+    });
   });
 
   it("returns 404 with the interaction id message for PATCH and DELETE on a missing interaction", async () => {

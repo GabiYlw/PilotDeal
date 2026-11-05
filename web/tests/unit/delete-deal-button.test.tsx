@@ -34,7 +34,9 @@ describe("DeleteDealButton", () => {
     const action = setup();
 
     await act(async () => {
-      fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete deal" }));
+      fireEvent.click(
+        within(screen.getByRole("dialog")).getByRole("button", { name: "Delete deal" }),
+      );
     });
 
     expect(action).toHaveBeenCalledOnce();
@@ -44,7 +46,9 @@ describe("DeleteDealButton", () => {
     setup({ status: "error", fieldErrors: {}, formError: "Could not delete. Please try again." });
 
     await act(async () => {
-      fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Delete deal" }));
+      fireEvent.click(
+        within(screen.getByRole("dialog")).getByRole("button", { name: "Delete deal" }),
+      );
     });
 
     expect(screen.queryByRole("dialog")).toBeNull();

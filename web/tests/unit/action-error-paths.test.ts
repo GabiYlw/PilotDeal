@@ -23,10 +23,7 @@ import {
   updateDeal,
 } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
-import {
-  API_NOT_RUNNING_MESSAGE,
-  SAVE_FAILED_MESSAGE,
-} from "@/lib/messages";
+import { API_NOT_RUNNING_MESSAGE, SAVE_FAILED_MESSAGE } from "@/lib/messages";
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -96,15 +93,18 @@ describe.each(SAVE_ACTIONS)("%s", (_name, run, arrange) => {
   it.each([
     ["the API is unreachable", DOWN, API_NOT_RUNNING_MESSAGE],
     ["the API answers 500", FAILING, SAVE_FAILED_MESSAGE],
-  ])("shows a form error and neither revalidates nor redirects when %s", async (_case, error, message) => {
-    arrange(error);
+  ])(
+    "shows a form error and neither revalidates nor redirects when %s",
+    async (_case, error, message) => {
+      arrange(error);
 
-    const result = await run();
+      const result = await run();
 
-    expect(result.formError).toBe(message);
-    expect(revalidatePath).not.toHaveBeenCalled();
-    expect(redirect).not.toHaveBeenCalled();
-  });
+      expect(result.formError).toBe(message);
+      expect(revalidatePath).not.toHaveBeenCalled();
+      expect(redirect).not.toHaveBeenCalled();
+    },
+  );
 });
 
 // The other actions' rethrow cases live in their own test files; editContact had none.

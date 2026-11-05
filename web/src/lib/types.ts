@@ -23,14 +23,7 @@ export interface HealthStatus {
   database: "up" | "down";
 }
 
-export const DEAL_STAGES = [
-  "LEAD",
-  "QUALIFIED",
-  "PROPOSAL",
-  "NEGOTIATION",
-  "WON",
-  "LOST",
-] as const;
+export const DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"] as const;
 export type DealStage = (typeof DEAL_STAGES)[number];
 
 export const INTERACTION_TYPES = ["EMAIL", "CALL", "MEETING", "NOTE"] as const;

@@ -72,7 +72,9 @@ describe("CompanyForm", () => {
 
   it("disables the submit button and shows the pending label while the action runs", async () => {
     let finish: (state: FormState<CompanyField>) => void = () => {};
-    const action = vi.fn(() => new Promise<FormState<CompanyField>>((resolve) => (finish = resolve)));
+    const action = vi.fn(
+      () => new Promise<FormState<CompanyField>>((resolve) => (finish = resolve)),
+    );
     render(
       <CompanyForm
         action={action}
@@ -112,7 +114,9 @@ describe("CompanyForm", () => {
   it("blocks a website without a protocol with an inline message", async () => {
     const action = renderForm(IDLE);
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Acme" } });
-    fireEvent.change(screen.getByLabelText("Website (optional)"), { target: { value: "acme.com" } });
+    fireEvent.change(screen.getByLabelText("Website (optional)"), {
+      target: { value: "acme.com" },
+    });
 
     await submit();
 

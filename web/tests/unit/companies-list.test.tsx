@@ -10,7 +10,14 @@ vi.mock("@/lib/api", async (importOriginal) => ({
 }));
 
 const companies: Company[] = [
-  { id: "c1", name: "Acme", industry: "SaaS", website: "https://acme.test", createdAt: "", updatedAt: "" },
+  {
+    id: "c1",
+    name: "Acme",
+    industry: "SaaS",
+    website: "https://acme.test",
+    createdAt: "",
+    updatedAt: "",
+  },
   { id: "c2", name: "Beta", industry: null, website: null, createdAt: "", updatedAt: "" },
   { id: "c3", name: "Gamma", industry: null, website: null, createdAt: "", updatedAt: "" },
 ];

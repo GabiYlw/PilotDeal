@@ -59,8 +59,8 @@ export const updateDealSchema = strictBody({
   stage: dealStageSchema.optional(),
   expectedCloseDate: expectedCloseDateSchema,
 }).refine((body) => Object.keys(body).length > 0, {
-    message: "At least one field must be provided",
-  });
+  message: "At least one field must be provided",
+});
 
 // Not strict on purpose: unknown query parameters are ignored.
 export const listDealsQuerySchema = paginationQuerySchema.extend({

@@ -117,7 +117,10 @@ describe("CompanyView", () => {
   });
 
   it.each<[string, () => void]>([
-    ["the company", () => vi.mocked(getCompany).mockRejectedValue(new ApiError("x", 404, "NOT_FOUND"))],
+    [
+      "the company",
+      () => vi.mocked(getCompany).mockRejectedValue(new ApiError("x", 404, "NOT_FOUND")),
+    ],
     [
       "a non-UUID id",
       () => vi.mocked(getCompany).mockRejectedValue(new ApiError("x", 400, "VALIDATION_ERROR")),
@@ -137,7 +140,10 @@ describe("CompanyView", () => {
   });
 
   it.each<[string, () => void]>([
-    ["company", () => vi.mocked(getCompany).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE))],
+    [
+      "company",
+      () => vi.mocked(getCompany).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE)),
+    ],
     [
       "contacts",
       () => vi.mocked(getCompanyContacts).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE)),
@@ -146,10 +152,13 @@ describe("CompanyView", () => {
       "deals",
       () => vi.mocked(getCompanyDeals).mockRejectedValue(new ApiError("x", 0, API_UNREACHABLE)),
     ],
-  ])("renders the unreachable hint when the %s call cannot reach the API", async (_name, arrange) => {
-    arrange();
-    await renderView();
+  ])(
+    "renders the unreachable hint when the %s call cannot reach the API",
+    async (_name, arrange) => {
+      arrange();
+      await renderView();
 
-    expect(screen.getByText("Cannot reach the API")).toBeTruthy();
-  });
+      expect(screen.getByText("Cannot reach the API")).toBeTruthy();
+    },
+  );
 });

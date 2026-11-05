@@ -97,7 +97,9 @@ describe("POST /companies/:companyId/contacts", () => {
   it("returns 404 and creates nothing when the company does not exist", async () => {
     const companyId = randomUUID();
 
-    const response = await request(app).post(`/companies/${companyId}/contacts`).send({ name: "J" });
+    const response = await request(app)
+      .post(`/companies/${companyId}/contacts`)
+      .send({ name: "J" });
 
     expect(response.status).toBe(404);
     expect(bodyOf(response)).toEqual({
@@ -239,7 +241,9 @@ describe("PATCH /contacts/:id", () => {
     const otherCompanyId = await createCompany("Other");
     const id = await createContact(companyId);
 
-    const response = await request(app).patch(`/contacts/${id}`).send({ companyId: otherCompanyId });
+    const response = await request(app)
+      .patch(`/contacts/${id}`)
+      .send({ companyId: otherCompanyId });
 
     expect(response.status).toBe(400);
     const stored = await prisma.contact.findUniqueOrThrow({ where: { id } });

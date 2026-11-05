@@ -65,7 +65,10 @@ export class AskService {
   }
 
   // A failed answer must never fail the request: the sources are still useful.
-  private async generateAnswer(question: string, labelled: LabelledRow[]): Promise<GeneratedAnswer> {
+  private async generateAnswer(
+    question: string,
+    labelled: LabelledRow[],
+  ): Promise<GeneratedAnswer> {
     try {
       return await this.answerGenerator.generate(question, labelled.map(toAnswerSource));
     } catch (error: unknown) {

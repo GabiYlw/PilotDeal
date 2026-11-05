@@ -63,8 +63,20 @@ describe("validation messages", () => {
     ],
     ["a missing title", createDealSchema, { value: 1 }, "title", "Title is required"],
     ["a missing value", createDealSchema, { title: "T" }, "value", "Value is required"],
-    ["a string value", createDealSchema, { ...DEAL, value: "100" }, "value", "Value must be a number"],
-    ["a negative value", createDealSchema, { ...DEAL, value: -5 }, "value", "Value must be 0 or more"],
+    [
+      "a string value",
+      createDealSchema,
+      { ...DEAL, value: "100" },
+      "value",
+      "Value must be a number",
+    ],
+    [
+      "a negative value",
+      createDealSchema,
+      { ...DEAL, value: -5 },
+      "value",
+      "Value must be 0 or more",
+    ],
     [
       "a value above the maximum",
       createDealSchema,
@@ -72,7 +84,13 @@ describe("validation messages", () => {
       "value",
       "Value must be at most 9,999,999,999.99",
     ],
-    ["3 decimals", createDealSchema, { ...DEAL, value: 1.234 }, "value", "Use at most 2 decimal places"],
+    [
+      "3 decimals",
+      createDealSchema,
+      { ...DEAL, value: 1.234 },
+      "value",
+      "Use at most 2 decimal places",
+    ],
     [
       "a lowercase stage",
       createDealSchema,
@@ -101,7 +119,13 @@ describe("validation messages", () => {
       "type",
       "Type must be one of EMAIL, CALL, MEETING, NOTE",
     ],
-    ["blank notes", createInteractionSchema, { type: "NOTE", notes: " " }, "notes", "Notes is required"],
+    [
+      "blank notes",
+      createInteractionSchema,
+      { type: "NOTE", notes: " " },
+      "notes",
+      "Notes is required",
+    ],
     [
       "a datetime without offset",
       createInteractionSchema,

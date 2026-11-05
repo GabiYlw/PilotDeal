@@ -70,7 +70,9 @@ describe("POST /deals/:dealId/interactions", () => {
     const dealId = await createDeal();
     const notes = "a".repeat(5000);
 
-    const plain = await request(app).post(`/deals/${dealId}/interactions`).send({ type: "NOTE", notes });
+    const plain = await request(app)
+      .post(`/deals/${dealId}/interactions`)
+      .send({ type: "NOTE", notes });
     const padded = await request(app)
       .post(`/deals/${dealId}/interactions`)
       .send({ type: "NOTE", notes: ` ${notes} ` });

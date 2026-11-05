@@ -46,10 +46,7 @@ export async function CompanyView({ params }: { params: Promise<{ id: string }> 
             <TextLink href="/companies" className="text-sm">
               All companies
             </TextLink>
-            <DeleteCompanyButton
-              companyName={company.name}
-              action={removeCompany.bind(null, id)}
-            />
+            <DeleteCompanyButton companyName={company.name} action={removeCompany.bind(null, id)} />
           </>
         }
       />

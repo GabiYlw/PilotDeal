@@ -44,6 +44,7 @@ Run from the repository root.
 | Integration tests (needs db running) | `npm --prefix api run test:integration` |
 | All API tests | `npm --prefix api test` |
 | Lint and typecheck | `npm --prefix api run lint` and `npm --prefix api run typecheck` |
+| Format (write / check) | `npm --prefix api run format` and `npm --prefix api run format:check` |
 | New migration | `npm --prefix api run migrate -- --name <name>` |
 | Seed data (also embeds notes; first run downloads the embedding model) | `npm --prefix api run seed` |
 | Embed interactions missing an embedding | `npm --prefix api run embed:backfill` |
@@ -51,9 +52,12 @@ Run from the repository root.
 | Web dev server (port 3000, needs the API on 3001) | `npm --prefix web run dev` |
 | Web tests | `npm --prefix web run test` |
 | Web lint and typecheck | `npm --prefix web run lint` and `npm --prefix web run typecheck` |
+| Web format (write / check) | `npm --prefix web run format` and `npm --prefix web run format:check` |
 | Web production build | `npm --prefix web run build` |
 
-Before reporting a task as done, run lint, typecheck and all API tests. If `web/` changed, also run web lint, typecheck, test and build.
+Before reporting a task as done, run `format` in every package you changed, then lint, typecheck and all API tests. If `web/` changed, also run web lint, typecheck, test and build.
+
+Formatting is Prettier with one shared config at the repository root (`.prettierrc.json`, `.prettierignore`). ESLint extends `eslint-config-prettier`, so it never reports formatting; do not add stylistic ESLint rules.
 
 ## Architecture rules
 

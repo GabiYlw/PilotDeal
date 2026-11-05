@@ -8,15 +8,7 @@ interface PaginationProps {
 }
 
 // An enabled control is a link; a disabled one is a disabled button, so it is not focusable.
-function PageControl({
-  label,
-  href,
-  enabled,
-}: {
-  label: string;
-  href: string;
-  enabled: boolean;
-}) {
+function PageControl({ label, href, enabled }: { label: string; href: string; enabled: boolean }) {
   if (!enabled) {
     return (
       <Button variant="secondary" size="sm" disabled>

@@ -20,7 +20,10 @@ export class EmbeddingOutputError extends Error {
 
 // Every caller goes through embedTexts/embedText, so a misbehaving provider can never
 // produce a malformed vector that reaches the database.
-export async function embedTexts(provider: EmbeddingProvider, texts: string[]): Promise<number[][]> {
+export async function embedTexts(
+  provider: EmbeddingProvider,
+  texts: string[],
+): Promise<number[][]> {
   const vectors = await provider.embed(texts);
   if (vectors.length !== texts.length) {
     throw new EmbeddingOutputError(

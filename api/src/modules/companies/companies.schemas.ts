@@ -18,8 +18,8 @@ export const updateCompanySchema = strictBody({
   industry: optionalText("Industry", 100),
   website: websiteSchema,
 }).refine((body) => Object.keys(body).length > 0, {
-    message: "At least one field must be provided",
-  });
+  message: "At least one field must be provided",
+});
 
 export type CreateCompanyInput = z.output<typeof createCompanySchema>;
 export type UpdateCompanyInput = z.output<typeof updateCompanySchema>;

@@ -18,10 +18,7 @@ export class InteractionService {
 
   async listForDeal(dealId: string, pagination: Pagination): Promise<Paginated<Interaction>> {
     await this.ensureDealExists(dealId);
-    return toPaginated(
-      await this.interactionRepository.listByDeal(dealId, pagination),
-      pagination,
-    );
+    return toPaginated(await this.interactionRepository.listByDeal(dealId, pagination), pagination);
   }
 
   async createForDeal(dealId: string, input: CreateInteractionInput): Promise<Interaction> {

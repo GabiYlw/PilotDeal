@@ -2,10 +2,7 @@ import { AskAnswer } from "@/components/ask/ask-answer";
 import { AskForm } from "@/components/ask/ask-form";
 import { ApiUnavailable } from "@/components/api-unavailable";
 import { runAsk } from "@/lib/ask";
-import {
-  ASK_SEARCH_STARTING_MESSAGE,
-  DEAL_NOT_FOUND_MESSAGE,
-} from "@/lib/messages";
+import { ASK_SEARCH_STARTING_MESSAGE, DEAL_NOT_FOUND_MESSAGE } from "@/lib/messages";
 
 // The form lives here (not in AskView) because API field errors are only known after the search
 // and must sit next to the input.

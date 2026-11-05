@@ -32,6 +32,9 @@ export function toSkipTake({ page, pageSize }: Pagination): { skip: number; take
   return { skip: (page - 1) * pageSize, take: pageSize };
 }
 
-export function toPaginated<T>(result: PageResult<T>, { page, pageSize }: Pagination): Paginated<T> {
+export function toPaginated<T>(
+  result: PageResult<T>,
+  { page, pageSize }: Pagination,
+): Paginated<T> {
   return { data: result.items, meta: { page, pageSize, total: result.total } };
 }

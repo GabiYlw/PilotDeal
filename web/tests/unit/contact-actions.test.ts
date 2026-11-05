@@ -2,12 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { addContact, editContact, removeContact } from "@/app/companies/[id]/actions";
-import {
-  ApiError,
-  createCompanyContact,
-  deleteContact,
-  updateContact,
-} from "@/lib/api";
+import { ApiError, createCompanyContact, deleteContact, updateContact } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
 import {
   COMPANY_NOT_FOUND_MESSAGE,

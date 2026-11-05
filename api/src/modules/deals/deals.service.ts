@@ -82,7 +82,10 @@ export class DealService {
     const scored = await Promise.all(candidates.map((candidate) => this.scoreCandidate(candidate)));
     const sorted = scored.filter((item) => item !== null).sort(comparePrioritized);
     const { skip, take } = toSkipTake(pagination);
-    return toPaginated({ items: sorted.slice(skip, skip + take), total: sorted.length }, pagination);
+    return toPaginated(
+      { items: sorted.slice(skip, skip + take), total: sorted.length },
+      pagination,
+    );
   }
 
   async getNextAction(id: string): Promise<DealNextAction> {

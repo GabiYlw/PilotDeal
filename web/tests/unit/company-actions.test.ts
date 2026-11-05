@@ -4,13 +4,7 @@ import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { editCompany, removeCompany } from "@/app/companies/[id]/actions";
 import { addCompany } from "@/app/companies/new/actions";
-import {
-  API_UNREACHABLE,
-  ApiError,
-  createCompany,
-  deleteCompany,
-  updateCompany,
-} from "@/lib/api";
+import { API_UNREACHABLE, ApiError, createCompany, deleteCompany, updateCompany } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
 import {
   API_NOT_RUNNING_MESSAGE,
@@ -143,7 +137,9 @@ describe("editCompany", () => {
 
     const result = await editCompany("c1", initialFormState(), form(FIELDS));
 
-    expect(result.fieldErrors).toEqual({ website: "Enter a valid URL starting with http:// or https://" });
+    expect(result.fieldErrors).toEqual({
+      website: "Enter a valid URL starting with http:// or https://",
+    });
     expect(result.values).toEqual(FIELDS);
     expect(revalidateMock).not.toHaveBeenCalled();
   });

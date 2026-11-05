@@ -64,12 +64,7 @@ export function CompanyDetails({ company, action }: { company: Company; action: 
         <DescriptionItem term="Created">{formatDate(company.createdAt)}</DescriptionItem>
       </DescriptionList>
       <div>
-        <Button
-          ref={editButtonRef}
-          variant="secondary"
-          size="sm"
-          onClick={() => setEditing(true)}
-        >
+        <Button ref={editButtonRef} variant="secondary" size="sm" onClick={() => setEditing(true)}>
           Edit
         </Button>
       </div>

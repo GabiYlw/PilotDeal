@@ -18,7 +18,9 @@ describe("jsdom dialog polyfill", () => {
   it("throws InvalidStateError when showModal is called on a disconnected dialog", () => {
     const dialog = document.createElement("dialog");
 
-    expect(() => dialog.showModal()).toThrowError(expect.objectContaining({ name: "InvalidStateError" }));
+    expect(() => dialog.showModal()).toThrowError(
+      expect.objectContaining({ name: "InvalidStateError" }),
+    );
   });
 
   it("does not move focus on showModal, so components must focus themselves", () => {

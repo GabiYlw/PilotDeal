@@ -97,9 +97,7 @@ describe("DealCreateForm", () => {
     await submit();
 
     expect(screen.getByText("Enter a title.")).toBeTruthy();
-    expect(
-      screen.getByText("Enter a number of 0 or more with at most 2 decimals."),
-    ).toBeTruthy();
+    expect(screen.getByText("Enter a number of 0 or more with at most 2 decimals.")).toBeTruthy();
     expect(action).not.toHaveBeenCalled();
   });
 });

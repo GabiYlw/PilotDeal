@@ -55,11 +55,13 @@ function formatFactors(factors: PriorityFactor[]): string[] {
 }
 
 function formatInteractions(context: DealContext): string[] {
-  return context.recentInteractions.slice(0, MAX_PROMPT_INTERACTIONS).flatMap((interaction) => [
-    `<interaction type="${interaction.type}" occurred_at="${interaction.occurredAt.toISOString()}">`,
-    escapePromptText(interaction.notes),
-    "</interaction>",
-  ]);
+  return context.recentInteractions
+    .slice(0, MAX_PROMPT_INTERACTIONS)
+    .flatMap((interaction) => [
+      `<interaction type="${interaction.type}" occurred_at="${interaction.occurredAt.toISOString()}">`,
+      escapePromptText(interaction.notes),
+      "</interaction>",
+    ]);
 }
 
 // Today's UTC date (YYYY-MM-DD) lets the model judge how recent each interaction is.

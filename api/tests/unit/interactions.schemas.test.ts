@@ -39,7 +39,10 @@ describe("createInteractionSchema", () => {
     ["empty notes", { type: "CALL", notes: "" }],
     ["whitespace notes", { type: "CALL", notes: "   " }],
     ["a date-only occurredAt", { type: "CALL", notes: "x", occurredAt: "2026-01-15" }],
-    ["an occurredAt without offset", { type: "CALL", notes: "x", occurredAt: "2026-01-15T10:30:00" }],
+    [
+      "an occurredAt without offset",
+      { type: "CALL", notes: "x", occurredAt: "2026-01-15T10:30:00" },
+    ],
     ["a non-date occurredAt", { type: "CALL", notes: "x", occurredAt: "not-a-date" }],
     ["a null occurredAt", { type: "CALL", notes: "x", occurredAt: null }],
     ["an occurredAt before 1900", { type: "CALL", notes: "x", occurredAt: "1899-12-31T23:59:59Z" }],

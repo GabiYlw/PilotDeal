@@ -34,8 +34,8 @@ export const updateInteractionSchema = strictBody({
   notes: notesSchema.optional(),
   occurredAt: occurredAtSchema.optional(),
 }).refine((body) => Object.keys(body).length > 0, {
-    message: "At least one field must be provided",
-  });
+  message: "At least one field must be provided",
+});
 
 export type CreateInteractionInput = z.output<typeof createInteractionSchema>;
 export type UpdateInteractionInput = z.output<typeof updateInteractionSchema>;

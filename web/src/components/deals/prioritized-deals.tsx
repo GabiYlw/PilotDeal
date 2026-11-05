@@ -34,12 +34,7 @@ export async function PrioritizedDeals({ searchParams }: { searchParams: SearchP
   return (
     <div className="flex flex-col gap-4">
       <DealsTable items={data} meta={meta} />
-      <Pagination
-        page={meta.page}
-        pageSize={meta.pageSize}
-        total={meta.total}
-        basePath="/deals"
-      />
+      <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} basePath="/deals" />
     </div>
   );
 }

@@ -49,14 +49,19 @@ describe("embeddings on interactions", () => {
 
     expect(response.status).toBe(201);
     expect(response.body).not.toHaveProperty("embedding");
-    expectCloseTo(await readEmbedding(prisma, bodyOf(response).id), fakeEmbedding("Price question"));
+    expectCloseTo(
+      await readEmbedding(prisma, bodyOf(response).id),
+      fakeEmbedding("Price question"),
+    );
   });
 
   it("recomputes the embedding when the notes change", async () => {
     const dealId = await createDeal();
     const id = bodyOf(await postInteraction(dealId, "Price question")).id;
 
-    const response = await request(app).patch(`/interactions/${id}`).send({ notes: "Contract delay" });
+    const response = await request(app)
+      .patch(`/interactions/${id}`)
+      .send({ notes: "Contract delay" });
 
     expect(response.status).toBe(200);
     expect(response.body).not.toHaveProperty("embedding");
@@ -103,7 +108,9 @@ describe("embeddings on interactions", () => {
     expect(await readEmbedding(prisma, id)).not.toBeNull();
     fake.failWith();
 
-    const response = await request(app).patch(`/interactions/${id}`).send({ notes: "Contract delay" });
+    const response = await request(app)
+      .patch(`/interactions/${id}`)
+      .send({ notes: "Contract delay" });
 
     expect(response.status).toBe(200);
     expect(bodyOf(response).notes).toBe("Contract delay");

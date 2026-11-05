@@ -58,7 +58,8 @@ export function strictBody<Shape extends z.core.$ZodLooseShape>(shape: Shape) {
 export function requiredText(label: string, max: number) {
   return z
     .string({
-      error: (issue) => (issue.input === undefined ? `${label} is required` : `${label} must be text`),
+      error: (issue) =>
+        issue.input === undefined ? `${label} is required` : `${label} must be text`,
     })
     .trim()
     .min(1, { error: `${label} is required` })

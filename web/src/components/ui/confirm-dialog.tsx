@@ -1,6 +1,13 @@
 "use client";
 
-import { type ReactNode, type RefObject, type SyntheticEvent, useEffect, useId, useRef } from "react";
+import {
+  type ReactNode,
+  type RefObject,
+  type SyntheticEvent,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
 import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {

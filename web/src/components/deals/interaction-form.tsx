@@ -23,10 +23,7 @@ export function InteractionForm({
   // interaction (see lib/page-version.ts).
   pageVersion: string;
 }) {
-  const [state, formAction, pending] = useActionState(
-    action,
-    initialFormState<InteractionField>(),
-  );
+  const [state, formAction, pending] = useActionState(action, initialFormState<InteractionField>());
   const { browserErrors, blockedBy, clearBrowserError, resetBrowserErrors } =
     useBrowserErrors<InteractionField>();
   const { changes, resetChanges } = usePageChanges(pageVersion);

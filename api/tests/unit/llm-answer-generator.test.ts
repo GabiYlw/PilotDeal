@@ -76,7 +76,10 @@ describe("LlmAnswerGenerator", () => {
     ["null input", () => Promise.resolve(null)],
     ["undefined input", () => Promise.resolve(undefined)],
     ["a string input", () => Promise.resolve("answer")],
-    ["a missing answer", () => Promise.resolve({ citedSources: [], insufficientInformation: false })],
+    [
+      "a missing answer",
+      () => Promise.resolve({ citedSources: [], insufficientInformation: false }),
+    ],
     ["an empty answer", () => Promise.resolve({ ...validOutput, answer: "" })],
     ["a whitespace-only answer", () => Promise.resolve({ ...validOutput, answer: "   " })],
     [

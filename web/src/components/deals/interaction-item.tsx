@@ -65,9 +65,7 @@ export function InteractionItem({
           {dateLabel}
         </time>
       </div>
-      <p className="text-sm break-words whitespace-pre-line text-foreground">
-        {interaction.notes}
-      </p>
+      <p className="text-sm break-words whitespace-pre-line text-foreground">{interaction.notes}</p>
       <div className="flex gap-1">
         <Button
           ref={editButtonRef}

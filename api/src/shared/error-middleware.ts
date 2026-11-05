@@ -11,9 +11,7 @@ function toErrorBody(code: string, message: string, details?: unknown): ErrorBod
 
 // express.json() throws this when the request body is not valid JSON.
 function isMalformedJsonError(error: unknown): boolean {
-  return (
-    error instanceof SyntaxError && "type" in error && error.type === "entity.parse.failed"
-  );
+  return error instanceof SyntaxError && "type" in error && error.type === "entity.parse.failed";
 }
 
 export const notFoundHandler: RequestHandler = (req, _res, next) => {

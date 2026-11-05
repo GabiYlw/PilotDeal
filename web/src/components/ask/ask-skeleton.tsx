@@ -13,13 +13,7 @@ export function AskResultsSkeleton() {
 }
 
 // Fallback while the answer is generated: the submitted question stays visible, disabled.
-export function AskPending({
-  question,
-  dealId,
-}: {
-  question: string;
-  dealId: string | null;
-}) {
+export function AskPending({ question, dealId }: { question: string; dealId: string | null }) {
   return (
     <div className="flex flex-col gap-6">
       <AskForm question={question} dealId={dealId} pending />

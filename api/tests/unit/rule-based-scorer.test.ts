@@ -81,10 +81,13 @@ describe("RuleBasedScorer", () => {
     it.each([
       [10, 20],
       [0, 0],
-    ])("measures from createdAt %i days ago when there are no interactions (%i points)", async (days, expected) => {
-      const ctx = context({ createdAt: daysAgo(days) });
-      expect(await pointsOf(ctx, "daysSinceContact")).toBe(expected);
-    });
+    ])(
+      "measures from createdAt %i days ago when there are no interactions (%i points)",
+      async (days, expected) => {
+        const ctx = context({ createdAt: daysAgo(days) });
+        expect(await pointsOf(ctx, "daysSinceContact")).toBe(expected);
+      },
+    );
 
     it("uses the latest occurredAt even when the interactions are not sorted", async () => {
       const ctx = context({ interactionDates: [daysAgo(10), daysAgo(2)] });
@@ -101,7 +104,8 @@ describe("RuleBasedScorer", () => {
       ["a future createdAt", { createdAt: new Date(NOW.getTime() + 5 * DAY) }],
     ])("gives 0 points and does not throw for %s", async (_label, overrides) => {
       const result = await scorer.score(context(overrides));
-      expect(result.factors.find((f) => f.name === "daysSinceContact")).toBeUndefined();    });
+      expect(result.factors.find((f) => f.name === "daysSinceContact")).toBeUndefined();
+    });
 
     it("counts calendar days, not elapsed 24-hour periods", async () => {
       const lateClock: Clock = { now: () => new Date("2026-03-15T00:01:00.000Z") };

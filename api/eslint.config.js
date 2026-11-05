@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
@@ -21,4 +22,6 @@ export default tseslint.config(
     files: ["**/*.js"],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  // Last: turns off every rule that would fight Prettier's formatting.
+  eslintConfigPrettier,
 );

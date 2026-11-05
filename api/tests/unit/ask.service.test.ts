@@ -165,10 +165,7 @@ describe("AskService", () => {
     it("passes the question and the labelled sources with their full notes to the generator", async () => {
       const longNotes = "x".repeat(EXCERPT_LENGTH + 50);
       const { askRepository, generate, service } = setup();
-      askRepository.searchInteractions.mockResolvedValue([
-        { ...first, notes: longNotes },
-        second,
-      ]);
+      askRepository.searchInteractions.mockResolvedValue([{ ...first, notes: longNotes }, second]);
 
       await service.ask({ question: "what happened?", limit: 5 });
 
@@ -249,7 +246,11 @@ describe("AskService", () => {
 
     it("returns the llm answer without ids or a warning when the information is insufficient", async () => {
       const { service, logger } = setupWithDraft(
-        draftOf({ answer: "The notes do not say.", citedLabels: [], insufficientInformation: true }),
+        draftOf({
+          answer: "The notes do not say.",
+          citedLabels: [],
+          insufficientInformation: true,
+        }),
       );
 
       const response = await service.ask({ question: "price", limit: 5 });
@@ -315,7 +316,11 @@ describe("AskService", () => {
       ["a 300-char note", "a".repeat(300), "a".repeat(300)],
       ["a 301-char note", "a".repeat(301), "a".repeat(300)],
       ["a 1000-char note", `${"a".repeat(300)}${"b".repeat(700)}`, "a".repeat(300)],
-      ["an emoji straddling position 300", `${"a".repeat(299)}${emoji}tail`, `${"a".repeat(299)}${emoji}`],
+      [
+        "an emoji straddling position 300",
+        `${"a".repeat(299)}${emoji}tail`,
+        `${"a".repeat(299)}${emoji}`,
+      ],
       ["an emoji right after 300 chars", `${"a".repeat(300)}${emoji}`, "a".repeat(300)],
     ])("is the first 300 code points for %s", async (_name, notes, expected) => {
       const { askRepository, service } = setup();
@@ -345,20 +350,25 @@ describe("AskService", () => {
   it.each([
     ["the provider rejects", () => Promise.reject(new Error("model down"))],
     ["the provider returns a malformed vector", () => Promise.resolve([[1, 2]])],
-  ])("rejects with EmbeddingUnavailableError and warns without the question when %s", async (_name, embed) => {
-    const provider: EmbeddingProvider = { dimensions: 384, embed };
-    const { askRepository, logger, service } = setup(provider);
+  ])(
+    "rejects with EmbeddingUnavailableError and warns without the question when %s",
+    async (_name, embed) => {
+      const provider: EmbeddingProvider = { dimensions: 384, embed };
+      const { askRepository, logger, service } = setup(provider);
 
-    const error: unknown = await service.ask({ question: "secret question", limit: 5 }).catch((e: unknown) => e);
+      const error: unknown = await service
+        .ask({ question: "secret question", limit: 5 })
+        .catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(EmbeddingUnavailableError);
-    expect(error).toMatchObject({
-      statusCode: 503,
-      code: "EMBEDDING_UNAVAILABLE",
-      message: "Semantic search is unavailable: the question could not be embedded",
-    });
-    expect(askRepository.searchInteractions).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain("secret question");
-  });
+      expect(error).toBeInstanceOf(EmbeddingUnavailableError);
+      expect(error).toMatchObject({
+        statusCode: 503,
+        code: "EMBEDDING_UNAVAILABLE",
+        message: "Semantic search is unavailable: the question could not be embedded",
+      });
+      expect(askRepository.searchInteractions).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(logger.warn.mock.calls)).not.toContain("secret question");
+    },
+  );
 });

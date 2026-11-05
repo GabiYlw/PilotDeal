@@ -15,9 +15,9 @@ describe("AskPending", () => {
     const input = screen.getByRole("textbox", { name: "Question" }) as HTMLInputElement;
     expect(input.value).toBe("What about price?");
     expect(input.disabled).toBe(true);
-    expect((screen.getByRole("button", { name: "Searching..." }) as HTMLButtonElement).disabled).toBe(
-      true,
-    );
+    expect(
+      (screen.getByRole("button", { name: "Searching..." }) as HTMLButtonElement).disabled,
+    ).toBe(true);
     expect(screen.getByRole("status", { name: "Searching the notes" })).toBeTruthy();
   });
 });

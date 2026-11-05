@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { type InteractionItemActions, InteractionTimeline } from "@/components/deals/interaction-timeline";
+import {
+  type InteractionItemActions,
+  InteractionTimeline,
+} from "@/components/deals/interaction-timeline";
 import type { Interaction } from "@/lib/types";
 
 function interaction(
@@ -9,7 +12,15 @@ function interaction(
   occurredAt: string,
   notes: string,
 ): Interaction {
-  return { id, dealId: "d1", type, notes, occurredAt, createdAt: occurredAt, updatedAt: occurredAt };
+  return {
+    id,
+    dealId: "d1",
+    type,
+    notes,
+    occurredAt,
+    createdAt: occurredAt,
+    updatedAt: occurredAt,
+  };
 }
 
 const actionsFor = vi.fn<(item: Interaction) => InteractionItemActions>(() => ({
@@ -80,10 +91,7 @@ describe("InteractionTimeline", () => {
       />,
     );
 
-    expect(actionsFor.mock.calls.map(([item]) => item.id)).toEqual([
-      "i2",
-      "i1",
-    ]);
+    expect(actionsFor.mock.calls.map(([item]) => item.id)).toEqual(["i2", "i1"]);
     expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(2);
     expect(screen.getAllByRole("button", { name: "Delete" })).toHaveLength(2);
   });

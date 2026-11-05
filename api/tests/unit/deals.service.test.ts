@@ -73,7 +73,9 @@ function candidate(
     },
     companyName: "Acme",
     interactionCount: 7,
-    recentInteractions: [{ type: "CALL", notes: "hi", occurredAt: new Date("2026-06-01T00:00:00Z") }],
+    recentInteractions: [
+      { type: "CALL", notes: "hi", occurredAt: new Date("2026-06-01T00:00:00Z") },
+    ],
   };
 }
 
@@ -340,7 +342,14 @@ describe("DealService", () => {
         candidate("id-a", { expectedCloseDate: "2026-12-31" }), // 10
         candidate("id-f", { expectedCloseDate: "2026-01-01" }), // 90
       ]);
-      scoresById(listScorer, { "id-a": 10, "id-b": 50, "id-c": 50, "id-d": 50, "id-e": 50, "id-f": 90 });
+      scoresById(listScorer, {
+        "id-a": 10,
+        "id-b": 50,
+        "id-c": 50,
+        "id-d": 50,
+        "id-e": 50,
+        "id-f": 90,
+      });
 
       const result = await service.listPrioritized(pagination);
 

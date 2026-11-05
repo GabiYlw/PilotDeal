@@ -94,7 +94,9 @@ describe("POST /companies", () => {
   ];
 
   it.each(invalidBodies)("returns 400 for %s", async (_label, body) => {
-    const response = await request(app).post("/companies").send(body as object);
+    const response = await request(app)
+      .post("/companies")
+      .send(body as object);
 
     expect(response.status).toBe(400);
     expect(bodyOf(response).error.code).toBe("VALIDATION_ERROR");
@@ -145,7 +147,9 @@ describe("GET /companies", () => {
     const response = await request(app).get("/companies?page=2&pageSize=2");
 
     expect(response.status).toBe(200);
-    expect(bodyOf(response).data.map((company: { name: string }) => company.name)).toEqual(["Oldest"]);
+    expect(bodyOf(response).data.map((company: { name: string }) => company.name)).toEqual([
+      "Oldest",
+    ]);
     expect(bodyOf(response).meta).toEqual({ page: 2, pageSize: 2, total: 3 });
   });
 
@@ -160,7 +164,10 @@ describe("GET /companies", () => {
 
     const response = await request(app).get("/companies");
 
-    expect(bodyOf(response).data.map((company: { name: string }) => company.name)).toEqual(["B", "A"]);
+    expect(bodyOf(response).data.map((company: { name: string }) => company.name)).toEqual([
+      "B",
+      "A",
+    ]);
   });
 
   it("returns an empty data array for a page past the end", async () => {

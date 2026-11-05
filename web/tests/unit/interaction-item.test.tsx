@@ -25,7 +25,12 @@ function setup({
   >(async () => editResult);
   const remove = vi.fn<(state: ActionState) => Promise<ActionState>>(async () => removeResult);
   render(
-    <InteractionItem interaction={INTERACTION} dateLabel="Oct 22, 2026" edit={edit} remove={remove} />,
+    <InteractionItem
+      interaction={INTERACTION}
+      dateLabel="Oct 22, 2026"
+      edit={edit}
+      remove={remove}
+    />,
   );
   return { edit, remove };
 }
@@ -59,7 +64,9 @@ describe("InteractionItem editing", () => {
     const type = within(form).getByLabelText<HTMLSelectElement>("Type");
     expect(type.value).toBe("CALL");
     expect(document.activeElement).toBe(type);
-    expect(within(form).getByLabelText<HTMLTextAreaElement>("Notes").value).toBe("Called the buyer");
+    expect(within(form).getByLabelText<HTMLTextAreaElement>("Notes").value).toBe(
+      "Called the buyer",
+    );
     expect(within(form).getByLabelText<HTMLInputElement>("Date").value).toBe("2026-10-22");
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   });

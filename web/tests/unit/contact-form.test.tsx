@@ -107,7 +107,9 @@ describe("ContactForm", () => {
 
   it("disables the submit button and shows the pending label while the action runs", async () => {
     let finish: (state: FormState<ContactField>) => void = () => {};
-    const action = vi.fn(() => new Promise<FormState<ContactField>>((resolve) => (finish = resolve)));
+    const action = vi.fn(
+      () => new Promise<FormState<ContactField>>((resolve) => (finish = resolve)),
+    );
     render(
       <ContactForm
         action={action}
@@ -121,7 +123,9 @@ describe("ContactForm", () => {
 
     await submit();
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Adding..." }).disabled).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Adding..." }).disabled).toBe(
+      true,
+    );
     await act(async () => finish(IDLE));
   });
 

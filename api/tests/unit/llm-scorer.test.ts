@@ -103,16 +103,19 @@ describe("LlmScorer", () => {
     [130, 100, 100], // band lifts to 110, so only the 0..100 step brings it down to 100
     [-30, 0, 0], // band caps at -10, so only the 0..100 step brings it up to 0
     [-25, 5, 0],
-  ])("clamps baseline %i with LLM score %i to %i and factors sum to it", async (base, llm, expected) => {
-    const { scorer, callTool } = setup(base);
-    callTool.mockResolvedValue({ score: llm, reason: "R", nextAction: "N" });
+  ])(
+    "clamps baseline %i with LLM score %i to %i and factors sum to it",
+    async (base, llm, expected) => {
+      const { scorer, callTool } = setup(base);
+      callTool.mockResolvedValue({ score: llm, reason: "R", nextAction: "N" });
 
-    const result = await scorer.score(context());
+      const result = await scorer.score(context());
 
-    expect(result.score).toBe(expected);
-    expect(sumOfFactors(result)).toBe(expected);
-    expect(result.scoredBy).toBe("llm");
-  });
+      expect(result.score).toBe(expected);
+      expect(sumOfFactors(result)).toBe(expected);
+      expect(result.scoredBy).toBe("llm");
+    },
+  );
 
   it("does not mutate the baseline result or its factors", async () => {
     const { scorer, callTool, baseline } = setup(50);

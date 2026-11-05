@@ -21,8 +21,8 @@ export const updateContactSchema = strictBody({
   phone: optionalText("Phone", 50),
   role: optionalText("Role", 100),
 }).refine((body) => Object.keys(body).length > 0, {
-    message: "At least one field must be provided",
-  });
+  message: "At least one field must be provided",
+});
 
 export type CreateContactInput = z.output<typeof createContactSchema>;
 export type UpdateContactInput = z.output<typeof updateContactSchema>;
