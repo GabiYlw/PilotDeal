@@ -59,6 +59,16 @@ Before reporting a task as done, run `format` in every package you changed, then
 
 Formatting is Prettier with one shared config at the repository root (`.prettierrc.json`, `.prettierignore`). ESLint extends `eslint-config-prettier`, so it never reports formatting; do not add stylistic ESLint rules.
 
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests, using the commands from the table above (with `npm ci` instead of `npm install`):
+
+- **api:** format check, lint, typecheck, unit tests and integration tests against a pgvector service container, with `EMBEDDING_OFFLINE=true` and no `ANTHROPIC_API_KEY`.
+- **web:** format check, lint, typecheck, tests and the production build.
+- **docker:** builds both images without pushing them.
+
+When a command in the table changes, update the workflow too. Lint the workflow with actionlint: `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12`.
+
 ### Full stack in Docker
 
 Local development runs only `db` in Docker. The `api` and `web` services belong to the compose profile `full`, so they start only when the profile is named. Stop local dev servers first: the containers publish the same ports (3000, 3001).

@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch or pull request cancels the run still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: API (format, lint, typecheck, tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      # Same image and credentials as the db service in docker-compose.yml.
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: pilotdeal
+          POSTGRES_PASSWORD: pilotdeal
+          POSTGRES_DB: pilotdeal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pilotdeal -d pilotdeal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://pilotdeal:pilotdeal@localhost:5432/pilotdeal
+      DATABASE_URL_TEST: postgresql://pilotdeal:pilotdeal@localhost:5432/pilotdeal_test
+      # Use only a cached embedding model, never download one. Tests use a fake provider, so a
+      # test that reaches the real model fails instead of downloading it.
+      EMBEDDING_OFFLINE: "true"
+      # ANTHROPIC_API_KEY is deliberately not set: tests must never call Claude.
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      # Reuses the init script that docker compose runs on a fresh volume.
+      - name: Create the test database
+        run: docker exec -i "${{ job.services.db.id }}" psql -v ON_ERROR_STOP=1 -U pilotdeal -d pilotdeal < docker/db-init/01-create-databases.sql
+
+      - name: Install dependencies
+        run: npm --prefix api ci
+
+      - name: Check formatting
+        run: npm --prefix api run format:check
+
+      - name: Lint
+        run: npm --prefix api run lint
+
+      - name: Typecheck
+        run: npm --prefix api run typecheck
+
+      - name: Unit tests
+        run: npm --prefix api run test:unit
+
+      - name: Integration tests
+        run: npm --prefix api run test:integration
+
+  web:
+    name: Web (format, lint, typecheck, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm --prefix web ci
+
+      - name: Check formatting
+        run: npm --prefix web run format:check
+
+      - name: Lint
+        run: npm --prefix web run lint
+
+      - name: Typecheck
+        run: npm --prefix web run typecheck
+
+      - name: Tests
+        run: npm --prefix web run test
+
+      # lib/api.ts throws while prerendering when API_URL is unset. Nothing is fetched at build time.
+      - name: Production build
+        run: npm --prefix web run build
+        env:
+          API_URL: http://localhost:3001
+
+  docker:
+    name: Docker images (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [api, web]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Build only, never push. The GitHub Actions cache (one scope per image) keeps rebuilds fast.
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
