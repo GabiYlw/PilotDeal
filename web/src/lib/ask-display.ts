@@ -43,8 +43,10 @@ export const EXAMPLE_QUESTIONS = [
 export type RelevanceLevel = "high" | "medium" | "low";
 
 // Display bands for cosine similarity; the API already drops anything below 0.25.
-export const HIGH_RELEVANCE = 0.6;
-export const MEDIUM_RELEVANCE = 0.4;
+// Calibrated for all-MiniLM-L6-v2 on short CRM notes, where the best match for a question
+// typically scores 0.37 to 0.47. The bands describe closeness of wording, not correctness.
+export const HIGH_RELEVANCE = 0.4;
+export const MEDIUM_RELEVANCE = 0.3;
 
 export function relevanceLevel(similarity: number): RelevanceLevel {
   if (similarity >= HIGH_RELEVANCE) return "high";

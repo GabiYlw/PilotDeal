@@ -40,11 +40,11 @@ describe("SourceCard", () => {
 
   // The similarity bands are covered by relevanceLevel in ask-display.test.ts; this checks the wiring.
   it("shows relevance as a level and never prints a percentage", () => {
-    const card = renderCard(false, { similarity: 0.59 });
+    const card = renderCard(false, { similarity: 0.35 });
 
     expect(screen.getByText("Relevance: Medium")).toBeTruthy();
     expect(screen.getByRole("meter").getAttribute("aria-valuetext")).toBe("Medium");
     expect(card.textContent).not.toContain("%");
-    expect(card.textContent).not.toContain("0.59");
+    expect(card.textContent).not.toContain("0.35");
   });
 });

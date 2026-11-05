@@ -29,11 +29,11 @@ describe("askHref", () => {
 
 describe("relevanceLevel", () => {
   it.each([
-    [0.75, "high"],
-    [0.6, "high"],
-    [0.59, "medium"],
-    [0.4, "medium"],
-    [0.39, "low"],
+    [0.47, "high"],
+    [0.4, "high"],
+    [0.399, "medium"],
+    [0.3, "medium"],
+    [0.299, "low"],
     [0.25, "low"],
   ])("maps similarity %s to %s", (similarity, level) => {
     expect(relevanceLevel(similarity)).toBe(level);
