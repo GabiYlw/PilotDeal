@@ -7,15 +7,26 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
 
 **Live demo:** [demo.pilotdeal.online](https://demo.pilotdeal.online) _(coming soon)_
 
-<!--
-Screenshots: add the images to docs/screenshots/ and uncomment.
+**Open deals ranked by priority**, with the reason behind each score:
 
-| Deals ranked by priority | Deal with next best action | Ask your CRM |
-|---|---|---|
-| ![Deals](docs/screenshots/deals.png) | ![Deal detail](docs/screenshots/deal-detail.png) | ![Ask your CRM](docs/screenshots/ask.png) |
--->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/deals-dark.png">
+  <img alt="Deals list ranked by priority score, with stage, value, expected close date, overdue badges and the reason for each score" src="docs/screenshots/deals-light.png">
+</picture>
 
-_Screenshots coming soon._
+**A deal with its next best action** and the factors that make up the score:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/deal-detail-dark.png">
+  <img alt="Deal page with details, interaction timeline, edit forms and the next action card showing the score breakdown" src="docs/screenshots/deal-detail-light.png">
+</picture>
+
+**Ask your CRM**: semantic search over interaction notes. Shown here without an API key, so only the most relevant notes are listed; with a key, Claude adds an answer that cites them.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/ask-dark.png">
+  <img alt="Ask your CRM page with a question about pricing and the most relevant interaction notes as labelled sources" src="docs/screenshots/ask-light.png">
+</picture>
 
 ## Features
 
