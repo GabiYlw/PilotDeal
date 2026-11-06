@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { NavLinks } from "@/components/sidebar-nav";
 
@@ -16,8 +16,8 @@ describe("NavLinks", () => {
 
     expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual([
       "Home",
-      "Deals",
       "Companies",
+      "Deals",
       "Ask",
     ]);
     expect(currentLinks()).toEqual([]);
@@ -32,5 +32,15 @@ describe("NavLinks", () => {
     render(<NavLinks pathname={pathname} />);
 
     expect(currentLinks()).toEqual([label]);
+  });
+
+  it.each([
+    ["Workspace", ["Home", "Companies", "Deals"]],
+    ["AI", ["Ask"]],
+  ])("groups the %s links under their section label", (section, labels) => {
+    render(<NavLinks />);
+
+    const list = within(screen.getByRole("list", { name: section }));
+    expect(list.getAllByRole("link").map((link) => link.textContent)).toEqual(labels);
   });
 });

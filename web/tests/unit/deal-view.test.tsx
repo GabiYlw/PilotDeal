@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DealView } from "@/components/deals/deal-view";
 import {
@@ -69,14 +69,15 @@ async function renderView() {
 }
 
 describe("DealView", () => {
-  it("shows the title, company link, all-deals link and details", async () => {
+  it("shows the title, company link, breadcrumb back to deals and details", async () => {
     await renderView();
 
     expect(screen.getByRole("heading", { name: "Big deal" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Acme Corp" }).getAttribute("href")).toBe(
       "/companies/c1",
     );
-    expect(screen.getByRole("link", { name: "All deals" }).getAttribute("href")).toBe("/deals");
+    const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+    expect(breadcrumb.getByRole("link", { name: "Deals" }).getAttribute("href")).toBe("/deals");
     expect(screen.getByText("60,000")).toBeTruthy();
     expect(screen.getByText("Closed on")).toBeTruthy();
     expect(screen.getByText("No interactions yet")).toBeTruthy();

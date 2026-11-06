@@ -13,6 +13,7 @@ export default function CompaniesPage(props: PageProps<"/companies">) {
       <PageHeader
         title="Companies"
         description="All companies, newest first."
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Companies" }]}
         actions={<ButtonLink href="/companies/new">New company</ButtonLink>}
       />
       <Suspense fallback={null}>

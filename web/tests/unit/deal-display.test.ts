@@ -26,9 +26,9 @@ describe("deal display helpers", () => {
 
   it.each<[DealStage, string]>([
     ["LEAD", "neutral"],
-    ["QUALIFIED", "neutral"],
-    ["PROPOSAL", "neutral"],
-    ["NEGOTIATION", "neutral"],
+    ["QUALIFIED", "accent-subtle"],
+    ["PROPOSAL", "accent-subtle"],
+    ["NEGOTIATION", "accent-subtle"],
     ["WON", "success"],
     ["LOST", "danger"],
   ])("gives stage %s the %s badge variant", (stage, variant) => {

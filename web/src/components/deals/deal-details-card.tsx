@@ -1,18 +1,16 @@
 import { StageBadge } from "@/components/deals/stage-badge";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { DescriptionItem, DescriptionList } from "@/components/ui/description-list";
-import { formatDate, formatValue } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import type { Deal } from "@/lib/types";
 
 export function DealDetailsCard({ deal }: { deal: Deal }) {
   return (
-    <Card>
+    <Card className="flex flex-col gap-4">
+      <CardHeader title="Details" />
       <DescriptionList>
         <DescriptionItem term="Stage">
           <StageBadge stage={deal.stage} />
-        </DescriptionItem>
-        <DescriptionItem term="Value">
-          <span className="tabular-nums">{formatValue(deal.value)}</span>
         </DescriptionItem>
         <DescriptionItem term="Expected close">
           {deal.expectedCloseDate ? (

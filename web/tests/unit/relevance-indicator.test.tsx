@@ -22,11 +22,11 @@ describe("RelevanceIndicator", () => {
 describe("Card", () => {
   it("uses the strong accent border only when highlighted", () => {
     const { container, rerender } = render(<Card />);
-    expect(container.firstElementChild?.className).toContain("border-border");
+    expect(container.firstElementChild?.className).toContain("border-card-border");
     expect(container.firstElementChild?.className).not.toContain("border-accent");
 
     rerender(<Card highlighted />);
     expect(container.firstElementChild?.className).toContain("border-accent");
-    expect(container.firstElementChild?.className).not.toContain("border-border");
+    expect(container.firstElementChild?.className).not.toContain("border-card-border");
   });
 });

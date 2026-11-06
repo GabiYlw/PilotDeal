@@ -27,10 +27,7 @@ export function RelevanceIndicator({
         {[1, 2, 3].map((segment) => (
           <span
             key={segment}
-            className={cn(
-              "h-1.5 w-4 rounded-full",
-              segment <= filled ? "bg-accent" : "bg-surface-hover",
-            )}
+            className={cn("h-1.5 w-4 rounded-full", segment <= filled ? "bg-accent" : "bg-canvas")}
           />
         ))}
       </div>

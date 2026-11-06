@@ -1,58 +1,62 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useLayoutEffect, useSyncExternalStore } from "react";
-import { cn } from "@/lib/cn";
 import {
   applyThemeAttribute,
-  readThemeChoice,
-  saveThemeChoice,
-  subscribeToThemeChoice,
-  type ThemeChoice,
+  oppositeTheme,
+  readStoredTheme,
+  readTheme,
+  saveTheme,
+  subscribeToTheme,
+  type Theme,
 } from "@/lib/theme";
 
-const OPTIONS: ReadonlyArray<{ value: ThemeChoice; label: string }> = [
-  { value: "system", label: "System" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-];
+// The icon shows what a click switches to: Moon in the light theme, Sun in the dark theme.
+const LABELS: Record<Theme, string> = {
+  light: "Switch to dark theme",
+  dark: "Switch to light theme",
+};
 
-// The server cannot read localStorage, so it renders "system"; React then re-renders
-// with the stored choice without a hydration error.
-function serverChoice(): ThemeChoice {
-  return "system";
+const ICON_CLASS = "size-4";
+
+// The server cannot read localStorage or the system preference, so it renders null.
+function serverTheme(): Theme | null {
+  return null;
+}
+
+function ThemeIcon({ theme }: { theme: Theme | null }) {
+  if (theme === null) {
+    // Before hydration both icons are in the HTML and CSS tokens show the right one, so the
+    // first paint never shows the wrong icon.
+    return (
+      <>
+        <Moon aria-hidden="true" className={`${ICON_CLASS} [display:var(--theme-icon-moon)]`} />
+        <Sun aria-hidden="true" className={`${ICON_CLASS} [display:var(--theme-icon-sun)]`} />
+      </>
+    );
+  }
+  const Icon = theme === "light" ? Moon : Sun;
+  return <Icon aria-hidden="true" className={ICON_CLASS} />;
 }
 
 export function ThemeToggle() {
-  const choice = useSyncExternalStore(subscribeToThemeChoice, readThemeChoice, serverChoice);
+  const theme = useSyncExternalStore(subscribeToTheme, readTheme, serverTheme);
 
   // The inline script in layout.tsx sets data-theme before paint. This re-applies it when
-  // React's dev remount clears it, and when another tab changes the choice.
+  // React's dev remount clears it, and when another tab changes the theme.
   useLayoutEffect(() => {
-    applyThemeAttribute(readThemeChoice());
-  }, [choice]);
+    applyThemeAttribute(readStoredTheme());
+  }, [theme]);
 
   return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className="inline-flex rounded-md border border-border bg-background p-0.5"
+    <button
+      type="button"
+      aria-label={theme === null ? "Switch theme" : LABELS[theme]}
+      onClick={() => saveTheme(oppositeTheme(readTheme()))}
+      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors duration-150 hover:border-accent motion-reduce:transition-none"
     >
-      {OPTIONS.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          aria-pressed={choice === option.value}
-          onClick={() => saveThemeChoice(option.value)}
-          className={cn(
-            "rounded px-2 py-0.5 text-xs font-medium transition-colors",
-            choice === option.value
-              ? "bg-surface-hover text-foreground"
-              : "text-muted hover:text-foreground",
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+      <ThemeIcon theme={theme} />
+    </button>
   );
 }

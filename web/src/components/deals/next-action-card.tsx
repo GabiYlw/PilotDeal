@@ -13,8 +13,8 @@ export function NextActionCard({ result }: { result: DealNextAction }) {
         <ScoredByBadge scoredBy={result.scoredBy} />
         <OverdueBadge factors={result.factors} />
       </div>
-      <p className="text-base font-medium text-foreground">{result.nextAction}</p>
-      <ScoreBar score={result.score} label="Priority score" />
+      <p className="text-lg leading-snug font-semibold text-foreground">{result.nextAction}</p>
+      <ScoreBar score={result.score} label="Priority score" size="lg" />
       <CardDescription>{result.reason}</CardDescription>
       <FactorsList factors={result.factors} />
     </Card>

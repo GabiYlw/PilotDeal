@@ -2,18 +2,17 @@ import { addCompany } from "@/app/companies/new/actions";
 import { CompanyForm } from "@/components/companies/company-form";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { TextLink } from "@/components/ui/text-link";
 
 export default function NewCompanyPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="New company"
-        actions={
-          <TextLink href="/companies" className="text-sm">
-            All companies
-          </TextLink>
-        }
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Companies", href: "/companies" },
+          { label: "New company" },
+        ]}
       />
       <Card className="w-full max-w-xl">
         <CompanyForm

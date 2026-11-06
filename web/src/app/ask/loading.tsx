@@ -7,6 +7,7 @@ export default function AskLoading() {
       <PageHeader
         title="Ask your CRM"
         description="Answers come only from your interaction notes and cite their sources."
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Ask" }]}
       />
       <AskPageSkeleton />
     </div>

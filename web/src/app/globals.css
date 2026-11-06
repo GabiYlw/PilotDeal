@@ -10,20 +10,38 @@
  *   by the inline script in app/layout.tsx.
  *
  * Every text/background pair meets WCAG AA (4.5:1) in both themes.
+ *
+ * Light is fully light and dark is fully dark: every surface, including the sidebar, takes its
+ * color from these tokens. Light uses neutral grays with white cards; dark uses neutral
+ * near-black grays. Teal (#5bc0be) is the accent in both. There are no gradients.
+ *
+ * Layers: canvas (page) -> surface (cards, sidebar, tables) -> background (inputs).
+ * Elevation: soft neutral shadows in light; a faint top highlight plus a deeper shadow in dark,
+ * with a subtle card border in both. Light and dark share one design: only these values change,
+ * never layout, radius or borders.
  */
 
 :root {
   color-scheme: light;
+  --canvas: #f2f3f5;
   --background: #ffffff;
-  --surface: #f5f7fa;
-  --surface-hover: #ebeff5;
-  --border: #dde3eb;
-  --border-strong: #c3ccd9;
+  --surface: #ffffff;
+  --surface-hover: #f6f7f8;
+  --border: #e3e5e8;
+  --border-strong: #c9cdd2;
+  --card-border: #e6e8eb;
   --text: #0b132b;
   --text-muted: #3a506b;
   --accent: #5bc0be;
   --accent-hover: #4eaeac;
   --accent-foreground: #0b132b;
+  --accent-subtle: #e3f5f4;
+  --tint-slate: #eef0f2;
+  --tint-slate-foreground: #3a506b;
+  --tint-navy: #e2e4e8;
+  --tint-navy-foreground: #0b132b;
+  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.12);
+  --elevation-raised: 0 2px 4px 0 rgb(0 0 0 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.22);
   --link: #1f7472;
   --ring: #1f7472;
   --success: #1e6b45;
@@ -34,64 +52,90 @@
   --danger-subtle: #fbeaec;
   --danger-foreground: #ffffff;
   --danger-hover: #8c2131;
-  --overlay: rgb(11 19 43 / 0.35);
+  --overlay: rgb(0 0 0 / 0.4);
+  /* Which ThemeToggle icon shows before React knows the theme (see theme-toggle.tsx). */
+  --theme-icon-moon: block;
+  --theme-icon-sun: none;
 }
 
 /* The dark set is listed twice: once for an explicit choice, once for the system preference. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0b132b;
-  --surface: #1c2541;
-  --surface-hover: #243052;
-  --border: #3a506b;
-  --border-strong: #4d6585;
+  --canvas: #12171d;
+  --background: #12171d;
+  --surface: #1b252d;
+  --surface-hover: #24303a;
+  --border: #2e3b46;
+  --border-strong: #40505d;
+  --card-border: #27333d;
   --text: #ffffff;
-  --text-muted: #a3b3c9;
+  --text-muted: #a7b1bb;
   --accent: #5bc0be;
   --accent-hover: #74cccb;
-  --accent-foreground: #0b132b;
+  --accent-foreground: #12171d;
+  --accent-subtle: #173a3c;
+  --tint-slate: #2a3640;
+  --tint-slate-foreground: #c9d2da;
+  --tint-navy: #1f2a3d;
+  --tint-navy-foreground: #a9bbdc;
+  --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.7);
   --link: #5bc0be;
   --ring: #5bc0be;
   --success: #74d3a0;
-  --success-subtle: #163330;
+  --success-subtle: #17322a;
   --warning: #e8bf6a;
-  --warning-subtle: #2f2b22;
+  --warning-subtle: #33291a;
   --danger: #f3949c;
-  --danger-subtle: #36202d;
-  --danger-foreground: #0b132b;
+  --danger-subtle: #3b2026;
+  --danger-foreground: #12171d;
   --danger-hover: #f6aab1;
-  --overlay: rgb(0 0 0 / 0.55);
+  --overlay: rgb(0 0 0 / 0.6);
+  --theme-icon-moon: none;
+  --theme-icon-sun: block;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --background: #0b132b;
-    --surface: #1c2541;
-    --surface-hover: #243052;
-    --border: #3a506b;
-    --border-strong: #4d6585;
+    --canvas: #12171d;
+    --background: #12171d;
+    --surface: #1b252d;
+    --surface-hover: #24303a;
+    --border: #2e3b46;
+    --border-strong: #40505d;
+    --card-border: #27333d;
     --text: #ffffff;
-    --text-muted: #a3b3c9;
+    --text-muted: #a7b1bb;
     --accent: #5bc0be;
     --accent-hover: #74cccb;
-    --accent-foreground: #0b132b;
+    --accent-foreground: #12171d;
+    --accent-subtle: #173a3c;
+    --tint-slate: #2a3640;
+    --tint-slate-foreground: #c9d2da;
+    --tint-navy: #1f2a3d;
+    --tint-navy-foreground: #a9bbdc;
+    --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.7);
     --link: #5bc0be;
     --ring: #5bc0be;
     --success: #74d3a0;
-    --success-subtle: #163330;
+    --success-subtle: #17322a;
     --warning: #e8bf6a;
-    --warning-subtle: #2f2b22;
+    --warning-subtle: #33291a;
     --danger: #f3949c;
-    --danger-subtle: #36202d;
-    --danger-foreground: #0b132b;
+    --danger-subtle: #3b2026;
+    --danger-foreground: #12171d;
     --danger-hover: #f6aab1;
-    --overlay: rgb(0 0 0 / 0.55);
+    --overlay: rgb(0 0 0 / 0.6);
+    --theme-icon-moon: none;
+    --theme-icon-sun: block;
   }
 }
 
 /* "inline" makes utilities reference the variables directly, so they follow the active theme. */
 @theme inline {
+  --color-canvas: var(--canvas);
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
@@ -102,6 +146,14 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-card-border: var(--card-border);
+  --color-tint-slate: var(--tint-slate);
+  --color-tint-slate-foreground: var(--tint-slate-foreground);
+  --color-tint-navy: var(--tint-navy);
+  --color-tint-navy-foreground: var(--tint-navy-foreground);
+  --shadow-card: var(--elevation-card);
+  --shadow-raised: var(--elevation-raised);
   --color-link: var(--link);
   --color-ring: var(--ring);
   --color-success: var(--success);
@@ -122,7 +174,7 @@
   }
 
   body {
-    background-color: var(--background);
+    background-color: var(--canvas);
     color: var(--text);
   }
 

@@ -1,6 +1,6 @@
 import { type ContactAction, ContactForm } from "@/components/companies/contact-form";
 import { ContactItem, type RemoveContactAction } from "@/components/companies/contact-item";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { contactsVersion } from "@/lib/page-version";
 import type { Contact } from "@/lib/types";
@@ -25,7 +25,7 @@ export function ContactsSection({
 }) {
   return (
     <Card className="flex flex-col gap-5">
-      <CardTitle>Contacts</CardTitle>
+      <CardHeader title="Contacts" />
       <ContactForm
         action={addAction}
         idPrefix="contact"

@@ -81,9 +81,9 @@ function ConfirmDialogPanel({
       aria-describedby={messageId}
       onCancel={handleCancel}
       onClose={handleClose}
-      className="m-auto w-full max-w-sm rounded-lg border border-border bg-background p-5 text-foreground backdrop:bg-overlay"
+      className="m-auto w-full max-w-sm rounded-2xl border border-card-border bg-surface p-6 shadow-raised text-foreground backdrop:bg-overlay"
     >
-      <h2 id={titleId} className="text-sm font-medium text-foreground">
+      <h2 id={titleId} className="text-base font-semibold text-foreground">
         {title}
       </h2>
       <div id={messageId} className="mt-2 text-sm text-muted">

@@ -16,11 +16,12 @@ export const STAGE_LABELS: Record<DealStage, string> = {
   LOST: "Lost",
 };
 
-// State colors are reserved for the two closed outcomes.
+// State colors are reserved for the two closed outcomes. Stages past Lead get the soft accent pill.
 export function stageBadgeVariant(stage: DealStage): BadgeVariant {
   if (stage === "WON") return "success";
   if (stage === "LOST") return "danger";
-  return "neutral";
+  if (stage === "LEAD") return "neutral";
+  return "accent-subtle";
 }
 
 export const INTERACTION_TYPE_LABELS: Record<InteractionType, string> = {

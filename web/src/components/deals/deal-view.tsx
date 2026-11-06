@@ -1,3 +1,4 @@
+import { Coins, MessageSquareText, MessagesSquare } from "lucide-react";
 import { Suspense } from "react";
 import {
   addInteraction,
@@ -16,10 +17,13 @@ import { InteractionForm } from "@/components/deals/interaction-form";
 import { InteractionTimeline } from "@/components/deals/interaction-timeline";
 import { NextActionPanel } from "@/components/deals/next-action-panel";
 import { StageForm } from "@/components/deals/stage-form";
-import { Card, CardTitle } from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { StatCard, StatGrid } from "@/components/ui/stat-card";
 import { TextLink } from "@/components/ui/text-link";
 import { askHref } from "@/lib/ask-display";
+import { formatValue } from "@/lib/format";
 import { getCompany, getDeal, getDealInteractions } from "@/lib/api";
 import { loadResource } from "@/lib/load";
 import { pageVersion } from "@/lib/page-version";
@@ -53,21 +57,28 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
         }
         actions={
           <>
-            <TextLink href={askHref({ dealId: id })} className="text-sm">
+            <ButtonLink href={askHref({ dealId: id })} variant="secondary">
+              <MessageSquareText aria-hidden="true" className="size-4" strokeWidth={1.75} />
               Ask about this deal
-            </TextLink>
-            <TextLink href="/deals" className="text-sm">
-              All deals
-            </TextLink>
+            </ButtonLink>
             <DeleteDealButton dealTitle={deal.title} action={removeDeal.bind(null, id)} />
           </>
         }
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Deals", href: "/deals" },
+          { label: deal.title },
+        ]}
       />
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <StatGrid>
+        <StatCard icon={Coins} tone="navy" label="Value" value={formatValue(deal.value)} />
+        <StatCard icon={MessagesSquare} tone="slate" label="Interactions" value={meta.total} />
+      </StatGrid>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
           <DealDetailsCard deal={deal} />
           <Card className="flex flex-col gap-5">
-            <CardTitle>Interactions</CardTitle>
+            <CardHeader title="Interactions" />
             <InteractionForm
               action={addInteraction.bind(null, id)}
               pageVersion={pageVersion(deal, interactions, meta.total)}
@@ -84,7 +95,7 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
         </div>
         <div className="flex flex-col gap-6">
           <Card className="flex flex-col gap-4">
-            <CardTitle>Edit deal</CardTitle>
+            <CardHeader title="Edit deal" />
             <DealEditForm deal={deal} action={editDeal.bind(null, id, deal.companyId)} />
           </Card>
           <Card>

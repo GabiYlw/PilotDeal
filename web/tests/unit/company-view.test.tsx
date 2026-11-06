@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompanyView } from "@/components/companies/company-view";
 import {
@@ -81,7 +81,8 @@ describe("CompanyView", () => {
     await renderView();
 
     expect(screen.getByRole("heading", { name: "Acme Corp" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "All companies" }).getAttribute("href")).toBe(
+    const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+    expect(breadcrumb.getByRole("link", { name: "Companies" }).getAttribute("href")).toBe(
       "/companies",
     );
     expect(screen.getByRole("button", { name: "Delete company" })).toBeTruthy();

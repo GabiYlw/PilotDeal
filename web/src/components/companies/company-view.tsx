@@ -1,3 +1,4 @@
+import { Handshake, Users } from "lucide-react";
 import {
   addContact,
   addDeal,
@@ -11,9 +12,8 @@ import { CompanyDealsSection } from "@/components/companies/company-deals-sectio
 import { CompanyDetails } from "@/components/companies/company-details";
 import { ContactsSection } from "@/components/companies/contacts-section";
 import { DeleteCompanyButton } from "@/components/companies/delete-company-button";
-import { Card, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { TextLink } from "@/components/ui/text-link";
+import { StatCard, StatGrid } from "@/components/ui/stat-card";
 import { getCompany, getCompanyContacts, getCompanyDeals } from "@/lib/api";
 import { loadResource } from "@/lib/load";
 
@@ -42,20 +42,21 @@ export async function CompanyView({ params }: { params: Promise<{ id: string }> 
         title={company.name}
         description={company.industry ?? undefined}
         actions={
-          <>
-            <TextLink href="/companies" className="text-sm">
-              All companies
-            </TextLink>
-            <DeleteCompanyButton companyName={company.name} action={removeCompany.bind(null, id)} />
-          </>
+          <DeleteCompanyButton companyName={company.name} action={removeCompany.bind(null, id)} />
         }
+        breadcrumb={[
+          { label: "Home", href: "/" },
+          { label: "Companies", href: "/companies" },
+          { label: company.name },
+        ]}
       />
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <StatGrid>
+        <StatCard icon={Users} tone="slate" label="Contacts" value={contactsMeta.total} />
+        <StatCard icon={Handshake} tone="teal" label="Deals" value={dealsMeta.total} />
+      </StatGrid>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
-          <Card className="flex flex-col gap-4">
-            <CardTitle>Details</CardTitle>
-            <CompanyDetails company={company} action={editCompany.bind(null, id)} />
-          </Card>
+          <CompanyDetails company={company} action={editCompany.bind(null, id)} />
           <ContactsSection
             contacts={contacts}
             total={contactsMeta.total}

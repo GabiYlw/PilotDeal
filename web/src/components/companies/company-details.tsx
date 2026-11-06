@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { type CompanyAction, CompanyForm } from "@/components/companies/company-form";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 import { DescriptionItem, DescriptionList } from "@/components/ui/description-list";
 import { MutedText } from "@/components/ui/muted-text";
 import { TextLink } from "@/components/ui/text-link";
@@ -28,46 +29,54 @@ export function CompanyDetails({ company, action }: { company: Company; action: 
     setEditing(false);
   }
 
-  if (editing) {
-    return (
-      <CompanyForm
-        action={action}
-        defaults={{
-          name: company.name,
-          industry: company.industry ?? "",
-          website: company.website ?? "",
-        }}
-        idPrefix="company-edit"
-        ariaLabel="Edit company"
-        submitLabel="Save"
-        pendingLabel="Saving..."
-        onCancel={closeEditor}
-        onSaved={closeEditor}
-        autoFocus
-      />
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-4">
-      <DescriptionList>
-        <DescriptionItem term="Industry">{company.industry ?? <MutedText />}</DescriptionItem>
-        <DescriptionItem term="Website">
-          {company.website ? (
-            <TextLink href={company.website} target="_blank" rel="noopener noreferrer">
-              {company.website}
-            </TextLink>
-          ) : (
-            <MutedText />
-          )}
-        </DescriptionItem>
-        <DescriptionItem term="Created">{formatDate(company.createdAt)}</DescriptionItem>
-      </DescriptionList>
-      <div>
-        <Button ref={editButtonRef} variant="secondary" size="sm" onClick={() => setEditing(true)}>
-          Edit
-        </Button>
-      </div>
-    </div>
+    <Card className="flex flex-col gap-4">
+      <CardHeader
+        title="Details"
+        actions={
+          !editing && (
+            <Button
+              ref={editButtonRef}
+              variant="secondary"
+              size="sm"
+              onClick={() => setEditing(true)}
+            >
+              Edit
+            </Button>
+          )
+        }
+      />
+      {editing ? (
+        <CompanyForm
+          action={action}
+          defaults={{
+            name: company.name,
+            industry: company.industry ?? "",
+            website: company.website ?? "",
+          }}
+          idPrefix="company-edit"
+          ariaLabel="Edit company"
+          submitLabel="Save"
+          pendingLabel="Saving..."
+          onCancel={closeEditor}
+          onSaved={closeEditor}
+          autoFocus
+        />
+      ) : (
+        <DescriptionList>
+          <DescriptionItem term="Industry">{company.industry ?? <MutedText />}</DescriptionItem>
+          <DescriptionItem term="Website">
+            {company.website ? (
+              <TextLink href={company.website} target="_blank" rel="noopener noreferrer">
+                {company.website}
+              </TextLink>
+            ) : (
+              <MutedText />
+            )}
+          </DescriptionItem>
+          <DescriptionItem term="Created">{formatDate(company.createdAt)}</DescriptionItem>
+        </DescriptionList>
+      )}
+    </Card>
   );
 }

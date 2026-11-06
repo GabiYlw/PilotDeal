@@ -6,7 +6,7 @@ export function Skeleton({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       aria-hidden="true"
-      className={cn("animate-pulse rounded-md bg-surface-hover", className)}
+      className={cn("animate-pulse rounded-xl bg-border", className)}
       {...props}
     />
   );

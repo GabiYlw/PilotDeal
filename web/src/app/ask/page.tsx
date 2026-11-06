@@ -13,6 +13,7 @@ export default function AskPage(props: PageProps<"/ask">) {
       <PageHeader
         title="Ask your CRM"
         description="Answers come only from your interaction notes and cite their sources."
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Ask" }]}
       />
       <Suspense fallback={<AskPageSkeleton />}>
         <AskView searchParams={props.searchParams} />

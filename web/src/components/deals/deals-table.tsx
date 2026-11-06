@@ -18,7 +18,7 @@ function DealRow({ item, rank }: { item: PrioritizedDeal; rank: number }) {
   return (
     <TableRow>
       <TableCell className="text-muted tabular-nums">{rank}</TableCell>
-      <TableCell>
+      <TableCell className="min-w-40">
         <TextLink href={`/deals/${deal.id}`}>{deal.title}</TextLink>
       </TableCell>
       <TableCell>{deal.companyName}</TableCell>
@@ -26,7 +26,7 @@ function DealRow({ item, rank }: { item: PrioritizedDeal; rank: number }) {
         <StageBadge stage={deal.stage} />
       </TableCell>
       <TableCell className="text-right tabular-nums">{formatValue(deal.value)}</TableCell>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         <div className="flex items-center gap-2">
           {deal.expectedCloseDate ? (
             <span>{formatDate(deal.expectedCloseDate)}</span>
@@ -36,10 +36,10 @@ function DealRow({ item, rank }: { item: PrioritizedDeal; rank: number }) {
           <OverdueBadge factors={priority.factors} />
         </div>
       </TableCell>
-      <TableCell className="min-w-32">
+      <TableCell className="w-40 min-w-36">
         <ScoreBar score={priority.score} label={`Priority score for ${deal.title}`} />
       </TableCell>
-      <TableCell className="max-w-sm text-muted">{priority.reason}</TableCell>
+      <TableCell className="max-w-sm min-w-60 text-muted">{priority.reason}</TableCell>
     </TableRow>
   );
 }
@@ -47,7 +47,7 @@ function DealRow({ item, rank }: { item: PrioritizedDeal; rank: number }) {
 export function DealsTable({ items, meta }: { items: PrioritizedDeal[]; meta: PaginationMeta }) {
   const firstRank = (meta.page - 1) * meta.pageSize + 1;
   return (
-    <Table>
+    <Table className="min-w-240">
       <TableHeader>
         <TableRow>
           <TableHead>Rank</TableHead>

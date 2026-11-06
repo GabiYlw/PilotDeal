@@ -18,7 +18,7 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/deal-detail-dark.png">
-  <img alt="Deal page with details, interaction timeline, edit forms and the next action card showing the score breakdown" src="docs/screenshots/deal-detail-light.png">
+  <img alt="Deal page with value and interaction count cards, details, interaction timeline, edit forms and the next action card showing the score breakdown" src="docs/screenshots/deal-detail-light.png">
 </picture>
 
 **Ask your CRM**: semantic search over interaction notes. Shown here without an API key, so only the most relevant notes are listed; with a key, Claude adds an answer that cites them.
@@ -33,7 +33,7 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
 - **Priority scoring.** Every open deal gets a score from 0 to 100, computed by transparent rules: days since the last interaction, deal value, stage and expected close date. Each score comes with the factors that produced it, so it can be explained.
 - **Next best action.** On a deal's page, Claude reads the recent interactions and suggests the next best action. It may adjust the rule-based score by **at most 20 points**, and the adjustment is shown as its own factor. Without an API key, or if the model fails, the rule-based action is used.
 - **Ask your CRM.** Ask a question in plain English ("Who is worried about pricing?"). The API retrieves the most relevant interaction notes by semantic search (RAG) and Claude answers **only from those notes, with citations** to its sources. Questions can be scoped to a single deal.
-- **CRM basics.** Companies, contacts, deals and interactions with create, edit and delete, in a minimalist dashboard with light and dark themes.
+- **CRM basics.** Companies, contacts, deals and interactions with create, edit and delete, in a clean dashboard with light and dark themes. The theme follows the system until you pick one with the toggle.
 
 ## Architecture
 
@@ -59,7 +59,7 @@ flowchart LR
     embed -. local model, no network .-> model[[all-MiniLM-L6-v2<br/>384 dimensions]]
 ```
 
-The browser only talks to the Next.js server. The web app fetches data on the server and calls the API over HTTP; it holds no business logic. The API owns every rule, including scoring, and is the only part that talks to the database or to Claude.
+The home page shows the same architecture as a diagram. The browser only talks to the Next.js server. The web app fetches data on the server and calls the API over HTTP; it holds no business logic. The API owns every rule, including scoring, and is the only part that talks to the database or to Claude.
 
 ### Tech stack
 

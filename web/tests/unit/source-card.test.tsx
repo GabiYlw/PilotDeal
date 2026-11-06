@@ -34,7 +34,7 @@ describe("SourceCard", () => {
     const card = renderCard(false);
 
     expect(screen.queryByText("Cited")).toBeNull();
-    expect(card.className).toContain("border-border");
+    expect(card.className).toContain("border-card-border");
     expect(card.className).not.toContain("border-accent");
   });
 
