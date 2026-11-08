@@ -27,6 +27,7 @@ api/                  Express REST API (TypeScript, Prisma, PostgreSQL)
     unit/             No database, no network
     integration/      Supertest against a real test database
 web/                  Next.js dashboard (App Router), consumes the API over HTTP only
+site/                 One-page presentation website (Next.js static export, all text in src/content.ts)
 docker-compose.yml    db (pgvector), api, web
 .claude/              Feature pipeline (commands and agents). Do not modify unless asked.
 ```
@@ -54,6 +55,11 @@ Run from the repository root.
 | Web lint and typecheck | `npm --prefix web run lint` and `npm --prefix web run typecheck` |
 | Web format (write / check) | `npm --prefix web run format` and `npm --prefix web run format:check` |
 | Web production build | `npm --prefix web run build` |
+| Install site deps | `npm --prefix site install` |
+| Site dev server (port 3002) | `npm --prefix site run dev` |
+| Site lint and typecheck | `npm --prefix site run lint` and `npm --prefix site run typecheck` |
+| Site format (write / check) | `npm --prefix site run format` and `npm --prefix site run format:check` |
+| Site static build (output in `site/out`) | `npm --prefix site run build` |
 
 Before reporting a task as done, run `format` in every package you changed, then lint, typecheck and all API tests. If `web/` changed, also run web lint, typecheck, test and build.
 
@@ -65,6 +71,7 @@ Formatting is Prettier with one shared config at the repository root (`.prettier
 
 - **api:** format check, lint, typecheck, unit tests and integration tests against a pgvector service container, with `EMBEDDING_OFFLINE=true` and no `ANTHROPIC_API_KEY`.
 - **web:** format check, lint, typecheck, tests and the production build.
+- **site:** format check, lint, typecheck and the static build.
 - **docker:** builds both images without pushing them.
 
 When a command in the table changes, update the workflow too. Lint the workflow with actionlint: `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12`.

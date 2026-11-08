@@ -1,4 +1,4 @@
-# Shared by api/ and web/ (their format scripts pass --ignore-path ../.prettierignore).
+# Shared by api/, web/ and site/ (their format scripts pass --ignore-path ../.prettierignore).
 # Patterns are relative to this file.
 **/node_modules/
 **/package-lock.json
@@ -7,5 +7,8 @@ api/prisma/migrations/
 web/.next/
 web/out/
 web/next-env.d.ts
+site/.next/
+site/out/
+site/next-env.d.ts
 **/*.tsbuildinfo
 **/coverage/

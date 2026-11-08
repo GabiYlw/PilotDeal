@@ -105,6 +105,35 @@ jobs:
         env:
           API_URL: http://localhost:3001
 
+  site:
+    name: Site (format, lint, typecheck, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install dependencies
+        run: npm --prefix site ci
+
+      - name: Check formatting
+        run: npm --prefix site run format:check
+
+      - name: Lint
+        run: npm --prefix site run lint
+
+      - name: Typecheck
+        run: npm --prefix site run typecheck
+
+      # Static export to site/out. The site has no server code and reads no environment variables.
+      - name: Static build
+        run: npm --prefix site run build
+
   docker:
     name: Docker images (${{ matrix.service }})
     runs-on: ubuntu-latest
