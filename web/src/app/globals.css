@@ -56,6 +56,9 @@
   /* Which ThemeToggle icon shows before React knows the theme (see theme-toggle.tsx). */
   --theme-icon-moon: block;
   --theme-icon-sun: none;
+  /* Which logo file shows (see logo.tsx): the dark artwork in light, the white one in dark. */
+  --logo-on-light: block;
+  --logo-on-dark: none;
 }
 
 /* The dark set is listed twice: once for an explicit choice, once for the system preference. */
@@ -93,6 +96,8 @@
   --overlay: rgb(0 0 0 / 0.6);
   --theme-icon-moon: none;
   --theme-icon-sun: block;
+  --logo-on-light: none;
+  --logo-on-dark: block;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -130,6 +135,8 @@
     --overlay: rgb(0 0 0 / 0.6);
     --theme-icon-moon: none;
     --theme-icon-sun: block;
+    --logo-on-light: none;
+    --logo-on-dark: block;
   }
 }
 
