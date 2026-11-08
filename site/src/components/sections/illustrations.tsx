@@ -1,6 +1,6 @@
-import { ArrowDown, ArrowRight, ShieldCheck, UserCheck } from "lucide-react";
+import { ArrowDown, ShieldCheck } from "lucide-react";
 import { Badge, IllustrationPanel } from "@/components/ui/primitives";
-import { underTheHood } from "@/content";
+import { whyPilotDeal } from "@/content";
 
 // Small pictures of the app's real UI, built in HTML from the same tokens. They show sample data
 // that the card text already explains, so the drawings are hidden from screen readers.
@@ -10,13 +10,13 @@ const ICON = { strokeWidth: 1.75, "aria-hidden": true } as const;
 function SampleDataLabel() {
   return (
     <span className="self-end font-mono text-xs tracking-wider text-muted uppercase">
-      {underTheHood.illustrationNote}
+      {whyPilotDeal.illustrationNote}
     </span>
   );
 }
 
 export function ScoresIllustration() {
-  const data = underTheHood.scores;
+  const data = whyPilotDeal.scores;
   return (
     <IllustrationPanel aria-hidden="true" className="flex flex-col gap-4">
       <SampleDataLabel />
@@ -45,7 +45,7 @@ export function ScoresIllustration() {
 }
 
 export function SourcesIllustration() {
-  const data = underTheHood.sources;
+  const data = whyPilotDeal.sources;
   return (
     <IllustrationPanel aria-hidden="true" className="flex flex-col gap-3">
       <SampleDataLabel />
@@ -82,7 +82,7 @@ export function SourcesIllustration() {
 export function FallbackIllustration() {
   return (
     <IllustrationPanel aria-hidden="true" className="flex flex-col gap-2">
-      {underTheHood.fallback.rows.map((row) => (
+      {whyPilotDeal.fallback.rows.map((row) => (
         <div
           key={row.label}
           className="flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2.5"
@@ -100,7 +100,7 @@ export function GuardrailsList() {
   return (
     <IllustrationPanel>
       <ul className="flex flex-col gap-3">
-        {underTheHood.guardrails.items.map((item) => (
+        {whyPilotDeal.guardrails.items.map((item) => (
           <li key={item.title} className="flex gap-3">
             <ShieldCheck {...ICON} className="mt-0.5 size-4 shrink-0 text-link" />
             <span className="text-sm">
@@ -114,8 +114,8 @@ export function GuardrailsList() {
   );
 }
 
-export function EmbeddingsIllustration() {
-  const { flow } = underTheHood.embeddings;
+export function PrivacyIllustration() {
+  const { flow } = whyPilotDeal.privacy;
   return (
     <IllustrationPanel aria-hidden="true" className="flex flex-col items-stretch gap-1.5">
       {flow.map((step, index) => (
@@ -127,31 +127,6 @@ export function EmbeddingsIllustration() {
           </div>
         </div>
       ))}
-    </IllustrationPanel>
-  );
-}
-
-export function AgentsIllustration() {
-  const data = underTheHood.agents;
-  return (
-    <IllustrationPanel aria-hidden="true">
-      <ol className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-        {data.steps.map((step, index) => (
-          <li key={step} className="flex flex-col items-center gap-2 sm:flex-1 sm:flex-row">
-            <span className="w-full rounded-lg border border-card-border bg-surface px-3 py-2 text-center text-sm font-medium text-foreground">
-              <span className="mr-2 font-mono text-xs text-link">0{index + 1}</span>
-              {step}
-            </span>
-            <ArrowRight {...ICON} className="size-4 shrink-0 rotate-90 text-muted sm:rotate-0" />
-          </li>
-        ))}
-        <li className="flex sm:flex-1">
-          <span className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground">
-            <UserCheck {...ICON} className="size-4" />
-            {data.human}
-          </span>
-        </li>
-      </ol>
     </IllustrationPanel>
   );
 }

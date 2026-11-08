@@ -19,11 +19,7 @@ export interface ThemedImage {
   height: number;
 }
 
-const GITHUB_REPO = "https://github.com/GabiYlw/PilotDeal";
-const GITHUB_PROFILE = "https://github.com/GabiYlw";
-const LINKEDIN = "https://www.linkedin.com/in/gabriel-galbenu-68b753359/";
 const DEMO = "/demo";
-const AUTHOR = "Galbenu Florin Gabriel";
 
 // The screenshots in docs/screenshots/ are all 2880 x 2048.
 function screenshot(name: string, alt: string): ThemedImage {
@@ -54,9 +50,9 @@ const SCREENSHOTS = {
 export const site = {
   url: "https://pilotdeal.online",
   name: "PilotDeal",
-  title: "PilotDeal: an AI-assisted mini CRM",
+  title: "PilotDeal: know which deal to work on next",
   description:
-    "PilotDeal ranks your open deals, explains why, and answers questions from your own client notes, with sources.",
+    "PilotDeal ranks your open deals, explains every score and suggests the next step. Ask questions in plain English and get answers from your own client notes, with sources.",
   ogImage: { path: "/og.png", width: 1200, height: 630, alt: "PilotDeal" },
   logoAlt: "PilotDeal",
   homeLabel: "PilotDeal home",
@@ -69,7 +65,7 @@ export const header = {
   links: [
     { label: "The problem", href: "#problem" },
     { label: "How it works", href: "#how-it-works" },
-    { label: "Under the hood", href: "#under-the-hood" },
+    { label: "Why PilotDeal", href: "#why-pilotdeal" },
     { label: "FAQ", href: "#faq" },
   ] satisfies LinkItem[],
   cta: { label: "Try the demo", href: DEMO } satisfies LinkItem,
@@ -87,7 +83,8 @@ export const hero = {
   intro:
     "PilotDeal is an AI-assisted mini CRM that ranks your open deals, explains why, and answers questions from your own client notes, with sources.",
   primary: { label: "Try the live demo", href: DEMO } satisfies LinkItem,
-  secondary: { label: "View on GitHub", href: GITHUB_REPO, external: true } satisfies LinkItem,
+  secondary: { label: "See how it works", href: "#how-it-works" } satisfies LinkItem,
+  demoNote: "Live demo · sample data",
   screenshot: SCREENSHOTS.deals,
   browserAddress: "pilotdeal.online/demo/deals",
 };
@@ -168,19 +165,17 @@ export const comparison = {
 
 // Sample values for the illustrations. They follow the real rules in api/src/scoring/
 // (Negotiation 25, close date passed 25, 8+ days without contact 20, 20,000+ value 15).
-export const underTheHood = {
-  id: "under-the-hood",
-  eyebrow: "Under the hood",
-  title: "Built to be trusted, not just clever",
+export const whyPilotDeal = {
+  id: "why-pilotdeal",
+  eyebrow: "Why PilotDeal",
+  title: "AI your sales team can check",
   illustrationNote: "Sample data",
   scores: {
     title: "Explainable scores",
-    text: "Every score is the sum of named factors: stage, deal value, days since the last contact and the close date. You see each factor's points, never a black box.",
+    text: "Every score adds up from named factors: stage, deal value, days since the last contact and the close date. Your team sees why a deal is at the top, not just that it is.",
     dealTitle: "Fleet tracking renewal",
     overdue: "Overdue",
-    scoreLabel: "Priority score",
     score: 85,
-    factorsLabel: "Scoring factors",
     factors: [
       { label: "Stage", points: "+25" },
       { label: "Close date passed", points: "+25" },
@@ -190,7 +185,7 @@ export const underTheHood = {
   },
   sources: {
     title: "Answers with sources",
-    text: "Ask finds the notes closest to your question, Claude answers only from them, and every claim cites its source. An answer that cites none of them is dropped.",
+    text: "Ask a question in plain English. The answer comes only from your team's notes and cites the notes it used. If the AI cannot point to a note, you get the matching notes instead.",
     question: "What did Northwind say about pricing?",
     answer: [
       "They asked for a discount on a two-year term ",
@@ -206,59 +201,41 @@ export const underTheHood = {
   },
   fallback: {
     title: "Works without AI",
-    text: "Without an API key, or when the AI fails or returns invalid output, the rule-based score is used. Ask still returns the most relevant notes.",
+    text: "If the AI is switched off or unavailable, PilotDeal keeps ranking deals with its built-in rules, and Ask still finds the most relevant notes.",
     rows: [
-      { label: "API key set", badge: "Scored by AI", tone: "accent" as const },
-      { label: "No key, or the AI fails", badge: "Scored by rules", tone: "neutral" as const },
+      { label: "AI on", badge: "Scored by AI", tone: "accent" as const },
+      { label: "AI off or unavailable", badge: "Scored by rules", tone: "neutral" as const },
     ],
   },
   guardrails: {
-    title: "Guardrails",
-    text: "The AI is treated as an untrusted helper.",
+    title: "AI with guardrails",
+    text: "The AI helps your team. It never gets the last word.",
     items: [
       {
-        title: "Validated output",
-        text: "Claude answers through a fixed tool schema, checked again on the server.",
-      },
-      {
-        title: "Grounding check",
-        text: "An answer must cite at least one of the retrieved notes.",
-      },
-      {
-        title: "Prompt injection protection",
-        text: "Notes are escaped and marked as data, never instructions.",
-      },
-      {
-        title: "Capped adjustment",
+        title: "Bounded scores",
         text: "The AI can move a rule-based score by 20 points at most.",
       },
+      {
+        title: "Grounded answers",
+        text: "An answer must cite at least one of your notes, or it is not shown.",
+      },
+      {
+        title: "Checked replies",
+        text: "Every AI reply is checked before it reaches the screen; a malformed one is discarded.",
+      },
+      {
+        title: "Notes stay data",
+        text: "Your notes reach the AI as data, never as instructions.",
+      },
     ],
   },
-  embeddings: {
-    title: "Local embeddings",
-    text: "Notes are embedded on the API server with all-MiniLM-L6-v2 and stored in PostgreSQL with pgvector. No third-party embedding service sees them.",
+  privacy: {
+    title: "Private by design",
+    text: "Search over your notes runs on the PilotDeal server, so no outside search service sees them. The AI only receives the notes a single task needs.",
     flow: [
-      { label: "Interaction notes", detail: "saved or edited" },
-      { label: "all-MiniLM-L6-v2", detail: "runs on the API server" },
-      { label: "pgvector", detail: "vector(384) in PostgreSQL" },
-    ],
-  },
-  agents: {
-    title: "Built with AI agents",
-    text: "Features go through a Claude Code pipeline of four agents: a planner, a coder, a tester and a reviewer. No agent commits: a human reviews every change and commits it.",
-    pipelineLabel: "Feature pipeline",
-    steps: ["Planner", "Coder", "Tester", "Reviewer"],
-    human: "Human review",
-  },
-  stack: {
-    label: "Stack",
-    items: [
-      "Next.js",
-      "Express",
-      "PostgreSQL with pgvector",
-      "Claude API",
-      "Docker",
-      "GitHub Actions",
+      { label: "Your notes", detail: "saved or edited" },
+      { label: "Search index", detail: "built on the PilotDeal server" },
+      { label: "Your database", detail: "stored next to your deals" },
     ],
   },
 };
@@ -269,39 +246,27 @@ export const faq = {
   title: "Questions",
   items: [
     {
-      question: "Is PilotDeal a real product?",
-      answer: ["It is a portfolio project with a live demo running on sample data."],
-    },
-    {
-      question: "What is sent to the AI?",
+      question: "Can I trust the scores?",
       answer: [
-        "Only what one task needs, and only when an API key is set. To score a deal: that deal's details and its five most recent notes. To answer a question: the question and the notes found for it. Embeddings are computed on the server.",
+        "Every score shows its working: the points for stage, deal value, days since the last contact and the close date add up to the score. If the AI adjusts it, the adjustment appears as its own line and is never more than 20 points, and each deal page shows whether it was scored by rules or by AI.",
       ],
     },
     {
-      question: "What happens without an API key?",
+      question: "Does the AI decide for me?",
       answer: [
-        "Everything still works: scores come from rules, and Ask returns the most relevant notes without a generated answer.",
+        "No. PilotDeal suggests a priority and a next step, and you decide what to do. It never changes a deal on its own: stages, values and dates change only when someone edits them.",
       ],
     },
     {
-      question: "How is it built?",
+      question: "Where is my data processed?",
       answer: [
-        "The code, the architecture and the setup steps are in the ",
-        { label: "GitHub repository", href: GITHUB_REPO, external: true },
-        " and its ",
-        { label: "README", href: `${GITHUB_REPO}#readme`, external: true },
-        ".",
+        "Your deals and notes are stored in PilotDeal's database, and search over your notes runs on the PilotDeal server. Only when the AI features are on does PilotDeal send Claude, Anthropic's AI model, what one task needs: a deal's details and its five most recent notes to score it, or your question and the matching notes, with their deal and company names, to answer it.",
       ],
     },
     {
-      question: "Who made it?",
+      question: "What happens if the AI is unavailable?",
       answer: [
-        `${AUTHOR}. Find me on `,
-        { label: "LinkedIn", href: LINKEDIN, external: true },
-        " and ",
-        { label: "GitHub", href: GITHUB_PROFILE, external: true },
-        ".",
+        "Everything keeps working: scores come from the built-in rules, and Ask returns the most relevant notes without a generated answer.",
       ],
     },
   ] satisfies { question: string; answer: RichText }[],
@@ -310,15 +275,10 @@ export const faq = {
 export const finalCta = {
   title: "See it in action.",
   primary: hero.primary,
-  secondary: hero.secondary,
+  demoNote: hero.demoNote,
 };
 
 export const footer = {
-  tagline: "An AI-assisted mini CRM that ranks your deals and answers from your notes.",
-  linksLabel: "Elsewhere",
-  links: [
-    { label: "GitHub", href: GITHUB_REPO, external: true },
-    { label: "LinkedIn", href: LINKEDIN, external: true },
-  ] satisfies LinkItem[],
-  copyright: `© 2026 ${AUTHOR}`,
+  tagline: "Know which deal matters, and what to do next.",
+  copyright: "© 2026 PilotDeal",
 };

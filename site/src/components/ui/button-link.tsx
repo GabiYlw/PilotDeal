@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
 import type { LinkItem } from "@/content";
 import { cn } from "@/lib/cn";
 import { SmartLink } from "./smart-link";
@@ -17,7 +17,8 @@ const SIZES: Record<ButtonLinkSize, string> = {
 };
 
 // A pill-shaped link that looks like a button, with an optional trailing arrow: "arrow" for a
-// page on this domain, "external" for a link that leaves it.
+// page on this domain, "down" for a section further down this page, "external" for a link that
+// leaves the domain.
 export function ButtonLink({
   link,
   variant = "primary",
@@ -29,7 +30,7 @@ export function ButtonLink({
   link: LinkItem;
   variant?: ButtonLinkVariant;
   size?: ButtonLinkSize;
-  icon?: "none" | "arrow" | "external";
+  icon?: "none" | "arrow" | "down" | "external";
   className?: string;
   onClick?: () => void;
 }) {
@@ -46,6 +47,7 @@ export function ButtonLink({
     >
       {link.label}
       {icon === "arrow" && <ArrowRight aria-hidden="true" strokeWidth={1.75} className="size-4" />}
+      {icon === "down" && <ArrowDown aria-hidden="true" strokeWidth={1.75} className="size-4" />}
       {icon === "external" && (
         <ArrowUpRight aria-hidden="true" strokeWidth={1.75} className="size-4" />
       )}

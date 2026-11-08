@@ -1,6 +1,6 @@
 import { BrowserFrame } from "@/components/ui/browser-frame";
 import { ButtonLink } from "@/components/ui/button-link";
-import { Container } from "@/components/ui/primitives";
+import { Container, DemoNote } from "@/components/ui/primitives";
 import { ThemedImage } from "@/components/ui/themed-image";
 import { hero } from "@/content";
 
@@ -19,9 +19,12 @@ export function Hero() {
             <span className="block text-link">{second}</span>
           </h1>
           <p className="max-w-2xl text-base text-muted sm:text-lg">{hero.intro}</p>
-          <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-            <ButtonLink link={hero.primary} icon="arrow" />
-            <ButtonLink link={hero.secondary} variant="secondary" icon="external" />
+          <div className="flex w-full flex-col items-center gap-3">
+            <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+              <ButtonLink link={hero.primary} icon="arrow" />
+              <ButtonLink link={hero.secondary} variant="secondary" icon="down" />
+            </div>
+            <DemoNote>{hero.demoNote}</DemoNote>
           </div>
         </div>
         <BrowserFrame address={hero.browserAddress} className="w-full max-w-5xl">

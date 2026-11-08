@@ -4,7 +4,7 @@ import { FinalCta } from "@/components/sections/final-cta";
 import { Hero } from "@/components/sections/hero";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { Problem } from "@/components/sections/problem";
-import { UnderTheHood } from "@/components/sections/under-the-hood";
+import { WhyPilotDeal } from "@/components/sections/why-pilotdeal";
 
 export default function HomePage() {
   return (
@@ -13,7 +13,7 @@ export default function HomePage() {
       <Problem />
       <HowItWorks />
       <Comparison />
-      <UnderTheHood />
+      <WhyPilotDeal />
       <Faq />
       <FinalCta />
     </>

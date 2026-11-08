@@ -101,6 +101,11 @@ export function Section({
   );
 }
 
+// Says plainly that the demo runs on sample data. Sits next to the demo buttons.
+export function DemoNote({ className, ...props }: ComponentProps<"p">) {
+  return <p className={cn("font-mono text-xs tracking-wide text-muted", className)} {...props} />;
+}
+
 // The canvas panel at the top of an "Under the hood" card.
 export function IllustrationPanel({ className, ...props }: ComponentProps<"div">) {
   return (
