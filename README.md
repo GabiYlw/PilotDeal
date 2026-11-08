@@ -5,7 +5,7 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
 [![CI](https://github.com/GabiYlw/PilotDeal/actions/workflows/ci.yml/badge.svg)](https://github.com/GabiYlw/PilotDeal/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Live demo:** [demo.pilotdeal.online](https://demo.pilotdeal.online) _(coming soon)_
+**Live demo:** [pilotdeal.online/demo](https://pilotdeal.online/demo) _(coming soon)_
 
 **Open deals ranked by priority**, with the reason behind each score:
 
