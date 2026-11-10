@@ -1,16 +1,17 @@
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
-// Shared look for Input, Select and Textarea. aria-invalid turns the border red.
+// Shared look for Input, Select and Textarea. aria-invalid turns the border red. Below md fields
+// are 44px tall with 16px text, so they are easy to tap and iOS does not zoom in on focus.
 const FIELD =
-  "w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted transition-colors hover:border-border-strong focus-visible:border-ring disabled:opacity-50 aria-[invalid=true]:border-danger";
+  "w-full min-w-0 rounded-lg border border-border bg-background px-3 text-base md:text-sm text-foreground placeholder:text-muted transition-colors hover:border-border-strong focus-visible:border-ring disabled:opacity-50 aria-[invalid=true]:border-danger";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input className={cn(FIELD, "h-9", className)} {...props} />;
+  return <input className={cn(FIELD, "h-11 md:h-9", className)} {...props} />;
 }
 
 export function Select({ className, ...props }: ComponentProps<"select">) {
-  return <select className={cn(FIELD, "h-9", className)} {...props} />;
+  return <select className={cn(FIELD, "h-11 md:h-9", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {

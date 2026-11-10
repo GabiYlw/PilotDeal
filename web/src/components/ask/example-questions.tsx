@@ -9,7 +9,9 @@ export function ExampleQuestions({ dealId }: { dealId: string | null }) {
       <ul className="flex flex-col gap-2 text-sm">
         {EXAMPLE_QUESTIONS.map((question) => (
           <li key={question}>
-            <TextLink href={askHref({ question, dealId })}>{question}</TextLink>
+            <TextLink standalone href={askHref({ question, dealId })}>
+              {question}
+            </TextLink>
           </li>
         ))}
       </ul>

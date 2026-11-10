@@ -20,8 +20,8 @@ export async function CompaniesList({ searchParams }: { searchParams: SearchPara
   if (meta.total === 0) {
     return (
       <EmptyState
-        title="No companies yet"
-        action={<ButtonLink href="/companies/new">New company</ButtonLink>}
+        title="No clients yet"
+        action={<ButtonLink href="/clients/new">New client</ButtonLink>}
       />
     );
   }
@@ -30,7 +30,7 @@ export async function CompaniesList({ searchParams }: { searchParams: SearchPara
       <EmptyState
         title="This page is empty"
         action={
-          <ButtonLink href="/companies" variant="secondary">
+          <ButtonLink href="/clients" variant="secondary">
             Back to the first page
           </ButtonLink>
         }
@@ -44,7 +44,7 @@ export async function CompaniesList({ searchParams }: { searchParams: SearchPara
         page={meta.page}
         pageSize={meta.pageSize}
         total={meta.total}
-        basePath="/companies"
+        basePath="/clients"
       />
     </div>
   );

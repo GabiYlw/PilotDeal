@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompaniesList } from "@/components/companies/companies-list";
 import { API_UNREACHABLE, ApiError, getCompanies } from "@/lib/api";
@@ -35,19 +35,47 @@ beforeEach(() => {
   vi.mocked(getCompanies).mockResolvedValue(page(companies, 3));
 });
 
+// Both layouts are in the DOM (CSS shows the cards below md and the table from md up, and jsdom
+// applies no CSS), so these queries are scoped to one of them.
+function table() {
+  return within(screen.getByRole("table"));
+}
+
+function cards() {
+  return within(screen.getByRole("list", { name: "Clients" }));
+}
+
 describe("CompaniesList", () => {
-  it("renders a table with a link per company and the external website link", async () => {
+  it("renders a table with a link per client and the external website link", async () => {
     await renderList();
 
-    expect(screen.getByRole("columnheader", { name: "Name" })).toBeTruthy();
-    expect(screen.getByRole("columnheader", { name: "Industry" })).toBeTruthy();
-    expect(screen.getByRole("columnheader", { name: "Website" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Acme" }).getAttribute("href")).toBe("/companies/c1");
-    const website = screen.getByRole("link", { name: "https://acme.test" });
+    expect(table().getByRole("columnheader", { name: "Name" })).toBeTruthy();
+    expect(table().getByRole("columnheader", { name: "Industry" })).toBeTruthy();
+    expect(table().getByRole("columnheader", { name: "Website" })).toBeTruthy();
+    expect(table().getByRole("link", { name: "Acme" }).getAttribute("href")).toBe("/clients/c1");
+    const website = table().getByRole("link", { name: "https://acme.test" });
     expect(website.getAttribute("href")).toBe("https://acme.test");
     expect(website.getAttribute("target")).toBe("_blank");
     expect(website.getAttribute("rel")).toBe("noopener noreferrer");
-    expect(screen.getAllByText("None").length).toBe(4);
+    expect(table().getAllByText("None").length).toBe(4);
+  });
+
+  it("renders the phone cards with the name link and industry and website as label and value", async () => {
+    await renderList();
+
+    const [acme, beta] = cards().getAllByRole("listitem");
+    expect(cards().getAllByRole("listitem")).toHaveLength(3);
+    const acmeCard = within(acme);
+    expect(acmeCard.getByRole("link", { name: "Acme" }).getAttribute("href")).toBe("/clients/c1");
+    expect(acmeCard.getAllByRole("term").map((term) => term.textContent)).toEqual([
+      "Industry",
+      "Website",
+    ]);
+    expect(acmeCard.getByText("SaaS")).toBeTruthy();
+    const website = acmeCard.getByRole("link", { name: "https://acme.test" });
+    expect(website.getAttribute("target")).toBe("_blank");
+    expect(website.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(within(beta).getAllByText("None")).toHaveLength(2);
   });
 
   it.each<[string, string | string[] | undefined, number]>([
@@ -65,9 +93,9 @@ describe("CompaniesList", () => {
     vi.mocked(getCompanies).mockResolvedValue(page([], 0));
     await renderList();
 
-    expect(screen.getByText("No companies yet")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "New company" }).getAttribute("href")).toBe(
-      "/companies/new",
+    expect(screen.getByText("No clients yet")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "New client" }).getAttribute("href")).toBe(
+      "/clients/new",
     );
   });
 
@@ -77,7 +105,7 @@ describe("CompaniesList", () => {
 
     expect(screen.getByText("This page is empty")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to the first page" }).getAttribute("href")).toBe(
-      "/companies",
+      "/clients",
     );
   });
 
@@ -85,9 +113,7 @@ describe("CompaniesList", () => {
     vi.mocked(getCompanies).mockResolvedValue(page(companies, 45));
     await renderList();
 
-    expect(screen.getByRole("link", { name: "Next" }).getAttribute("href")).toBe(
-      "/companies?page=2",
-    );
+    expect(screen.getByRole("link", { name: "Next" }).getAttribute("href")).toBe("/clients?page=2");
   });
 
   it("does not show pagination for a single page", async () => {

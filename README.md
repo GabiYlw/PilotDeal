@@ -11,7 +11,7 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/deals-dark.png">
-  <img alt="Deals list ranked by priority score, with stage, value, expected close date, overdue badges and the reason for each score" src="docs/screenshots/deals-light.png">
+  <img alt="Deals list ranked by priority score, with client, stage, value, expected close date, overdue badges and the reason for each score" src="docs/screenshots/deals-light.png">
 </picture>
 
 **A deal with its next best action** and the factors that make up the score:
@@ -21,19 +21,20 @@ An AI-assisted mini CRM that tells you which deal to work on next, and answers q
   <img alt="Deal page with value and interaction count cards, details, interaction timeline, edit forms and the next action card showing the score breakdown" src="docs/screenshots/deal-detail-light.png">
 </picture>
 
-**Ask your CRM**: semantic search over interaction notes. Shown here without an API key, so only the most relevant notes are listed; with a key, Claude adds an answer that cites them.
+**Ask the Pilot**: semantic search over interaction notes. Shown here without an API key, so only the most relevant notes are listed; with a key, Claude adds an answer that cites them.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/ask-dark.png">
-  <img alt="Ask your CRM page with a question about pricing and the most relevant interaction notes as labelled sources" src="docs/screenshots/ask-light.png">
+  <img alt="Ask the Pilot page with a question about pricing and the most relevant interaction notes as labelled sources" src="docs/screenshots/ask-light.png">
 </picture>
 
 ## Features
 
 - **Priority scoring.** Every open deal gets a score from 0 to 100, computed by transparent rules: days since the last interaction, deal value, stage and expected close date. Each score comes with the factors that produced it, so it can be explained.
 - **Next best action.** On a deal's page, Claude reads the recent interactions and suggests the next best action. It may adjust the rule-based score by **at most 20 points**, and the adjustment is shown as its own factor. Without an API key, or if the model fails, the rule-based action is used.
-- **Ask your CRM.** Ask a question in plain English ("Who is worried about pricing?"). The API retrieves the most relevant interaction notes by semantic search (RAG) and Claude answers **only from those notes, with citations** to its sources. Questions can be scoped to a single deal.
-- **CRM basics.** Companies, contacts, deals and interactions with create, edit and delete, in a clean dashboard with light and dark themes. The theme follows the system until you pick one with the toggle.
+- **Ask the Pilot.** Ask a question in plain English ("Who is worried about pricing?"). The API retrieves the most relevant interaction notes by semantic search (RAG) and Claude answers **only from those notes, with citations** to its sources. Questions can be scoped to a single deal.
+- **CRM basics.** Clients, contacts, deals and interactions with create, edit and delete, in a clean dashboard with light and dark themes. The theme follows the system until you pick one with the toggle.
+- **Works on phones.** Every page works from 320px wide: the deal and client tables turn into cards, controls stack, and tap targets are at least 44px.
 
 ## Architecture
 
@@ -55,7 +56,7 @@ flowchart LR
     web -- HTTP / JSON --> routes
     repos --> db[(PostgreSQL<br/>with pgvector)]
     scorers -- next action --> claude[Claude API]
-    services -- Ask your CRM answers --> claude
+    services -- Ask the Pilot answers --> claude
     embed -. local model, no network .-> model[[all-MiniLM-L6-v2<br/>384 dimensions]]
 ```
 
@@ -86,7 +87,7 @@ The home page shows the same architecture as a diagram. The browser only talks t
 ### Limitations and next steps
 
 - **No evaluation set yet.** Retrieval quality and answer quality are covered by tests of the logic around the model, not measured against a labelled set of questions. Building a small evaluation set is the next step.
-- **No agent with tools yet.** Ask your CRM answers from retrieved notes in one step; it cannot yet query deals, values or dates through tools.
+- **No agent with tools yet.** Ask the Pilot answers from retrieved notes in one step; it cannot yet query deals, values or dates through tools.
 - **Single user, no authentication.** There are no accounts or permissions yet, so it is not ready for real customer data.
 
 ## Getting started
@@ -100,7 +101,7 @@ git clone https://github.com/GabiYlw/PilotDeal.git
 cd PilotDeal
 
 # Optional: enable Claude features. Without a key, scoring is rule-based and
-# Ask your CRM returns the most relevant notes without a generated answer.
+# Ask the Pilot returns the most relevant notes without a generated answer.
 cp .env.example .env   # then set ANTHROPIC_API_KEY
 
 docker compose --profile full up -d --build --wait
@@ -148,7 +149,7 @@ Every variable is validated at startup, and the API fails fast with a clear mess
 
 ### Seeding
 
-The seed creates 5 companies with contacts, deals in every stage and realistic interaction notes, then embeds the notes. It **deletes existing data first**.
+The seed creates 5 clients with contacts, deals in every stage and realistic interaction notes, then embeds the notes. It **deletes existing data first**.
 
 - Local: `npm --prefix api run seed`
 - Docker: `docker compose --profile full exec api node dist/prisma/seed.js`

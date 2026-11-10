@@ -6,7 +6,7 @@ import {
   editContact,
   removeCompany,
   removeContact,
-} from "@/app/companies/[id]/actions";
+} from "@/app/clients/[id]/actions";
 import { ApiUnavailable } from "@/components/api-unavailable";
 import { CompanyDealsSection } from "@/components/companies/company-deals-section";
 import { CompanyDetails } from "@/components/companies/company-details";
@@ -46,7 +46,7 @@ export async function CompanyView({ params }: { params: Promise<{ id: string }> 
         }
         breadcrumb={[
           { label: "Home", href: "/" },
-          { label: "Companies", href: "/companies" },
+          { label: "Clients", href: "/clients" },
           { label: company.name },
         ]}
       />

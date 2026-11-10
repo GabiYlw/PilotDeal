@@ -16,7 +16,7 @@ export function SourceCard({ source, cited }: { source: AskSource; cited: boolea
       highlighted={cited}
       className="flex scroll-mt-6 flex-col gap-2"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-foreground">{source.label}</span>
         {cited && <Badge variant="accent">Cited</Badge>}
         <Badge>{INTERACTION_TYPE_LABELS[source.type]}</Badge>

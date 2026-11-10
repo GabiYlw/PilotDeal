@@ -26,7 +26,7 @@ export function StatCard({
       <IconCircle icon={icon} tone={tone} />
       <div className="flex min-w-0 flex-col gap-1.5">
         <dt className="text-sm font-medium text-muted">{label}</dt>
-        <dd className="text-3xl leading-none font-bold tracking-tight text-foreground tabular-nums">
+        <dd className="text-3xl leading-none font-bold tracking-tight [overflow-wrap:anywhere] text-foreground tabular-nums">
           {value}
         </dd>
       </div>

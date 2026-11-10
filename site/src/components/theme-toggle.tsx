@@ -64,7 +64,7 @@ export function ThemeToggle() {
       type="button"
       aria-label={theme === null ? header.theme.unknown : LABELS[theme]}
       onClick={() => saveTheme(oppositeTheme(readTheme()))}
-      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors duration-150 hover:border-accent motion-reduce:transition-none"
+      className="flex size-11 shrink-0 md:size-9 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors duration-150 hover:border-accent motion-reduce:transition-none"
     >
       <ThemeIcon theme={theme} />
     </button>

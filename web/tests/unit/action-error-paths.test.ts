@@ -10,7 +10,7 @@ import {
   editCompany,
   editContact,
   removeContact,
-} from "@/app/companies/[id]/actions";
+} from "@/app/clients/[id]/actions";
 import { editDeal } from "@/app/deals/[id]/actions";
 import {
   API_UNREACHABLE,

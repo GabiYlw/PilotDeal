@@ -74,7 +74,7 @@ describe("DealView", () => {
 
     expect(screen.getByRole("heading", { name: "Big deal" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Acme Corp" }).getAttribute("href")).toBe(
-      "/companies/c1",
+      "/clients/c1",
     );
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     expect(breadcrumb.getByRole("link", { name: "Deals" }).getAttribute("href")).toBe("/deals");
@@ -83,7 +83,7 @@ describe("DealView", () => {
     expect(screen.getByText("No interactions yet")).toBeTruthy();
   });
 
-  it("links to Ask your CRM scoped to this deal", async () => {
+  it("links to Ask the Pilot scoped to this deal", async () => {
     await renderView();
 
     expect(screen.getByRole("link", { name: "Ask about this deal" }).getAttribute("href")).toBe(

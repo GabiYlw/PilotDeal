@@ -16,7 +16,7 @@ export function SiteHeader() {
         <a
           href="#top"
           aria-label={site.homeLabel}
-          className="flex shrink-0 items-center rounded-md py-2"
+          className="flex min-h-11 shrink-0 items-center rounded-md py-2"
         >
           <Logo className="h-3 w-auto min-[400px]:h-3.5 sm:h-4" />
         </a>

@@ -59,13 +59,15 @@ export function InteractionItem({
   const typeLabel = INTERACTION_TYPE_LABELS[interaction.type];
   return (
     <>
-      <div id={summaryId} className="flex items-center gap-2">
+      <div id={summaryId} className="flex flex-wrap items-center gap-2">
         <Badge>{typeLabel}</Badge>
         <time dateTime={interaction.occurredAt} className="text-xs text-muted">
           {dateLabel}
         </time>
       </div>
-      <p className="text-sm break-words whitespace-pre-line text-foreground">{interaction.notes}</p>
+      <p className="text-sm [overflow-wrap:anywhere] whitespace-pre-line text-foreground">
+        {interaction.notes}
+      </p>
       <div className="flex gap-1">
         <Button
           ref={editButtonRef}

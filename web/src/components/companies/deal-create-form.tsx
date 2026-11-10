@@ -104,7 +104,7 @@ export function DealCreateForm({
         <FieldError id="new-deal-date-error" message={fieldErrors.expectedCloseDate} />
       </div>
       <FormError message={state.formError} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Creating..." : "Create deal"}
         </Button>

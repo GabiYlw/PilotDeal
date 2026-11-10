@@ -24,7 +24,7 @@ describe("HomeStats", () => {
 
     expect(screen.getAllByRole("term").map((term) => term.textContent)).toEqual([
       "Open deals",
-      "Companies",
+      "Clients",
     ]);
     expect(screen.getAllByRole("definition").map((value) => value.textContent)).toEqual([
       "7",

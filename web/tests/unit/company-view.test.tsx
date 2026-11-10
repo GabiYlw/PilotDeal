@@ -16,7 +16,7 @@ vi.mock("@/lib/api", async (importOriginal) => ({
   getCompanyContacts: vi.fn(),
   getCompanyDeals: vi.fn(),
 }));
-vi.mock("@/app/companies/[id]/actions", () => ({
+vi.mock("@/app/clients/[id]/actions", () => ({
   addContact: vi.fn(),
   addDeal: vi.fn(),
   editCompany: vi.fn(),
@@ -82,14 +82,18 @@ describe("CompanyView", () => {
 
     expect(screen.getByRole("heading", { name: "Acme Corp" })).toBeTruthy();
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
-    expect(breadcrumb.getByRole("link", { name: "Companies" }).getAttribute("href")).toBe(
-      "/companies",
-    );
-    expect(screen.getByRole("button", { name: "Delete company" })).toBeTruthy();
+    expect(breadcrumb.getByRole("link", { name: "Clients" }).getAttribute("href")).toBe("/clients");
+    expect(screen.getByRole("button", { name: "Delete client" })).toBeTruthy();
     expect(screen.getByText("Ann Lee")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Big deal" }).getAttribute("href")).toBe("/deals/d1");
-    expect(screen.getByText("Won")).toBeTruthy();
-    expect(screen.getByText("No date")).toBeTruthy();
+    // The deals show as a table and as phone cards (CSS picks one; jsdom applies no CSS).
+    const table = within(screen.getByRole("table"));
+    expect(table.getByRole("link", { name: "Big deal" }).getAttribute("href")).toBe("/deals/d1");
+    expect(table.getByText("Won")).toBeTruthy();
+    expect(table.getByText("No date")).toBeTruthy();
+    const card = within(within(screen.getByRole("list", { name: "Deals" })).getByRole("listitem"));
+    expect(card.getByRole("link", { name: "Big deal" }).getAttribute("href")).toBe("/deals/d1");
+    expect(card.getByText("Won")).toBeTruthy();
+    expect(card.getByText("No date")).toBeTruthy();
   });
 
   it("fetches contacts and deals with page 1 and pageSize 100", async () => {

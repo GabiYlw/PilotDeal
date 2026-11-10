@@ -106,7 +106,7 @@ export function CompanyForm({
         <FieldError id={`${website}-error`} message={fieldErrors.website} />
       </div>
       <FormError message={state.formError} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>

@@ -55,7 +55,7 @@ export function CompanyDetails({ company, action }: { company: Company; action: 
             website: company.website ?? "",
           }}
           idPrefix="company-edit"
-          ariaLabel="Edit company"
+          ariaLabel="Edit client"
           submitLabel="Save"
           pendingLabel="Saving..."
           onCancel={closeEditor}
@@ -67,7 +67,7 @@ export function CompanyDetails({ company, action }: { company: Company; action: 
           <DescriptionItem term="Industry">{company.industry ?? <MutedText />}</DescriptionItem>
           <DescriptionItem term="Website">
             {company.website ? (
-              <TextLink href={company.website} target="_blank" rel="noopener noreferrer">
+              <TextLink standalone href={company.website} target="_blank" rel="noopener noreferrer">
                 {company.website}
               </TextLink>
             ) : (

@@ -2,8 +2,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { editCompany, removeCompany } from "@/app/companies/[id]/actions";
-import { addCompany } from "@/app/companies/new/actions";
+import { editCompany, removeCompany } from "@/app/clients/[id]/actions";
+import { addCompany } from "@/app/clients/new/actions";
 import { API_UNREACHABLE, ApiError, createCompany, deleteCompany, updateCompany } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
 import {
@@ -67,8 +67,8 @@ describe("addCompany", () => {
       industry: null,
       website: "https://acme.test",
     });
-    expect(revalidateMock).toHaveBeenCalledWith("/companies");
-    expect(redirectMock).toHaveBeenCalledWith("/companies/new1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients");
+    expect(redirectMock).toHaveBeenCalledWith("/clients/new1");
   });
 
   it("sends whitespace-only optional fields as null", async () => {
@@ -127,8 +127,8 @@ describe("editCompany", () => {
       industry: null,
       website: "https://acme.test",
     });
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
-    expect(revalidateMock).toHaveBeenCalledWith("/companies");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients");
     expect(result).toEqual({ status: "success", fieldErrors: {} });
   });
 
@@ -167,9 +167,9 @@ describe("removeCompany", () => {
     await expect(removeCompany("c1")).rejects.toBe(REDIRECT);
 
     expect(deleteMock).toHaveBeenCalledWith("c1");
-    expect(revalidateMock).toHaveBeenCalledWith("/companies");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients");
     expect(revalidateMock).toHaveBeenCalledWith("/deals");
-    expect(redirectMock).toHaveBeenCalledWith("/companies?deleted=1", "replace");
+    expect(redirectMock).toHaveBeenCalledWith("/clients?deleted=1", "replace");
   });
 
   it("redirects to the already-deleted notice on a 404", async () => {
@@ -177,7 +177,7 @@ describe("removeCompany", () => {
 
     await expect(removeCompany("c1")).rejects.toBe(REDIRECT);
 
-    expect(redirectMock).toHaveBeenCalledWith("/companies?deleted=already", "replace");
+    expect(redirectMock).toHaveBeenCalledWith("/clients?deleted=already", "replace");
   });
 
   it.each([

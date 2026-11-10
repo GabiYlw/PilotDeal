@@ -17,7 +17,7 @@ export function DeleteDealButton({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const { open, pending, error, openDialog, closeDialog, confirm } = useConfirmedAction(action);
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col gap-1 sm:items-end">
       <Button ref={triggerRef} variant="secondary" size="sm" onClick={openDialog}>
         Delete deal
       </Button>

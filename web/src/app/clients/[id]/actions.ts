@@ -34,7 +34,7 @@ const DEAL_FIELDS = ["title", "value", "stage", "expectedCloseDate"] as const;
 const NO_FIELDS = [] as const;
 
 function revalidateCompany(companyId: string): void {
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/clients/${companyId}`);
 }
 
 function contactValues(formData: FormData) {
@@ -81,7 +81,7 @@ export async function editCompany(
     throw error;
   }
   revalidateCompany(companyId);
-  revalidatePath("/companies");
+  revalidatePath("/clients");
   return { status: "success", fieldErrors: {} };
 }
 
@@ -102,7 +102,7 @@ export async function removeCompany(companyId: string): Promise<ActionState> {
     outcome = "already";
   }
   // The delete cascades to the company's deals, so the deals list changes too.
-  revalidatePath("/companies");
+  revalidatePath("/clients");
   revalidatePath("/deals");
   // Outside the try: redirect works by throwing, and a catch would swallow it.
   redirect(companyDeletedUrl(outcome), RedirectType.replace);

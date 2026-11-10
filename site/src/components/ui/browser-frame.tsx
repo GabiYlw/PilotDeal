@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-// A simple browser window around a screenshot: three dots and an optional address pill.
+// A simple browser window around a screenshot: three dots and an optional address pill. Below
+// 360px the dots are hidden so the whole address fits.
 export function BrowserFrame({
   address,
   className,
@@ -22,7 +23,7 @@ export function BrowserFrame({
         aria-hidden="true"
         className="flex items-center gap-3 border-b border-card-border bg-canvas px-4 py-2.5"
       >
-        <span className="flex gap-1.5">
+        <span className="flex gap-1.5 max-[359px]:hidden">
           <span className="size-2.5 rounded-full bg-border-strong" />
           <span className="size-2.5 rounded-full bg-border-strong" />
           <span className="size-2.5 rounded-full bg-border-strong" />

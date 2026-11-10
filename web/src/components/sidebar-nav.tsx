@@ -11,16 +11,22 @@ interface NavLink {
   icon: LucideIcon;
 }
 
-const SECTIONS: ReadonlyArray<{ label: string; links: ReadonlyArray<NavLink> }> = [
+// grow: on a phone the sections share the bar's spare width in proportion to their link count.
+const SECTIONS: ReadonlyArray<{ label: string; grow: string; links: ReadonlyArray<NavLink> }> = [
   {
     label: "Workspace",
+    grow: "grow-3",
     links: [
       { href: "/", label: "Home", icon: House },
-      { href: "/companies", label: "Companies", icon: Building2 },
+      { href: "/clients", label: "Clients", icon: Building2 },
       { href: "/deals", label: "Deals", icon: Handshake },
     ],
   },
-  { label: "AI", links: [{ href: "/ask", label: "Ask", icon: MessageSquareText }] },
+  {
+    label: "AI",
+    grow: "grow",
+    links: [{ href: "/ask", label: "Ask", icon: MessageSquareText }],
+  },
 ];
 
 // The label is hidden on a phone, but still names its list for assistive technology.
@@ -36,12 +42,13 @@ function isActive(pathname: string | undefined, href: string): boolean {
 function NavItem({ link, active }: { link: NavLink; active: boolean }) {
   const Icon = link.icon;
   return (
-    <li>
+    <li className="flex-auto md:flex-none">
       <Link
         href={link.href}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm whitespace-nowrap transition-colors md:gap-2.5 md:px-3 md:py-2.5",
+          // Phone: a tab with the icon above the label, at least 44px tall. Desktop: icon and label in a row.
+          "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-xs whitespace-nowrap transition-colors md:min-h-0 md:flex-row md:justify-start md:gap-2.5 md:px-3 md:py-2.5 md:text-sm",
           active
             ? "bg-accent font-semibold text-accent-foreground"
             : "font-medium text-muted hover:bg-surface-hover hover:text-foreground",
@@ -61,10 +68,10 @@ function NavItem({ link, active }: { link: NavLink; active: boolean }) {
 // No hooks, so it can render in the static shell. Without a pathname no link is highlighted.
 export function NavLinks({ pathname }: { pathname?: string }) {
   return (
-    <nav aria-label="Main" className="-m-1 overflow-x-auto p-1 md:m-0 md:overflow-visible md:p-0">
-      <div className="flex gap-0.5 md:flex-col md:gap-5">
+    <nav aria-label="Main">
+      <div className="flex gap-1 md:flex-col md:gap-5">
         {SECTIONS.map((section) => (
-          <div key={section.label} className="flex flex-col gap-1.5">
+          <div key={section.label} className={cn("flex flex-col gap-1.5 md:grow-0", section.grow)}>
             <p
               id={sectionLabelId(section.label)}
               className="hidden px-3 text-[11px] font-semibold tracking-wider text-muted uppercase md:block"
@@ -73,7 +80,7 @@ export function NavLinks({ pathname }: { pathname?: string }) {
             </p>
             <ul
               aria-labelledby={sectionLabelId(section.label)}
-              className="flex gap-0.5 md:flex-col"
+              className="flex gap-1 md:flex-col md:gap-0.5"
             >
               {section.links.map((link) => (
                 <NavItem key={link.href} link={link} active={isActive(pathname, link.href)} />

@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { addDeal } from "@/app/companies/[id]/actions";
+import { addDeal } from "@/app/clients/[id]/actions";
 import { editDeal } from "@/app/deals/[id]/actions";
 import { ApiError, createCompanyDeal, updateDeal } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
@@ -59,7 +59,7 @@ describe("addDeal", () => {
     expect(companyId).toBe("c1");
     expect(body).toEqual({ title: "Big", value: 1500.5, stage: "LEAD" });
     expect("expectedCloseDate" in body).toBe(false);
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
     expect(revalidateMock).toHaveBeenCalledWith("/deals");
     expect(redirectMock).toHaveBeenCalledWith("/deals/d9");
   });
@@ -136,7 +136,7 @@ describe("editDeal", () => {
     expect("stage" in updateMock.mock.calls[0][1]).toBe(false);
     expect(revalidateMock).toHaveBeenCalledWith("/deals/d1");
     expect(revalidateMock).toHaveBeenCalledWith("/deals");
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
     expect(result).toEqual({ status: "success", fieldErrors: {} });
   });
 

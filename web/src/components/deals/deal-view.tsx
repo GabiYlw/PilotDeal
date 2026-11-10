@@ -52,7 +52,7 @@ export async function DealView({ params }: { params: Promise<{ id: string }> }) 
         title={deal.title}
         description={
           <>
-            Company: <TextLink href={`/companies/${company.id}`}>{company.name}</TextLink>
+            Client: <TextLink href={`/clients/${company.id}`}>{company.name}</TextLink>
           </>
         }
         actions={

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function CompanyDetailSkeleton() {
   return (
-    <div role="status" aria-label="Loading company" className="flex flex-col gap-6">
+    <div role="status" aria-label="Loading client" className="flex flex-col gap-6">
       <Skeleton className="h-12 w-72" />
       <div className="grid gap-4 sm:grid-cols-2">
         <Skeleton className="h-20 w-full" />

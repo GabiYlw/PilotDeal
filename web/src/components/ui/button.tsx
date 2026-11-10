@@ -17,9 +17,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger: "border-transparent bg-danger text-danger-foreground hover:bg-danger-hover",
 };
 
+// Below md every button is 44px tall, the minimum tap target on a touch screen.
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-9 px-4 text-sm",
+  sm: "h-11 px-3 text-sm md:h-8 md:text-xs",
+  md: "h-11 px-4 text-sm md:h-9",
 };
 
 interface ButtonStyle {

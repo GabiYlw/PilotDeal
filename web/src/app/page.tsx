@@ -30,7 +30,7 @@ const FEATURES = [
     tone: "slate",
   },
   {
-    title: "Ask your CRM",
+    title: "Ask the Pilot",
     description:
       "Ask questions in plain English. Answers come only from your interaction notes and cite their sources.",
     href: "/ask",
@@ -49,7 +49,7 @@ export default function HomePage() {
           <>
             <ButtonLink href="/deals">View deals</ButtonLink>
             <ButtonLink href="/ask" variant="secondary">
-              Ask your CRM
+              Ask the Pilot
             </ButtonLink>
           </>
         }
@@ -75,7 +75,7 @@ export default function HomePage() {
                 <IconCircle icon={feature.icon} tone={feature.tone} />
                 <CardTitle>{feature.title}</CardTitle>
                 <CardDescription className="flex-1">{feature.description}</CardDescription>
-                <TextLink href={feature.href} className="text-sm">
+                <TextLink standalone href={feature.href} className="self-start text-sm">
                   Try it
                 </TextLink>
               </Card>
@@ -92,7 +92,7 @@ export default function HomePage() {
       </section>
 
       <footer className="border-t border-border-strong pt-6 text-sm">
-        <TextLink href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
+        <TextLink standalone href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
           View the source on GitHub
           <span className="sr-only"> (opens in a new tab)</span>
         </TextLink>

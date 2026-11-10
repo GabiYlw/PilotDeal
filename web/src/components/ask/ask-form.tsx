@@ -19,17 +19,17 @@ export function AskForm({
   pending?: boolean;
 }) {
   return (
-    <Form action="/ask" aria-label="Ask your CRM" className="flex flex-col gap-3">
+    <Form action="/ask" aria-label="Ask the Pilot" className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="ask-question">Question</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 min-[400px]:flex-row">
           <Input
             id="ask-question"
             name="q"
             defaultValue={question ?? ""}
             placeholder="Ask about your interaction notes"
             disabled={pending}
-            className="flex-1"
+            className="min-[400px]:flex-1"
             {...errorProps("ask-question", fieldError)}
           />
           <Button type="submit" disabled={pending}>

@@ -30,7 +30,10 @@ export function Pagination({ page, pageSize, total, basePath }: PaginationProps)
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-between gap-4">
+    <nav
+      aria-label="Pagination"
+      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+    >
       <p className="text-sm text-muted">
         Showing {from}-{to} of {total}
       </p>

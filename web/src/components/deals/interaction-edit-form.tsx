@@ -101,7 +101,7 @@ export function InteractionEditForm({
         <FieldError id={`${base}-date-error`} message={fieldErrors.occurredAt} />
       </div>
       <FormError message={state.formError} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Saving..." : "Save"}
         </Button>

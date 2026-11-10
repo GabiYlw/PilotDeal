@@ -63,9 +63,11 @@ export function ContactItem({
   return (
     <>
       <div id={summaryId} className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium text-foreground">{contact.name}</span>
+        <span className="text-sm font-medium [overflow-wrap:anywhere] text-foreground">
+          {contact.name}
+        </span>
         {details.map((detail, index) => (
-          <span key={index} className="text-sm break-words text-muted">
+          <span key={index} className="text-sm [overflow-wrap:anywhere] text-muted">
             {detail}
           </span>
         ))}

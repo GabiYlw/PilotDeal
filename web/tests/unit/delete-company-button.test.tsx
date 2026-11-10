@@ -8,14 +8,14 @@ const SUCCESS: ActionState = { status: "success", fieldErrors: {} };
 function setup(result: ActionState = SUCCESS) {
   const action = vi.fn<(state: ActionState) => Promise<ActionState>>(async () => result);
   render(<DeleteCompanyButton companyName="Acme" action={action} />);
-  fireEvent.click(screen.getByRole("button", { name: "Delete company" }));
+  fireEvent.click(screen.getByRole("button", { name: "Delete client" }));
   return action;
 }
 
 async function confirm() {
   await act(async () => {
     fireEvent.click(
-      within(screen.getByRole("dialog")).getByRole("button", { name: "Delete company" }),
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Delete client" }),
     );
   });
 }
@@ -24,7 +24,7 @@ describe("DeleteCompanyButton", () => {
   it("asks for confirmation naming the company and everything deleted with it", () => {
     setup();
 
-    const dialog = screen.getByRole("dialog", { name: "Delete company?" });
+    const dialog = screen.getByRole("dialog", { name: "Delete client?" });
     expect(dialog.textContent).toContain('"Acme"');
     expect(dialog.textContent).toContain("contacts, deals and interactions");
   });

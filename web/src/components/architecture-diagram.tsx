@@ -24,7 +24,7 @@ const DESCRIPTION =
   "rules. Services use repositories, which reach PostgreSQL with pgvector through Prisma and " +
   "raw SQL; a PriorityScorer, rule-based or LLM, which asks the Claude API for the next action; " +
   "and an EmbeddingProvider, which runs the all-MiniLM-L6-v2 model locally with no network. " +
-  "Services also ask Claude for Ask your CRM answers.";
+  "Services also ask Claude for Ask the Pilot answers.";
 
 // From sm up the two node rows share three columns: node, arrow, node. The path snakes:
 // Browser -> Next.js, down into Routes (right column), left to Services, down to the adapters.

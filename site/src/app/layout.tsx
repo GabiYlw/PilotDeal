@@ -41,7 +41,9 @@ export const metadata: Metadata = {
 // section stays visible. The theme script runs first, before first paint.
 const HEAD_SCRIPT = `${THEME_SCRIPT};document.documentElement.classList.add("js")`;
 
-// suppressHydrationWarning: HEAD_SCRIPT changes <html> attributes before React hydrates.
+// suppressHydrationWarning on <html>: HEAD_SCRIPT changes its attributes before React hydrates.
+// On <body>: browser extensions (ColorZilla's cz-shortcut-listen, Grammarly, ...) add attributes
+// before hydration. It only ignores attribute differences on that one element, not its children.
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
@@ -52,10 +54,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
       </head>
-      <body className="flex min-h-screen flex-col font-sans text-sm">
+      <body className="flex min-h-screen flex-col font-sans text-sm" suppressHydrationWarning>
         <a
           href="#main"
-          className="sr-only rounded-full bg-accent px-4 py-2 font-semibold text-accent-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
+          className="sr-only rounded-full bg-accent px-4 py-2 font-semibold text-accent-foreground focus:not-sr-only focus:fixed focus:inline-flex focus:min-h-11 focus:items-center focus:top-3 focus:left-3 focus:z-50"
         >
           {site.skipLink}
         </a>

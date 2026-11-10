@@ -43,7 +43,7 @@ const SCREENSHOTS = {
   ),
   ask: screenshot(
     "ask",
-    "PilotDeal Ask page: a plain-English question, a generated answer citing sources, and the matching notes.",
+    "PilotDeal Ask the Pilot page: a plain-English question, a generated answer citing sources, and the matching notes.",
   ),
 };
 
@@ -201,7 +201,7 @@ export const whyPilotDeal = {
   },
   fallback: {
     title: "Works without AI",
-    text: "If the AI is switched off or unavailable, PilotDeal keeps ranking deals with its built-in rules, and Ask still finds the most relevant notes.",
+    text: "If the AI is switched off or unavailable, PilotDeal keeps ranking deals with its built-in rules, and Ask the Pilot still finds the most relevant notes.",
     rows: [
       { label: "AI on", badge: "Scored by AI", tone: "accent" as const },
       { label: "AI off or unavailable", badge: "Scored by rules", tone: "neutral" as const },
@@ -266,7 +266,7 @@ export const faq = {
     {
       question: "What happens if the AI is unavailable?",
       answer: [
-        "Everything keeps working: scores come from the built-in rules, and Ask returns the most relevant notes without a generated answer.",
+        "Everything keeps working: scores come from the built-in rules, and Ask the Pilot returns the most relevant notes without a generated answer.",
       ],
     },
   ] satisfies { question: string; answer: RichText }[],

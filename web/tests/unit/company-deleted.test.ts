@@ -3,8 +3,8 @@ import { companyDeletedMessage, companyDeletedUrl } from "@/lib/company-deleted"
 
 describe("companyDeletedUrl", () => {
   it.each([
-    ["deleted", "/companies?deleted=1"],
-    ["already", "/companies?deleted=already"],
+    ["deleted", "/clients?deleted=1"],
+    ["already", "/clients?deleted=already"],
   ] as const)("builds the url for %s", (outcome, url) => {
     expect(companyDeletedUrl(outcome)).toBe(url);
   });
@@ -12,8 +12,8 @@ describe("companyDeletedUrl", () => {
 
 describe("companyDeletedMessage", () => {
   it.each<[string | string[] | undefined, string | null]>([
-    ["1", "Company deleted."],
-    ["already", "This company was already deleted."],
+    ["1", "Client deleted."],
+    ["already", "This client was already deleted."],
     ["yes", null],
     [undefined, null],
     [["1", "1"], null],

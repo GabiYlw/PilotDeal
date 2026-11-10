@@ -3,7 +3,7 @@ import { Breadcrumb, type BreadcrumbItem } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/cn";
 
 // Title on the left, breadcrumb and actions on the right. On a phone everything stacks in DOM
-// order: breadcrumb, title, actions.
+// order: breadcrumb, title, actions, and the actions stack full width.
 export function PageHeader({
   title,
   description,
@@ -24,12 +24,14 @@ export function PageHeader({
       )}
       <div className="flex min-w-0 flex-col gap-1.5 sm:col-start-1 sm:row-span-2 sm:row-start-1">
         <h1 className="text-3xl font-bold tracking-tight break-words text-foreground">{title}</h1>
-        {description && <p className="text-base text-muted">{description}</p>}
+        {description && (
+          <p className="text-base [overflow-wrap:anywhere] text-muted">{description}</p>
+        )}
       </div>
       {actions && (
         <div
           className={cn(
-            "flex flex-wrap items-center gap-2 sm:col-start-2 sm:justify-self-end",
+            "flex flex-col gap-2 sm:col-start-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-self-end",
             breadcrumb ? "sm:row-start-2" : "sm:row-start-1",
           )}
         >

@@ -48,7 +48,7 @@ describe("AskView", () => {
   it("shows the empty form and the example links when there is no question", async () => {
     await renderView({});
 
-    expect(screen.getByRole("form", { name: "Ask your CRM" })).toBeTruthy();
+    expect(screen.getByRole("form", { name: "Ask the Pilot" })).toBeTruthy();
     expect((screen.getByRole("textbox", { name: "Question" }) as HTMLInputElement).name).toBe("q");
     expect(screen.getByRole("button", { name: "Ask" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Try asking", level: 2 })).toBeTruthy();

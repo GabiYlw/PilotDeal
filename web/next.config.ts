@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  // The Companies pages were renamed to Clients. Old links and bookmarks keep working (308).
+  // Only page paths: the API keeps its /companies routes.
+  async redirects() {
+    return [
+      { source: "/companies", destination: "/clients", permanent: true },
+      { source: "/companies/:path*", destination: "/clients/:path*", permanent: true },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

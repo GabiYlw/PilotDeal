@@ -5,9 +5,9 @@ export function Notice({ children, action }: { children: ReactNode; action?: Rea
   return (
     <div
       role="status"
-      className="flex items-center justify-between gap-3 rounded-2xl border border-card-border bg-surface px-5 py-4 shadow-card text-sm text-foreground"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-card-border bg-surface px-5 py-4 shadow-card text-sm text-foreground"
     >
-      <span>{children}</span>
+      <span className="min-w-0 [overflow-wrap:anywhere]">{children}</span>
       {action}
     </div>
   );

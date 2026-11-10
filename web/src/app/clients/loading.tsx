@@ -5,9 +5,9 @@ export default function CompaniesLoading() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Companies"
-        description="All companies, newest first."
-        breadcrumb={[{ label: "Home", href: "/" }, { label: "Companies" }]}
+        title="Clients"
+        description="All clients, newest first."
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Clients" }]}
       />
       <CompaniesTableSkeleton />
     </div>

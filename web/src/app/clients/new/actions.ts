@@ -33,7 +33,7 @@ export async function addCompany(
     }
     throw error;
   }
-  revalidatePath("/companies");
+  revalidatePath("/clients");
   // Outside the try: redirect works by throwing, and a catch would swallow it.
-  redirect(`/companies/${company.id}`);
+  redirect(`/clients/${company.id}`);
 }

@@ -1,14 +1,14 @@
 export type CompanyDeletedOutcome = "deleted" | "already";
 
 const MESSAGES: Record<CompanyDeletedOutcome, string> = {
-  deleted: "Company deleted.",
-  already: "This company was already deleted.",
+  deleted: "Client deleted.",
+  already: "This client was already deleted.",
 };
 
 const QUERY_VALUES: Record<CompanyDeletedOutcome, string> = { deleted: "1", already: "already" };
 
 export function companyDeletedUrl(outcome: CompanyDeletedOutcome): string {
-  return `/companies?deleted=${QUERY_VALUES[outcome]}`;
+  return `/clients?deleted=${QUERY_VALUES[outcome]}`;
 }
 
 // Reads the ?deleted= search param. Anything unknown (including repeated params) gives no message.

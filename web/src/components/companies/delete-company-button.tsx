@@ -17,15 +17,15 @@ export function DeleteCompanyButton({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const { open, pending, error, openDialog, closeDialog, confirm } = useConfirmedAction(action);
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col gap-1 sm:items-end">
       <Button ref={triggerRef} variant="secondary" size="sm" onClick={openDialog}>
-        Delete company
+        Delete client
       </Button>
       <ConfirmDialog
         open={open}
-        title="Delete company?"
+        title="Delete client?"
         message={`"${companyName}" and all of its contacts, deals and interactions will be permanently deleted. This cannot be undone.`}
-        confirmLabel="Delete company"
+        confirmLabel="Delete client"
         pendingLabel="Deleting..."
         pending={pending}
         onConfirm={confirm}

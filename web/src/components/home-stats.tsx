@@ -40,7 +40,7 @@ export async function HomeStats() {
     <Overview>
       <StatGrid>
         <StatCard icon={Handshake} tone="teal" label="Open deals" value={totals.openDeals} />
-        <StatCard icon={Building2} tone="navy" label="Companies" value={totals.companies} />
+        <StatCard icon={Building2} tone="navy" label="Clients" value={totals.companies} />
       </StatGrid>
     </Overview>
   );

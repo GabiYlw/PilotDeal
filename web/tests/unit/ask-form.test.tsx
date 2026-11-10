@@ -13,7 +13,7 @@ describe("AskForm", () => {
   it("submits to /ask with the question in a field named q and no scope field when unscoped", () => {
     render(<AskForm />);
 
-    expect(screen.getByRole("form", { name: "Ask your CRM" }).getAttribute("action")).toBe("/ask");
+    expect(screen.getByRole("form", { name: "Ask the Pilot" }).getAttribute("action")).toBe("/ask");
     expect((screen.getByRole("textbox", { name: "Question" }) as HTMLInputElement).name).toBe("q");
     expect(document.querySelector('input[name="dealId"]')).toBeNull();
   });

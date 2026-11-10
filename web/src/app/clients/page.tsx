@@ -7,14 +7,14 @@ import { PageHeader } from "@/components/ui/page-header";
 
 // The header is static; searchParams are only read inside Suspense (the notice and the list), so
 // the shell can prerender.
-export default function CompaniesPage(props: PageProps<"/companies">) {
+export default function CompaniesPage(props: PageProps<"/clients">) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Companies"
-        description="All companies, newest first."
-        breadcrumb={[{ label: "Home", href: "/" }, { label: "Companies" }]}
-        actions={<ButtonLink href="/companies/new">New company</ButtonLink>}
+        title="Clients"
+        description="All clients, newest first."
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Clients" }]}
+        actions={<ButtonLink href="/clients/new">New client</ButtonLink>}
       />
       <Suspense fallback={null}>
         <CompanyDeletedNotice searchParams={props.searchParams} />

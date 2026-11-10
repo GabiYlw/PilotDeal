@@ -81,7 +81,7 @@ function ConfirmDialogPanel({
       aria-describedby={messageId}
       onCancel={handleCancel}
       onClose={handleClose}
-      className="m-auto w-full max-w-sm rounded-2xl border border-card-border bg-surface p-6 shadow-raised text-foreground backdrop:bg-overlay"
+      className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-card-border bg-surface p-6 shadow-raised text-foreground backdrop:bg-overlay"
     >
       <h2 id={titleId} className="text-base font-semibold text-foreground">
         {title}
@@ -89,7 +89,7 @@ function ConfirmDialogPanel({
       <div id={messageId} className="mt-2 text-sm text-muted">
         {message}
       </div>
-      <div className="mt-5 flex justify-end gap-2">
+      <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button ref={cancelRef} variant="secondary" disabled={pending} onClick={onCancel}>
           {cancelLabel}
         </Button>

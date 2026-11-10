@@ -118,7 +118,7 @@ export async function editDeal(
     throw error;
   }
   revalidateDeal(dealId);
-  revalidatePath(`/companies/${companyId}`);
+  revalidatePath(`/clients/${companyId}`);
   return { status: "success", fieldErrors: {} };
 }
 

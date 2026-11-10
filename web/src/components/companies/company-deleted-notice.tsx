@@ -13,7 +13,7 @@ export async function CompanyDeletedNotice({
   return (
     <Notice
       action={
-        <ButtonLink href="/companies" variant="ghost" size="sm" replace scroll={false}>
+        <ButtonLink href="/clients" variant="ghost" size="sm" replace scroll={false}>
           Dismiss
         </ButtonLink>
       }

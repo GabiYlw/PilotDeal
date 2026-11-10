@@ -16,7 +16,7 @@ describe("NavLinks", () => {
 
     expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual([
       "Home",
-      "Companies",
+      "Clients",
       "Deals",
       "Ask",
     ]);
@@ -35,7 +35,7 @@ describe("NavLinks", () => {
   });
 
   it.each([
-    ["Workspace", ["Home", "Companies", "Deals"]],
+    ["Workspace", ["Home", "Clients", "Deals"]],
     ["AI", ["Ask"]],
   ])("groups the %s links under their section label", (section, labels) => {
     render(<NavLinks />);

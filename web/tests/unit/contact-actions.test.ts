@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { revalidatePath } from "next/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { addContact, editContact, removeContact } from "@/app/companies/[id]/actions";
+import { addContact, editContact, removeContact } from "@/app/clients/[id]/actions";
 import { ApiError, createCompanyContact, deleteContact, updateContact } from "@/lib/api";
 import { initialFormState } from "@/lib/form-state";
 import {
@@ -60,7 +60,7 @@ describe("addContact", () => {
       phone: null,
       role: "CTO",
     });
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
     expect(result).toEqual({ status: "success", fieldErrors: {} });
   });
 
@@ -102,7 +102,7 @@ describe("editContact", () => {
       phone: null,
       role: "CTO",
     });
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
     expect(result).toEqual({ status: "success", fieldErrors: {} });
   });
 
@@ -133,7 +133,7 @@ describe("removeContact", () => {
     const result = await removeContact("c1", "p1");
 
     expect(deleteMock).toHaveBeenCalledWith("p1");
-    expect(revalidateMock).toHaveBeenCalledWith("/companies/c1");
+    expect(revalidateMock).toHaveBeenCalledWith("/clients/c1");
     expect(result.status).toBe("success");
   });
 

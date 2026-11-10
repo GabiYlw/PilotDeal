@@ -9,14 +9,22 @@ export const metadata: Metadata = {
   description: "AI-assisted mini CRM with deal priority scoring and natural-language questions.",
 };
 
-// suppressHydrationWarning: THEME_SCRIPT may add data-theme to <html> before React hydrates.
+// break-words on <body>: a long word (a URL, a name without spaces) wraps instead of widening the
+// page. Unlike overflow-wrap: anywhere it does not change min-content, so table columns keep their
+// widths.
+// suppressHydrationWarning on <html>: THEME_SCRIPT may add data-theme before React hydrates.
+// On <body>: browser extensions (ColorZilla's cz-shortcut-listen, Grammarly, ...) add attributes
+// before hydration. It only ignores attribute differences on that one element, not its children.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${GeistSans.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col font-sans text-sm md:flex-row">
+      <body
+        className="flex min-h-full flex-col font-sans text-sm break-words md:flex-row"
+        suppressHydrationWarning
+      >
         <Sidebar />
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:px-10 md:py-10">{children}</main>
       </body>
