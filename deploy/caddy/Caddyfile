@@ -1,0 +1,36 @@
+# Caddy gets and renews the Let's Encrypt certificates for both names on its own, and redirects
+# HTTP to HTTPS. SITE_DOMAIN comes from the server .env (default pilotdeal.online).
+
+{$SITE_DOMAIN:pilotdeal.online} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# The dashboard (Next.js with basePath /demo). The path is passed through unchanged.
+	@demo path /demo /demo/*
+	handle @demo {
+		reverse_proxy web:3000
+	}
+
+	# Everything else is the static presentation site.
+	handle {
+		root * /srv/site
+		try_files {path} {path}.html {path}/index.html
+		file_server
+	}
+
+	handle_errors 404 {
+		root * /srv/site
+		rewrite * /404.html
+		file_server
+	}
+}
+
+www.{$SITE_DOMAIN:pilotdeal.online} {
+	redir https://{$SITE_DOMAIN:pilotdeal.online}{uri} permanent
+}

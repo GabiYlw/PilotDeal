@@ -141,7 +141,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [api, web]
+        service: [api, web, caddy]
+        include:
+          - service: api
+            context: api
+          - service: web
+            context: web
+          # The public entry point of docker-compose.prod.yml; it also builds the site.
+          - service: caddy
+            context: deploy/caddy
+            build-contexts: site=site
     steps:
       - uses: actions/checkout@v5
 
@@ -151,7 +160,8 @@ jobs:
       - name: Build ${{ matrix.service }} image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.service }}
+          context: ${{ matrix.context }}
+          build-contexts: ${{ matrix.build-contexts }}
           push: false
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}

@@ -65,6 +65,10 @@ Before reporting a task as done, run `format` in every package you changed, then
 
 Formatting is Prettier with one shared config at the repository root (`.prettierrc.json`, `.prettierignore`). ESLint extends `eslint-config-prettier`, so it never reports formatting; do not add stylistic ESLint rules.
 
+### Production
+
+`docker-compose.prod.yml` runs the public deployment (pilotdeal.online): Caddy serves the built site at `/` and proxies `/demo` to the web app, which is built with `BASE_PATH=/demo`; only Caddy publishes ports. Setup, the server `.env`, the daily reseed and updates are in `deploy/README.md`. `BASE_PATH` is empty by default, so local development serves the web app at `/`. Under a base path, `next/link`, `redirect()`, `next/form` and config redirects add the prefix; a `next/image` string `src` does not, so images use static imports.
+
 ### Continuous integration
 
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests, using the commands from the table above (with `npm ci` instead of `npm install`):
@@ -72,7 +76,7 @@ Formatting is Prettier with one shared config at the repository root (`.prettier
 - **api:** format check, lint, typecheck, unit tests and integration tests against a pgvector service container, with `EMBEDDING_OFFLINE=true` and no `ANTHROPIC_API_KEY`.
 - **web:** format check, lint, typecheck, tests and the production build.
 - **site:** format check, lint, typecheck and the static build.
-- **docker:** builds both images without pushing them.
+- **docker:** builds the api, web and caddy images without pushing them.
 
 When a command in the table changes, update the workflow too. Lint the workflow with actionlint: `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12`.
 

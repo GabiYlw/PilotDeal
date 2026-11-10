@@ -17,6 +17,10 @@ COPY . .
 # fetch is deferred. The value is only read at request time, so compose sets the real one.
 ARG API_URL=http://api:3001
 ENV API_URL=$API_URL
+# Sub-path to serve the app under (docker-compose.prod.yml passes /demo). Inlined at build time,
+# so changing it needs a rebuild. Empty serves the app at /.
+ARG BASE_PATH=
+ENV BASE_PATH=$BASE_PATH
 RUN npm run build
 
 FROM base AS runtime

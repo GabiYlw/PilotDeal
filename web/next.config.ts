@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import { readBasePath } from "./src/lib/base-path";
 
 const nextConfig: NextConfig = {
+  // Empty by default; the production image is built with BASE_PATH=/demo.
+  basePath: readBasePath(process.env.BASE_PATH),
   // Emits .next/standalone (server.js plus only the files it needs) for the Docker image.
   // `next dev` and `next start` are unaffected.
   output: "standalone",

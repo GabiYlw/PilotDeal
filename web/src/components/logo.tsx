@@ -1,4 +1,6 @@
 import Image from "next/image";
+import logoOnLight from "../../public/brand/pilotdeal-logo.svg";
+import logoOnDark from "../../public/brand/pilotdeal-logo-white.svg";
 
 // Intrinsic size at the phone height (16px); the artwork's aspect ratio is about 14.3:1.
 const WIDTH = 229;
@@ -11,11 +13,13 @@ const SIZE_CLASS = "h-4 w-auto md:h-auto md:w-41";
 // matches the active theme, like the ThemeToggle icons, so the first paint and a toggle never show
 // the wrong logo. The hidden one has display: none, so screen readers announce only the visible one.
 // "eager" loads the hidden file too, so switching themes never waits for a download.
+// Static imports, not "/brand/..." strings: Next.js serves them from /_next/static with the basePath
+// (/demo in production) added, while next/image does not prefix a string src.
 export function Logo() {
   return (
     <>
       <Image
-        src="/brand/pilotdeal-logo.svg"
+        src={logoOnLight}
         alt="PilotDeal"
         width={WIDTH}
         height={HEIGHT}
@@ -23,7 +27,7 @@ export function Logo() {
         className={`${SIZE_CLASS} [display:var(--logo-on-light)]`}
       />
       <Image
-        src="/brand/pilotdeal-logo-white.svg"
+        src={logoOnDark}
         alt="PilotDeal"
         width={WIDTH}
         height={HEIGHT}

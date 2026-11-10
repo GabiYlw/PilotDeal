@@ -1,0 +1,105 @@
+# Production stack for pilotdeal.online (see deploy/README.md):
+#   docker compose -f docker-compose.prod.yml up -d --build --wait
+# Only Caddy publishes ports (80, 443). db, api and web are reachable only on the internal
+# network. Secrets come from the .env file next to this file on the server, never from the repo.
+name: pilotdeal-prod
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pilotdeal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: pilotdeal
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pilotdeal -d pilotdeal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *logging
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      # POSTGRES_PASSWORD must be URL-safe (deploy/README.md generates a hex one).
+      DATABASE_URL: postgresql://pilotdeal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/pilotdeal
+      PORT: "3001"
+      # Optional. Empty means rule-based scoring and /ask without a generated answer.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-5-5}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging: *logging
+
+  web:
+    build:
+      context: ./web
+      args:
+        BASE_PATH: /demo
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:3001
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/demo').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *logging
+
+  caddy:
+    build:
+      context: ./deploy/caddy
+      additional_contexts:
+        site: ./site
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-pilotdeal.online}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Certificates and ACME account; keep them across rebuilds to avoid Let's Encrypt rate limits.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:
