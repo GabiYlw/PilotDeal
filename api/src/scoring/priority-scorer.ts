@@ -1,5 +1,6 @@
-import type { OpenDealStage } from "../modules/deals/deals.schemas.js";
-import type { InteractionType } from "../modules/interactions/interactions.schemas.js";
+// Only zod-free modules: the static demo (web/src/demo) runs the rule-based scorer in the browser.
+import type { OpenDealStage } from "../modules/deals/deal-stages.js";
+import type { InteractionType } from "../modules/interactions/interaction-types.js";
 
 export interface ScoredDeal {
   id: string;

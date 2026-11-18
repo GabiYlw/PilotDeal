@@ -3,19 +3,19 @@ import type { PriorityResult } from "../../scoring/priority-scorer.js";
 import { paginationQuerySchema } from "../../shared/pagination.js";
 import { requiredText, strictBody } from "../../shared/validation.js";
 import type { InteractionType } from "../interactions/interactions.schemas.js";
+import { DEAL_STAGES, type DealStage } from "./deal-stages.js";
 
-export const DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"] as const;
+export {
+  DEAL_STAGES,
+  type DealStage,
+  isOpenStage,
+  OPEN_DEAL_STAGES,
+  type OpenDealStage,
+} from "./deal-stages.js";
+
 export const dealStageSchema = z.enum(DEAL_STAGES, {
   error: `Stage must be one of ${DEAL_STAGES.join(", ")}`,
 });
-export type DealStage = z.output<typeof dealStageSchema>;
-
-export const OPEN_DEAL_STAGES = ["LEAD", "QUALIFIED", "PROPOSAL", "NEGOTIATION"] as const;
-export type OpenDealStage = (typeof OPEN_DEAL_STAGES)[number];
-
-export function isOpenStage(stage: DealStage): stage is OpenDealStage {
-  return (OPEN_DEAL_STAGES as readonly DealStage[]).includes(stage);
-}
 
 const titleSchema = requiredText("Title", 200);
 

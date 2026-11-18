@@ -1,4 +1,4 @@
-import type { OpenDealStage } from "../modules/deals/deals.schemas.js";
+import type { OpenDealStage } from "../modules/deals/deal-stages.js";
 import type { Clock } from "../shared/clock.js";
 import type {
   DealContext,
@@ -149,19 +149,26 @@ function buildNextAction(metrics: Metrics, companyName: string): string {
   return STAGE_ACTIONS[metrics.stage];
 }
 
+// The rules as a plain synchronous function of the deal and the current time. RuleBasedScorer wraps
+// it; the static demo (web/src/demo) calls it directly in the browser. It must stay free of
+// Node-only and zod imports for that reason.
+export function scoreByRules(context: DealContext, now: Date): PriorityResult {
+  const metrics = computeMetrics(context, utcDay(now));
+  const factors = buildFactors(metrics);
+  return {
+    score: factors.reduce((sum, factor) => sum + factor.points, 0),
+    reason: buildReason(factors, metrics),
+    nextAction: buildNextAction(metrics, context.companyName),
+    factors,
+    scoredBy: "rules",
+  };
+}
+
 export class RuleBasedScorer implements PriorityScorer {
   constructor(private readonly clock: Clock) {}
 
   // Not async on purpose: nothing is awaited (lint rule require-await).
   score(context: DealContext): Promise<PriorityResult> {
-    const metrics = computeMetrics(context, utcDay(this.clock.now()));
-    const factors = buildFactors(metrics);
-    return Promise.resolve({
-      score: factors.reduce((sum, factor) => sum + factor.points, 0),
-      reason: buildReason(factors, metrics),
-      nextAction: buildNextAction(metrics, context.companyName),
-      factors,
-      scoredBy: "rules",
-    });
+    return Promise.resolve(scoreByRules(context, this.clock.now()));
   }
 }

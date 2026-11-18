@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The static demo's build output (npm run build:demo).
+    "out-demo/**",
   ]),
   // Last: turns off every rule that would fight Prettier's formatting.
   eslintConfigPrettier,

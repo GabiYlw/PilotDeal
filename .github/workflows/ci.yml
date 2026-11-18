@@ -71,6 +71,12 @@ jobs:
       - name: Integration tests
         run: npm --prefix api run test:integration
 
+      # The static demo reads web/src/demo/data/seed.json; it must match prisma/seed-data.ts.
+      - name: Demo seed data is up to date
+        run: |
+          npm --prefix api run demo:seed
+          git diff --exit-code web/src/demo/data/seed.json
+
   web:
     name: Web (format, lint, typecheck, tests, build)
     runs-on: ubuntu-latest
@@ -104,6 +110,10 @@ jobs:
         run: npm --prefix web run build
         env:
           API_URL: http://localhost:3001
+
+      # The static export for pilotdeal.online/demo: no API, imports the scorer from api/src.
+      - name: Static demo build
+        run: npm --prefix web run build:demo
 
   site:
     name: Site (format, lint, typecheck, build)

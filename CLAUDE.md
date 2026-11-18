@@ -49,17 +49,22 @@ Run from the repository root.
 | New migration | `npm --prefix api run migrate -- --name <name>` |
 | Seed data (also embeds notes; first run downloads the embedding model) | `npm --prefix api run seed` |
 | Embed interactions missing an embedding | `npm --prefix api run embed:backfill` |
+| Export the seed to the static demo (`web/src/demo/data/seed.json`) | `npm --prefix api run demo:seed` |
+| Regenerate the demo's preset Ask answers (needs the seeded db, the API running and `ANTHROPIC_API_KEY`) | `npm --prefix api run demo:answers` |
 | Install web deps | `npm --prefix web install` |
 | Web dev server (port 3000, needs the API on 3001) | `npm --prefix web run dev` |
 | Web tests | `npm --prefix web run test` |
 | Web lint and typecheck | `npm --prefix web run lint` and `npm --prefix web run typecheck` |
 | Web format (write / check) | `npm --prefix web run format` and `npm --prefix web run format:check` |
 | Web production build | `npm --prefix web run build` |
+| Web static demo build (output in `web/out-demo`) | `npm --prefix web run build:demo` |
 | Install site deps | `npm --prefix site install` |
 | Site dev server (port 3002) | `npm --prefix site run dev` |
 | Site lint and typecheck | `npm --prefix site run lint` and `npm --prefix site run typecheck` |
 | Site format (write / check) | `npm --prefix site run format` and `npm --prefix site run format:check` |
 | Site static build (output in `site/out`) | `npm --prefix site run build` |
+| Site and static demo in one folder for Cloudflare Pages (output in `dist`) | `node scripts/build-cloudflare.mjs` |
+| Serve `dist` locally like Cloudflare Pages (port 8788) | `node scripts/preview-dist.mjs` |
 
 Before reporting a task as done, run `format` in every package you changed, then lint, typecheck and all API tests. If `web/` changed, also run web lint, typecheck, test and build.
 
@@ -69,12 +74,23 @@ Formatting is Prettier with one shared config at the repository root (`.prettier
 
 `docker-compose.prod.yml` runs the public deployment (pilotdeal.online): Caddy serves the built site at `/` and proxies `/demo` to the web app, which is built with `BASE_PATH=/demo`; only Caddy publishes ports. Setup, the server `.env`, the daily reseed and updates are in `deploy/README.md`. `BASE_PATH` is empty by default, so local development serves the web app at `/`. Under a base path, `next/link`, `redirect()`, `next/form` and config redirects add the prefix; a `next/image` string `src` does not, so images use static imports.
 
+### Static demo
+
+`npm --prefix web run build:demo` (`DEMO_BUILD=true` in `web/next.config.ts`) builds a static export of the dashboard for `/demo`, with no API, database or AI. The normal build is unchanged.
+
+- **Routes:** the demo build only reads `*.demo.tsx` route files (`pageExtensions`); the normal build ignores them. They render the dashboard's own components from `web/src/demo`, which replaces `lib/api.ts` and the Server Actions with an in-memory store: same response shapes, same action signatures, the API's validation messages. Edits last until a reload.
+- **Data:** `web/src/demo/data/seed.json` is exported from `api/prisma/seed-data.ts` (`demo:seed`, checked in CI). Dates are relative and resolved in the browser, so the sample never goes stale.
+- **Scoring:** the demo imports the API's `scoreByRules` from `api/src/scoring/rule-based-scorer.ts`, so that file and its imports must stay free of zod and Node APIs.
+- **Ask the Pilot:** preset questions only. Their answers (`data/ask-answers.json`) were generated once by the real app with `demo:answers`.
+- **New clients and deals** get ids from a fixed pool (`web/src/demo/ids.ts`), because a static export needs every page built ahead of time.
+- The demo files are excluded from `web/tsconfig.json` (the Docker build only has `web/`) and type-checked with `tsconfig.demo.json` by `npm --prefix web run typecheck`. Data in the demo is fetched in the browser; that is the one exception to the web rules below.
+
 ### Continuous integration
 
 `.github/workflows/ci.yml` runs on pushes to `main` and on pull requests, using the commands from the table above (with `npm ci` instead of `npm install`):
 
-- **api:** format check, lint, typecheck, unit tests and integration tests against a pgvector service container, with `EMBEDDING_OFFLINE=true` and no `ANTHROPIC_API_KEY`.
-- **web:** format check, lint, typecheck, tests and the production build.
+- **api:** format check, lint, typecheck, unit tests and integration tests against a pgvector service container, with `EMBEDDING_OFFLINE=true` and no `ANTHROPIC_API_KEY`, then a check that the demo's `seed.json` matches the seed.
+- **web:** format check, lint, typecheck, tests, the production build and the static demo build.
 - **site:** format check, lint, typecheck and the static build.
 - **docker:** builds the api, web and caddy images without pushing them.
 

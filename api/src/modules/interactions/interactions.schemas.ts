@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { requiredText, strictBody } from "../../shared/validation.js";
+import { INTERACTION_TYPES, type InteractionType } from "./interaction-types.js";
 
-export const INTERACTION_TYPES = ["EMAIL", "CALL", "MEETING", "NOTE"] as const;
+export { INTERACTION_TYPES, type InteractionType } from "./interaction-types.js";
+
 export const interactionTypeSchema = z.enum(INTERACTION_TYPES, {
   error: `Type must be one of ${INTERACTION_TYPES.join(", ")}`,
 });
-export type InteractionType = z.output<typeof interactionTypeSchema>;
 
 const notesSchema = requiredText("Notes", 5000);
 

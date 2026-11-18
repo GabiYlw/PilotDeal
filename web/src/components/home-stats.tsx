@@ -1,7 +1,4 @@
-import { Building2, Handshake } from "lucide-react";
-import type { ReactNode } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { StatCard, StatGrid } from "@/components/ui/stat-card";
+import { HomeStatsView } from "@/components/home-stats-view";
 import { ApiError, getCompanies, getPrioritizedDeals } from "@/lib/api";
 
 // Only meta.total is read, so one item per page is enough.
@@ -21,38 +18,11 @@ async function loadTotals(): Promise<{ openDeals: number; companies: number } | 
   }
 }
 
-function Overview({ children }: { children: ReactNode }) {
-  return (
-    <section aria-labelledby="overview" className="flex flex-col gap-4">
-      <h2 id="overview" className="text-xs font-medium tracking-wide text-muted uppercase">
-        Overview
-      </h2>
-      {children}
-    </section>
-  );
-}
-
 // Server Component: fetches on every request. Render it inside <Suspense>.
 export async function HomeStats() {
   const totals = await loadTotals();
   if (totals === null) return null;
-  return (
-    <Overview>
-      <StatGrid>
-        <StatCard icon={Handshake} tone="teal" label="Open deals" value={totals.openDeals} />
-        <StatCard icon={Building2} tone="navy" label="Clients" value={totals.companies} />
-      </StatGrid>
-    </Overview>
-  );
+  return <HomeStatsView openDeals={totals.openDeals} companies={totals.companies} />;
 }
 
-export function HomeStatsSkeleton() {
-  return (
-    <Overview>
-      <div role="status" aria-label="Loading totals" className="grid gap-4 sm:grid-cols-2">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-      </div>
-    </Overview>
-  );
-}
+export { HomeStatsSkeleton } from "@/components/home-stats-view";

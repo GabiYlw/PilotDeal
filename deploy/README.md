@@ -61,3 +61,15 @@ the certificates live in named volumes and survive rebuilds.
 docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs -f caddy web api
 ```
+
+## Static hosting (Cloudflare Pages)
+
+A free alternative to the server above: the presentation site at `/` and a static demo of the dashboard at `/demo`, with no API, database or AI calls. The demo runs on sample data in the browser; edits last until a reload, and Ask the Pilot answers a few preset questions (see "Static demo" in `CLAUDE.md`).
+
+| Setting                | Value                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| Build command          | `npm ci --prefix site && npm ci --prefix web && node scripts/build-cloudflare.mjs` |
+| Build output directory | `dist`                                                                             |
+| Environment variable   | `NODE_VERSION=22`                                                                  |
+
+`dist/_redirects` sends the old `/demo/companies` URLs to `/demo/clients`. To check a build locally before deploying, run `node scripts/build-cloudflare.mjs`, then `node scripts/preview-dist.mjs` and open http://localhost:8788.
