@@ -26,8 +26,8 @@ function ComparisonList() {
     >
       {comparison.rows.map((row) => (
         <li key={row.topic} className="flex flex-col gap-3 px-5 py-4">
-          <p className="font-mono text-xs font-medium text-foreground">{row.topic}</p>
-          <dl className="flex flex-col gap-3 text-sm">
+          <p className="text-base font-semibold text-foreground">{row.topic}</p>
+          <dl className="flex flex-col gap-3 text-base">
             <div className="flex flex-col gap-1">
               <dt className={`${LABEL_CLASS} text-muted`}>{columns.typical}</dt>
               <dd className="text-muted">{row.typical}</dd>
@@ -49,7 +49,7 @@ function ComparisonTable() {
   const { columns } = comparison;
   return (
     <div className="mt-10 hidden overflow-x-auto rounded-2xl border border-card-border bg-surface shadow-card md:block">
-      <table className="w-full min-w-[40rem] text-sm">
+      <table className="w-full min-w-[40rem] text-base">
         <caption className="sr-only">{comparison.caption}</caption>
         <thead className="bg-canvas">
           <tr>
@@ -59,7 +59,7 @@ function ComparisonTable() {
             <th scope="col" className={`${HEAD_CLASS} text-muted`}>
               {columns.typical}
             </th>
-            <th scope="col" className={`${HEAD_CLASS} text-link`}>
+            <th scope="col" className={`${HEAD_CLASS} bg-accent-subtle text-link`}>
               {columns.pilotDeal}
             </th>
           </tr>
@@ -69,12 +69,12 @@ function ComparisonTable() {
             <tr key={row.topic} className="border-t border-border align-top">
               <th
                 scope="row"
-                className="w-1/4 px-5 py-4 text-left font-mono text-xs font-medium text-foreground"
+                className="w-1/4 px-5 py-4 text-left text-base font-semibold text-foreground"
               >
                 {row.topic}
               </th>
               <td className="w-1/4 px-5 py-4 text-muted">{row.typical}</td>
-              <td className="px-5 py-4 text-foreground">
+              <td className="bg-accent-subtle px-5 py-4 font-medium text-foreground">
                 <PilotDealValue text={row.pilotDeal} />
               </td>
             </tr>
@@ -85,10 +85,11 @@ function ComparisonTable() {
   );
 }
 
-// A stacked list below md, the table from md up.
+// A stacked list below md, the table from md up. Why PilotDeal follows on the same background, so
+// the bottom padding is "joined".
 export function Comparison() {
   return (
-    <Section labelledBy={TITLE_ID}>
+    <Section labelledBy={TITLE_ID} spacing="joined">
       <SectionHeading id={TITLE_ID} eyebrow={comparison.eyebrow} title={comparison.title} />
       <ComparisonList />
       <ComparisonTable />

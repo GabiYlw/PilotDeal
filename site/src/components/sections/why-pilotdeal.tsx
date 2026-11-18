@@ -24,11 +24,11 @@ function BenefitCard({
   className?: string;
 }) {
   return (
-    <Card className={cn("flex flex-col gap-5", className)}>
+    <Card className={cn("flex flex-col gap-6", className)}>
       {illustration}
       <div className="flex flex-col gap-2">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted">{text}</p>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <p className="text-base text-muted">{text}</p>
       </div>
     </Card>
   );

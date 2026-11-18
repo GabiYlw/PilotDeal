@@ -6,9 +6,10 @@ import { ButtonLink } from "./ui/button-link";
 import { Container } from "./ui/primitives";
 
 const NAV_LINK_CLASS =
-  "rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground motion-reduce:transition-none";
+  "rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-muted transition-colors duration-150 hover:text-foreground motion-reduce:transition-none";
 
-// Sticky header. From md up the anchor links sit inline; on a phone they move into MobileMenu.
+// Sticky header. From lg up the anchor links sit inline; below lg (where the four links would wrap)
+// they move into MobileMenu.
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-card-border bg-surface">
@@ -20,7 +21,7 @@ export function SiteHeader() {
         >
           <Logo className="h-3 w-auto min-[400px]:h-3.5 sm:h-4" />
         </a>
-        <nav aria-label={header.navLabel} className="hidden md:block">
+        <nav aria-label={header.navLabel} className="hidden lg:block">
           <ul className="flex items-center gap-1">
             {header.links.map((link) => (
               <li key={link.href}>

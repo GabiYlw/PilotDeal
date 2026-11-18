@@ -1,21 +1,27 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Components use the Tailwind names mapped in @theme below
- * (bg-surface, text-muted, border-border, ...), never raw hex values.
+ * Design tokens: the "Flight Deck" palette. This file is the single place to change the site's
+ * colors. Components use the Tailwind names mapped in @theme below (bg-surface, text-muted,
+ * bg-signal, ...), never raw hex values.
  *
  * Theme selection:
  * - No data-theme attribute: follow the system preference (the media query below).
  * - data-theme="light" or "dark": the user's explicit choice, set before first paint
  *   by the inline script in app/layout.tsx.
  *
- * The color values are copied from web/src/app/globals.css: keep the two files in step.
+ * Brand colors:
+ * - Navy #0B132B: text in light.
+ * - Teal #5BC0BE: the accent (primary buttons, highlights), shared with the dashboard in web/.
+ *   As text it is #1F7472 in light (#5BC0BE fails 4.5:1 on white) and #5BC0BE in dark.
+ * - Signal amber #F2A93B: "the next move". Used sparingly: the flight path's last waypoint and the
+ *   "with PilotDeal" highlight. As text it is #9A5B00 in light.
+ * Neutrals are cool slate grays. The dashboard (web/) keeps its own neutrals.
  *
  * Every text/background pair meets WCAG AA (4.5:1) in both themes.
  *
- * Light is fully light and dark is fully dark: every surface, including the header, takes its
- * color from these tokens. Light uses neutral grays with white cards; dark uses neutral
- * near-black grays. Teal (#5bc0be) is the accent in both. There are no gradients.
+ * Light is fully light and dark is fully dark: every surface, including the header and the
+ * closing band, takes its color from these tokens. There are no gradients.
  *
  * Layers: canvas (page) -> surface (cards, header, tables) -> background (inputs).
  * Elevation: soft neutral shadows in light; a faint top highlight plus a deeper shadow in dark,
@@ -25,25 +31,29 @@
 
 :root {
   color-scheme: light;
-  --canvas: #f2f3f5;
+  --canvas: #f4f6f8;
   --background: #ffffff;
   --surface: #ffffff;
-  --surface-hover: #f6f7f8;
-  --border: #e3e5e8;
-  --border-strong: #c9cdd2;
-  --card-border: #e6e8eb;
+  --surface-hover: #eef1f4;
+  --border: #e1e5ea;
+  --border-strong: #c3cad3;
+  --card-border: #e3e7ec;
   --text: #0b132b;
-  --text-muted: #3a506b;
+  --text-muted: #475569;
   --accent: #5bc0be;
-  --accent-hover: #4eaeac;
+  --accent-hover: #4aafad;
   --accent-foreground: #0b132b;
   --accent-subtle: #e3f5f4;
-  --tint-slate: #eef0f2;
-  --tint-slate-foreground: #3a506b;
-  --tint-navy: #e2e4e8;
+  --signal: #f2a93b;
+  --signal-foreground: #0b132b;
+  --signal-text: #9a5b00;
+  --signal-subtle: #fff4e0;
+  --tint-slate: #eef1f4;
+  --tint-slate-foreground: #475569;
+  --tint-navy: #e2e6ee;
   --tint-navy-foreground: #0b132b;
-  --elevation-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.12);
-  --elevation-raised: 0 2px 4px 0 rgb(0 0 0 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.22);
+  --elevation-card: 0 1px 2px 0 rgb(11 19 43 / 0.04), 0 12px 32px -16px rgb(11 19 43 / 0.16);
+  --elevation-raised: 0 2px 4px 0 rgb(11 19 43 / 0.05), 0 24px 56px -24px rgb(11 19 43 / 0.28);
   --link: #1f7472;
   --ring: #1f7472;
   --success: #1e6b45;
@@ -66,25 +76,29 @@
 /* The dark set is listed twice: once for an explicit choice, once for the system preference. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #12171d;
-  --background: #12171d;
-  --surface: #1b252d;
-  --surface-hover: #24303a;
-  --border: #2e3b46;
-  --border-strong: #40505d;
-  --card-border: #27333d;
-  --text: #ffffff;
-  --text-muted: #a7b1bb;
+  --canvas: #0b1220;
+  --background: #0b1220;
+  --surface: #131c2c;
+  --surface-hover: #1b2638;
+  --border: #253247;
+  --border-strong: #364559;
+  --card-border: #1f2a3c;
+  --text: #e8eef4;
+  --text-muted: #9aa8b8;
   --accent: #5bc0be;
   --accent-hover: #74cccb;
-  --accent-foreground: #12171d;
-  --accent-subtle: #173a3c;
-  --tint-slate: #2a3640;
+  --accent-foreground: #0b1220;
+  --accent-subtle: #12303a;
+  --signal: #f2a93b;
+  --signal-foreground: #0b1220;
+  --signal-text: #f2a93b;
+  --signal-subtle: #2e2614;
+  --tint-slate: #222e40;
   --tint-slate-foreground: #c9d2da;
-  --tint-navy: #1f2a3d;
+  --tint-navy: #1a2740;
   --tint-navy-foreground: #a9bbdc;
-  --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.7);
+  --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 12px 32px -16px rgb(0 0 0 / 0.7);
+  --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 24px 56px -24px rgb(0 0 0 / 0.8);
   --link: #5bc0be;
   --ring: #5bc0be;
   --success: #74d3a0;
@@ -93,7 +107,7 @@
   --warning-subtle: #33291a;
   --danger: #f3949c;
   --danger-subtle: #3b2026;
-  --danger-foreground: #12171d;
+  --danger-foreground: #0b1220;
   --danger-hover: #f6aab1;
   --overlay: rgb(0 0 0 / 0.6);
   --theme-icon-moon: none;
@@ -105,25 +119,29 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --canvas: #12171d;
-    --background: #12171d;
-    --surface: #1b252d;
-    --surface-hover: #24303a;
-    --border: #2e3b46;
-    --border-strong: #40505d;
-    --card-border: #27333d;
-    --text: #ffffff;
-    --text-muted: #a7b1bb;
+    --canvas: #0b1220;
+    --background: #0b1220;
+    --surface: #131c2c;
+    --surface-hover: #1b2638;
+    --border: #253247;
+    --border-strong: #364559;
+    --card-border: #1f2a3c;
+    --text: #e8eef4;
+    --text-muted: #9aa8b8;
     --accent: #5bc0be;
     --accent-hover: #74cccb;
-    --accent-foreground: #12171d;
-    --accent-subtle: #173a3c;
-    --tint-slate: #2a3640;
+    --accent-foreground: #0b1220;
+    --accent-subtle: #12303a;
+    --signal: #f2a93b;
+    --signal-foreground: #0b1220;
+    --signal-text: #f2a93b;
+    --signal-subtle: #2e2614;
+    --tint-slate: #222e40;
     --tint-slate-foreground: #c9d2da;
-    --tint-navy: #1f2a3d;
+    --tint-navy: #1a2740;
     --tint-navy-foreground: #a9bbdc;
-    --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-    --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 16px 40px -16px rgb(0 0 0 / 0.7);
+    --elevation-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 12px 32px -16px rgb(0 0 0 / 0.7);
+    --elevation-raised: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 24px 56px -24px rgb(0 0 0 / 0.8);
     --link: #5bc0be;
     --ring: #5bc0be;
     --success: #74d3a0;
@@ -132,7 +150,7 @@
     --warning-subtle: #33291a;
     --danger: #f3949c;
     --danger-subtle: #3b2026;
-    --danger-foreground: #12171d;
+    --danger-foreground: #0b1220;
     --danger-hover: #f6aab1;
     --overlay: rgb(0 0 0 / 0.6);
     --theme-icon-moon: none;
@@ -156,6 +174,10 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-subtle: var(--accent-subtle);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-signal-text: var(--signal-text);
+  --color-signal-subtle: var(--signal-subtle);
   --color-card-border: var(--card-border);
   --color-tint-slate: var(--tint-slate);
   --color-tint-slate-foreground: var(--tint-slate-foreground);

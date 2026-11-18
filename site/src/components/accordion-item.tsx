@@ -19,7 +19,7 @@ export function AccordionItem({ question, children }: { question: string; childr
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((value) => !value)}
-          className="flex w-full items-center justify-between gap-4 py-5 text-left text-base font-semibold text-foreground"
+          className="flex min-h-11 w-full items-center justify-between gap-4 py-5 text-left text-lg font-semibold text-foreground"
         >
           {question}
           <ChevronDown
@@ -34,7 +34,7 @@ export function AccordionItem({ question, children }: { question: string; childr
         role="region"
         aria-labelledby={buttonId}
         hidden={!open}
-        className="pb-5 text-sm text-muted"
+        className="pb-6 text-base text-muted"
       >
         {children}
       </div>

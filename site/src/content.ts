@@ -19,6 +19,12 @@ export interface ThemedImage {
   height: number;
 }
 
+/** A lettered marker on a product mockup, explained in the text next to it. */
+export interface Annotation {
+  marker: string;
+  text: string;
+}
+
 const DEMO = "/demo";
 
 // The screenshots in docs/screenshots/ are all 2880 x 2048.
@@ -36,14 +42,6 @@ const SCREENSHOTS = {
   deals: screenshot(
     "deals",
     "PilotDeal deals page: open deals ranked by priority score, each with its stage, value and next action.",
-  ),
-  dealDetail: screenshot(
-    "deal-detail",
-    "PilotDeal deal page: the deal's details, its next action card with the score factors, and its interaction timeline.",
-  ),
-  ask: screenshot(
-    "ask",
-    "PilotDeal Ask the Pilot page: a plain-English question, a generated answer citing sources, and the matching notes.",
   ),
 };
 
@@ -112,26 +110,114 @@ export const howItWorks = {
   id: "how-it-works",
   eyebrow: "How it works",
   title: "From notes to a ranked pipeline",
+  // Labels the mockups, which show sample data from the demo's seed.
+  sampleNote: "Sample data",
   steps: [
     {
       number: "01",
       title: "Log your interactions",
       text: "Calls, emails, meetings and notes on each deal.",
-      screenshot: SCREENSHOTS.dealDetail,
+      annotations: [
+        { marker: "A", text: "Each interaction has a type, a date and your notes." },
+        { marker: "B", text: "Notes become searchable as soon as they are saved." },
+      ],
     },
     {
       number: "02",
       title: "See your pipeline ranked",
       text: "Every open deal gets a score, the factors behind it and a suggested next action.",
-      screenshot: SCREENSHOTS.deals,
+      annotations: [
+        { marker: "A", text: "The next step, in plain words." },
+        { marker: "B", text: "The score and the factors it adds up from." },
+        { marker: "C", text: "Whether the rules or the AI scored it." },
+      ],
     },
     {
       number: "03",
       title: "Ask your notes",
       text: "Plain-English questions, answered only from your notes, with the sources cited.",
-      screenshot: SCREENSHOTS.ask,
+      annotations: [
+        { marker: "A", text: "The answer cites the notes it used." },
+        { marker: "B", text: "Each cited note, with its client and deal." },
+      ],
     },
-  ],
+  ] satisfies {
+    number: string;
+    title: string;
+    text: string;
+    annotations: Annotation[];
+  }[],
+  // Sample values for the mockups. They mirror the demo's seed data and the real scoring rules in
+  // api/src/scoring/ (26 days without contact 30, close date passed 25, 20,000+ value 15,
+  // Qualified 10).
+  log: {
+    title: "Interactions",
+    addLabel: "Add interaction",
+    deal: "Project management suite for three offices",
+    client: "Cedar & Stone Architects",
+    items: [
+      {
+        type: "Email",
+        date: "Oct 13, 2026",
+        notes:
+          "Tomas objected that the suite is too expensive compared with spreadsheets. Sent an ROI summary and have had no reply since.",
+      },
+      {
+        type: "Meeting",
+        date: "Oct 4, 2026",
+        notes:
+          "Needs assessment with Tomas Berg. The three offices currently coordinate projects in spreadsheets.",
+      },
+    ],
+  },
+  nextAction: {
+    title: "Next action",
+    scoredBy: "Scored by rules",
+    overdue: "Overdue",
+    action: "Confirm a new close date or push for a decision with Cedar & Stone Architects.",
+    score: 80,
+    reason: "No contact for 26 days and the expected close date passed 12 days ago.",
+    factors: [
+      { label: "Days since last contact", points: "+30" },
+      { label: "Close date passed", points: "+25" },
+      { label: "Deal value", points: "+15" },
+      { label: "Stage", points: "+10" },
+    ],
+  },
+  ask: {
+    questionLabel: "Question",
+    question: "Which customers are worried about pricing?",
+    button: "Ask",
+    answerTitle: "Answer",
+    answer: [
+      "Brightlake Software's CFO is comparing your proposal with a competitor quote ",
+      { label: "S1" },
+      ". Helios Solar Systems pushed back on the implementation fee, saying it is high compared with the license cost ",
+      { label: "S2" },
+      ".",
+    ] as (string | { label: string })[],
+    cited: "Cited",
+    sources: [
+      {
+        label: "S1",
+        type: "Call",
+        date: "Nov 7, 2026",
+        client: "Brightlake Software",
+        deal: "Annual analytics license renewal",
+        excerpt:
+          "Their CFO wants to compare our proposal with a competitor quote. Offered to walk through the price difference.",
+      },
+      {
+        label: "S2",
+        type: "Call",
+        date: "Oct 24, 2026",
+        client: "Helios Solar Systems",
+        deal: "Field service scheduling integration",
+        excerpt:
+          "Oliver Grant pushed back on the implementation fee. Said it is high compared with the license cost.",
+      },
+    ],
+  },
 };
 
 export const comparison = {
@@ -274,11 +360,21 @@ export const faq = {
 
 export const finalCta = {
   title: "See it in action.",
+  text: "Open the demo and see which deal is at the top, why it is there, and what to do next.",
   primary: hero.primary,
+  // Shown as a button that does nothing yet.
+  comingSoon: "Coming soon",
   demoNote: hero.demoNote,
 };
 
 export const footer = {
   tagline: "Know which deal matters, and what to do next.",
+  navLabel: "Footer",
+  links: [
+    { label: "How it works", href: "#how-it-works" },
+    { label: "Why PilotDeal", href: "#why-pilotdeal" },
+    { label: "FAQ", href: "#faq" },
+    { label: "Live demo", href: DEMO },
+  ] satisfies LinkItem[],
   copyright: "© 2026 PilotDeal",
 };

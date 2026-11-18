@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: HEAD_SCRIPT }} />
       </head>
-      <body className="flex min-h-screen flex-col font-sans text-sm" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col font-sans text-base" suppressHydrationWarning>
         <a
           href="#main"
           className="sr-only rounded-full bg-accent px-4 py-2 font-semibold text-accent-foreground focus:not-sr-only focus:fixed focus:inline-flex focus:min-h-11 focus:items-center focus:top-3 focus:left-3 focus:z-50"

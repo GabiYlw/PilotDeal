@@ -17,32 +17,37 @@ export function Problem() {
             intro={problem.intro}
           />
         </div>
-        <Card className="lg:col-span-3">
+        <Card className="sm:p-8 lg:col-span-3">
           <ol aria-label={problem.timelineLabel} className="flex flex-col">
             {problem.timeline.map((entry) => (
               <li
                 key={entry.time}
                 className="flex gap-4 border-b border-border py-4 first:pt-0 sm:gap-6"
               >
-                <time dateTime={entry.time} className="w-12 shrink-0 font-mono text-sm text-muted">
+                <time
+                  dateTime={entry.time}
+                  className="w-12 shrink-0 pt-0.5 font-mono text-sm text-muted"
+                >
                   {entry.time}
                 </time>
-                <span className="text-sm text-foreground">{entry.text}</span>
+                <span className="text-base text-foreground">{entry.text}</span>
               </li>
             ))}
           </ol>
-          <p className="mt-5 flex gap-4 rounded-xl border border-accent bg-accent-subtle p-4 sm:gap-6">
+          {/* Signal amber: the one "next move" on the page, like the last waypoint of the flight path. */}
+          {/* On a phone the time sits above the text, so the text keeps the card's full width. */}
+          <p className="mt-6 flex flex-col gap-2 rounded-xl border border-signal bg-signal-subtle p-4 sm:flex-row sm:gap-6 sm:p-5">
             <time
               dateTime={highlight.time}
-              className="w-12 shrink-0 font-mono text-sm font-semibold text-link"
+              className="w-12 shrink-0 pt-0.5 font-mono text-sm font-semibold text-signal-text"
             >
               {highlight.time}
             </time>
-            <span className="flex gap-2 text-sm text-foreground">
+            <span className="flex gap-2 text-base text-foreground">
               <Check
                 aria-hidden="true"
                 strokeWidth={1.75}
-                className="mt-0.5 size-4 shrink-0 text-link"
+                className="mt-1 size-4 shrink-0 text-signal-text"
               />
               <span>
                 <strong className="font-semibold">{highlight.label}:</strong> {highlight.text}

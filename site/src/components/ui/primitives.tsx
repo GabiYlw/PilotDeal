@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-// Small building blocks shared by the sections. Same looks as web/src/components/ui/.
+// Small building blocks shared by the sections.
 
 export function Container({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("mx-auto w-full max-w-6xl px-4 sm:px-6", className)} {...props} />;
@@ -33,7 +33,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
         BADGE_VARIANTS[variant],
         className,
       )}
@@ -42,12 +42,12 @@ export function Badge({
   );
 }
 
-// Small uppercase label above a heading or a table, in Geist Mono.
+// Small uppercase label above a heading, in Geist Mono, led by a short teal rule.
 export function Eyebrow({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       className={cn(
-        "font-mono text-xs font-semibold tracking-wider text-link uppercase",
+        "flex items-center gap-3 font-mono text-xs font-semibold tracking-wider text-link uppercase before:h-0.5 before:w-6 before:rounded-full before:bg-accent before:content-['']",
         className,
       )}
       {...props}
@@ -67,25 +67,37 @@ export function SectionHeading({
   intro?: ReactNode;
 }) {
   return (
-    <div className="flex max-w-2xl flex-col gap-3">
+    <div className="flex max-w-2xl flex-col gap-4">
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 id={id} className="text-3xl font-bold tracking-tight text-balance text-foreground">
+      <h2
+        id={id}
+        className="text-3xl leading-tight font-bold tracking-tight text-balance text-foreground sm:text-4xl lg:text-5xl"
+      >
         {title}
       </h2>
-      {intro && <p className="text-base text-muted">{intro}</p>}
+      {intro && <p className="text-lg text-muted">{intro}</p>}
     </div>
   );
 }
+
+// Vertical padding. "joined" drops most of the bottom padding, for a section whose next section
+// has the same background, so the two do not stack into one wide empty band.
+const SECTION_SPACING = {
+  default: "py-16 sm:py-20 lg:py-24",
+  joined: "pt-16 pb-4 sm:pt-20 sm:pb-6 lg:pt-24 lg:pb-8",
+};
 
 // A section of the page: labelled by its heading, offset for the sticky header, fades in once.
 export function Section({
   id,
   labelledBy,
+  spacing = "default",
   className,
   children,
 }: {
   id?: string;
   labelledBy: string;
+  spacing?: keyof typeof SECTION_SPACING;
   className?: string;
   children: ReactNode;
 }) {
@@ -94,7 +106,7 @@ export function Section({
       id={id}
       aria-labelledby={labelledBy}
       data-reveal=""
-      className={cn("scroll-mt-20 py-16 sm:py-24", className)}
+      className={cn("scroll-mt-20", SECTION_SPACING[spacing], className)}
     >
       <Container>{children}</Container>
     </section>
